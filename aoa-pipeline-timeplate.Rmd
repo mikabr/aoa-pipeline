@@ -1,0 +1,16 @@
+---
+title: "AoA prediction template"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This template provides the structure for how to fit age of acquisition (AoA) prediction models, using data and scripts in this repository.
+
+The general steps are:
+- loading the provided CDI data and predictor data
+- adding your predictor(s) to the provided predictor data
+- using the functions in `scripts/prep_data.R` to prepare the data for modeling
+- using the functions in `scripts/fit_models.R` to fit models and extract information from them
