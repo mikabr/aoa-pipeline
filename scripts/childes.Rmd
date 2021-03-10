@@ -5,6 +5,23 @@ output: html_document
 
 https://rpubs.com/gloukatou/736318
 
+```{r}
+metrics <- list(
+  count = function(lang_token_data, other_args) lang_token_data %>% count(gloss),
+  mlu = function(lang_token_data) lang_token_data %>% mutate(utterance_length = whatever) %>%
+    group_by(gloss) %>% summarise(mlu = mean(utterance_length)),
+)
+
+# speaker role filtering (default: everyone not child)
+# age grouping (default: no grouping)
+# child sex (default: everyone)
+get_childes_metrics <- function(language, metrics, other_args) {
+  # get token data for language
+  # apply each metric function
+  # return combined df with columns: language, gloss, metric1, metric2, etc
+}
+```
+
 
 The get_data function extracts CHILDES corpus based on several arguments defined by the user e.g. language, date, role. 
 Its output is a list of four dataframes, one with speaker information, one with utterances, one with word types and one with word tokens. 
