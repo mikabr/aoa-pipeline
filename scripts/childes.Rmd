@@ -3,134 +3,100 @@ title: "childes_pipeline"
 output: html_document
 ---
 
-https://rpubs.com/gloukatou/736318
+https://rpubs.com/gloukatou/739500
 
-```{r}
-metrics <- list(
-  count = function(lang_token_data, other_args) lang_token_data %>% count(gloss),
-  mlu = function(lang_token_data) lang_token_data %>% mutate(utterance_length = whatever) %>%
-    group_by(gloss) %>% summarise(mlu = mean(utterance_length)),
-)
+```{r, message=FALSE, warning=FALSE}
 
-# speaker role filtering (default: everyone not child)
-# age grouping (default: no grouping)
-# child sex (default: everyone)
-get_childes_metrics <- function(language, metrics, other_args) {
-  # get token data for language
-  # apply each metric function
-  # return combined df with columns: language, gloss, metric1, metric2, etc
-}
-```
-
-
-The get_data function extracts CHILDES corpus based on several arguments defined by the user e.g. language, date, role. 
-Its output is a list of four dataframes, one with speaker information, one with utterances, one with word types and one with word tokens. 
-
-```{r get data, echo = FALSE}
 library(tidyverse)
 library(childesr)
 library(data.table)
+library(stringr)
 
-#min_age, max_age, date not used yet
-get_data<-function(language=NULL, 
-                   corpus_name=NULL, 
-                   date=NULL, 
-                   collection_name=NULL, 
-                   role=NULL, 
-                   role_exclude=NULL, 
-                   minimum_age=NULL, 
-                   maximum_age=NULL, 
-                   sex=NULL, 
-                   educ=NULL, 
-                   target_child_name=NULL, 
-                   part_of_speech = NULL, 
-                   stem=NULL, 
-                   token=NULL){
+```
 
-#create speaker dataframe merging participants and statistics  
-speaker_statistics<-get_speaker_statistics( collection_name, corpus_name, target_child_name, role,  role_exclude, sex)
-participants<-get_participants(collection_name, corpus_name, target_child_name, role, sex)  
-names(participants)[names(participants) == "id"] <- "speaker_id"
-speakers<-participants %>% left_join(speaker_statistics, by=c("speaker_id", "collection_name", "collection_id", "corpus_id","target_child_id"))
+```{r main function, message=FALSE, warning=FALSE}
 
-#crelevant orpus_ids and speaker_ids
-corpus_ids<-speakers %>% distinct(corpus_id)
-speaker_ids<-speakers %>% distinct(speaker_id)
+args_<-list(lang = "ita", corpus = "Calambrone", word = "casa") #to fix add column
 
-#load utterances and types
-transcripts<-corpus_ids %>% left_join(get_transcripts()) 
-utterances <-speaker_ids %>% left_join(get_utterances(collection_name, corpus_name, target_child_name, role, role_exclude, sex,language))
-types<-speaker_ids %>% left_join(get_types(collection_name, corpus_name, target_child_name, role, role_exclude, sex,language))
 
-#load tokens if asked
-tokens<-data.frame()
-if (!is.null(token)){
-  tokens <-speaker_ids %>% left_join(get_tokens(token, collection_name, corpus_name, target_child_name, role, role_exclude, sex,language ))
-  }
+get_childes_metrics <- function(args_, column){
+  data_<- do.call(get_data, args_)
+  metrics <- list(wordcount = frequency(data_$tokens, column), mlu = mlu(data_$utterances, data_$tokens, column))
+  output<- metrics %>% reduce(left_join) %>% mutate(args = as.character(args_["lang"]))
+  return(output)
+}  
+```
 
-#return a list of dataframes
-return(list(utterances = data.table(utterances), speakers =data.table(speakers), types =data.table(types), tokens=data.table(tokens)))
+
+```{r get data,  message=FALSE, warning=FALSE}
+
+get_data<-function(lang = NULL,
+                   corpus = NULL,
+                   speaker_role = NULL, 
+                   speaker_role_exclude = "Target_Child", 
+                   child_age = NULL, 
+                   child_sex = NULL, 
+                   pos = NULL, 
+                   word)
+                   {
+speakers<-get_speaker_statistics(corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex)
+
+utterances <-get_utterances(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex)
+
+tokens_ <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, token="*")
+
+tokens1<-tokens_ %>% group_by(corpus_name) %>%  count()  %>% rename(corpuscount = n)
+tokens2<-tokens_ %>% group_by(speaker_role) %>%  count()  %>% rename(speakercount = n)
+tokens3<-tokens_ %>% group_by(target_child_name) %>%  count()  %>% rename(targetchildcount = n)
+tokens_ <- tokens_ %>% left_join(tokens1)  %>% left_join(tokens2)  %>% left_join(tokens3)
+
+tokens <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, part_of_speech = pos, token = word) %>%
+  left_join(tokens_)
+
+return(list(utterances = data.table(utterances), speakers =data.table(speakers), tokens=data.table(tokens))) #return a list of dataframes
 }
-
-```
-
-Example of get_data:
-
-```{r call function get data}
-#example
-example<-get_data(collection_name="Romance")
-
-utterances<-example$utterances
-types<-example$types
-speakers<-example$speakers
-tokens<-example$tokens
-
-head(utterances)
 ```
 
 
-The wordcount function gets as input the output of get_data function. It measures word counts across levels specified by the user (by default it counts across target children, speakers, transcripts).
-Its output is a list of dataframes with word counts.
 
-```{r word count predictor}
+```{r predictors,  message=FALSE, warning=FALSE}
 #predictors:word_counts sent_lengths final_counts solo_counts concreteness frequency word_length valence babiness
 #level on which user wants their predictor e.g. target_child_id, speaker_id, transcript_id
 
-wordcount<-function(db,target_child_id=TRUE, speaker_id=TRUE, transcript_id=TRUE){
-  
-if (target_child_id==TRUE){wordcount_targetchild<- utterances %>% 
-  group_by(target_child_id)  %>% 
-    mutate(words = strsplit(as.character(gloss), " ")) %>% 
-      unnest(words) %>% count(target_child_id, words) %>% 
-        rename(wordcount = n)}
 
-if (speaker_id==TRUE){ wordcount_speakerid<- utterances %>% 
-  group_by(speaker_id)  %>% 
-    mutate(words = strsplit(as.character(gloss), " ")) %>% 
-      unnest(words) %>% count(speaker_id, words) %>% 
-        rename(wordcount = n)  }
-   
-if (transcript_id==TRUE){wordcount_transcriptid<- utterances %>% 
-    group_by(transcript_id)  %>% 
-      mutate(words = strsplit(as.character(gloss), " ")) %>% 
-        unnest(words) %>% count(transcript_id, words) %>% 
-          rename(wordcount = n)  }
+frequency<-function(tokens, column = "corpus_name"){ #target_child_id, speaker_id language
+tokens_fr <- tokens %>% 
+  group_by(!!column, gloss, corpuscount)  %>% 
+    count()  %>% 
+      rename(wordcount = n) %>% 
+        mutate(freq= wordcount/corpuscount) %>%  #to fix with speakercount, targetchildcount
+         mutate(logfreq= log(freq)) %>%
+          ungroup() %>% 
+            select(gloss, freq, logfreq)
+return(tokens_fr)
+} 
   
-return(list(wordcount_targetchild = data.table(wordcount_targetchild), wordcount_speakerid =data.table(wordcount_speakerid), wordcount_transcriptid =data.table(wordcount_transcriptid)))
 
+mlu <- function(utterances, tokens, column = "corpus_name"){
+utterances_mlu<- utterances %>%
+    mutate(utt_length = sapply(strsplit(utterances$gloss, " "), length)) %>%
+     select(id, utt_length) %>%  
+      rename(utterance_id = id)
+tokens_mlu<- tokens %>% 
+    left_join(utterances_mlu) %>%
+     group_by(gloss)  %>% 
+      summarise(mlu = mean(utt_length)) %>%  ###tofix column
+        select(gloss, mlu)
+return(tokens_mlu)
 }
 
 ```
 
-Example of wordcount function. The output of the function will be converted into a dictionary and added to the main dataframe as a column. 
 
-```{r word count predictor example}
-example2<-wordcount(utterances)
+```{r example,  message=FALSE, warning=FALSE}
 
-wordcount_targetchild<-example2$wordcount_targetchild
-head(wordcount_targetchild)
+get_childes_metrics(args_, column = "corpus_name")
 
-######add to main dataframe as a dictionary????
 ######write.csv(tr,"/Users/lscpuser/Documents/coredata.csv" )  
 
 ```
