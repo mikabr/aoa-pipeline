@@ -14,3 +14,40 @@ The general steps are:
 - adding your predictor(s) to the provided predictor data
 - using the functions in `scripts/prep_data.R` to prepare the data for modeling
 - using the functions in `scripts/fit_models.R` to fit models and extract information from them
+
+
+# Wordbank data
+
+Example of getting Wordbank data for English:
+
+```{r}
+# read in cached data
+eng_data <- readRDS("data/wordbank/english_(american).rds")
+eng_data
+```
+
+```{r}
+# use individual functions to read data from db for each form, potentially
+# making changes in between steps
+eng_wg <- create_inst_data("English (American)", "WG")
+eng_ws <- create_inst_data("English (American)", "WS")
+eng_wg_summary <- collapse_inst_data(eng_wg)
+eng_ws_summary <- collapse_inst_data(eng_ws)
+eng_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
+eng_summary
+```
+
+```{r}
+# quick viz of item trajectories
+eng_summary %>%
+  mutate(prop = num_true / total,
+         measure = fct_relevel(measure, "understands")) %>%
+ggplot(aes(x = age, y = prop)) +
+  facet_grid(cols = vars(measure), scales = "free_x", space = "free_x",
+             labeller = as_labeller(str_to_sentence)) +
+  geom_smooth(aes(colour = uni_lemma, weight = total), alpha = 0.1, size = 0.1,
+              se = FALSE, method = "glm", method.args = list(family = "binomial")) +
+  scale_colour_discrete(guide = FALSE) +
+  scale_x_continuous(breaks = seq(8, 30, 4)) +
+  labs(x = "Age (months)", y = "Proportion of children")
+```

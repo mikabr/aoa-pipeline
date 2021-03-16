@@ -3,6 +3,7 @@ library(glue)
 library(wordbankr)
 
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
+  print(glue("Getting administraions for {language} {form}..."))
   
   admins <- get_administration_data(language = language, form = form,
                                     original_ids = TRUE)
@@ -21,6 +22,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
 }
 
 get_inst_words <- function(language, form) {
+  print(glue("Getting words for {language} {form}..."))
   get_item_data(language = language, form = form) %>%
     filter(type == "word") %>%
     select(language, form, lexical_class, category, uni_lemma, definition,
@@ -42,16 +44,18 @@ get_inst_data <- function(language, form, admins, items) {
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) %>%
     filter(measure == "produces" | form == "WG") %>%
-    select(-item_id, -num_item_id)
+    select(-num_item_id)
 }
 
-collapse_inst_data <- function(inst_data) {
-  print(glue("Wrangling data for {unique(inst_data$language)} {unique(inst_data$form)}..."))
+# remove "by item" option because hard to have different column names downstream
+collapse_inst_data <- function(inst_data) { #}, by = "uni_lemma") {
+  print(glue("Collapsing data for {unique(inst_data$language)} {unique(inst_data$form)}..."))
   
+  # if (by == "uni_lemma") {
   inst_uni_lemmas <- inst_data %>%
-    distinct(measure, lexical_class, category, uni_lemma, definition) %>%
+    distinct(measure, uni_lemma, lexical_class, category, item_id, definition) %>%
     group_by(uni_lemma) %>%
-    nest(items = c(lexical_class, category, definition))
+    nest(items = c(lexical_class, category, item_id, definition))
   
   inst_data %>%
     filter(!is.na(value)) %>%
@@ -60,21 +64,53 @@ collapse_inst_data <- function(inst_data) {
     summarise(uni_value = any(value)) %>%
     # for each age and uni_lemma, collapse across children
     group_by(language, form, measure, uni_lemma, age) %>%
-    summarise(num_true = sum(uni_value),
-              num_false = n() - num_true,
-              prop = mean(uni_value)) %>%
+    summarise(num_true = sum(uni_value), total = n()) %>%
     ungroup() %>%
     left_join(inst_uni_lemmas)
   
+  # } else if (by == "item") {
+  #   
+  #   inst_data %>%
+  #     filter(!is.na(value)) %>%
+  #     # for each age and item, collapse across children
+  #     group_by(language, form, measure, definition, age) %>%
+  #     summarise(num_true = sum(value), total = n()) %>%
+  #     ungroup()
+  #   
+  # } else {
+  #   stop('"by" must be "uni_lemma" or "item"')
+  # }
+  
+}
+
+combine_form_data <- function(inst_summaries) {
+  inst_combined <- bind_rows(inst_summaries)
+  inst_combined %>%
+    unnest(items) %>%
+    nest(items = -c(language, measure, uni_lemma, age, num_true, total)) %>%
+    group_by(language, measure, uni_lemma, age) %>%
+    summarise(num_true = sum(num_true), total = sum(total),
+              items = list(bind_rows(items))) %>%
+    ungroup()
 }
 
 create_inst_data <- function(language, form) {
-  inst_label <- paste(language, form, sep = "_") %>% str_replace(" ", "_") %>% str_to_lower()
   inst_admins <- get_inst_admins(language, form)
   inst_words <- get_inst_words(language, form)
   inst_data <- get_inst_data(language, form, inst_admins, inst_words)
-  inst_props <- collapse_inst_data(inst_data)
-  save(inst_props, file = glue("data/wordbank/{inst_label}.RData"))
 }
 
-# create_inst_data("English (American)", "WG")
+create_lang_data <- function(language, write = TRUE) {
+  lang <- language # for filter name scope issues
+  insts <- get_instruments()
+  forms <- insts %>% filter(language == lang) %>% pull(form)
+  
+  lang_datas <- map(forms, partial(create_inst_data, language = language))
+  lang_summaries <- map(lang_datas, collapse_inst_data)
+  lang_summary <- combine_form_data(lang_summaries)
+  
+  if (write) {
+    lang_label <- language %>% str_replace(" ", "_") %>% str_to_lower()
+    saveRDS(lang_summary, file = glue("data/wordbank/{lang_label}.rds"))
+  }
+}
