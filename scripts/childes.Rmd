@@ -16,13 +16,22 @@ library(stringr)
 
 ```{r main function, message=FALSE, warning=FALSE}
 
-args_<-list(lang = "ita", corpus = "Calambrone", word = "casa") #to fix add column
+word=""
 
-
-get_childes_metrics <- function(args_, column){
+get_childes_metrics <- function(args_, column="language", freq=FALSE, uttlength=FALSE, wordlen = FALSE ){
   data_<- do.call(get_data, args_)
-  metrics <- list(wordcount = frequency(data_$tokens, column), mlu = mlu(data_$utterances, data_$tokens, column))
-  output<- metrics %>% reduce(left_join) %>% mutate(args = as.character(args_["lang"]))
+  if (freq == TRUE){
+  wordcount = frequency(data_$tokens, column)
+  }
+  if (uttlength == TRUE){
+  mlu = mlu(data_$utterances, data_$tokens, column)
+  }
+  if (wordlen == TRUE){
+  wlength = wordlength( data_$tokens)
+  }
+  args = as.character(args_["lang"])
+  metrics <- full_join(wordcount, mlu) %>% full_join(wlength) %>% distinct()
+  output<- metrics %>% mutate(args = as.character(args_["lang"]))
   return(output)
 }  
 ```
@@ -50,8 +59,10 @@ tokens2<-tokens_ %>% group_by(speaker_role) %>%  count()  %>% rename(speakercoun
 tokens3<-tokens_ %>% group_by(target_child_name) %>%  count()  %>% rename(targetchildcount = n)
 tokens_ <- tokens_ %>% left_join(tokens1)  %>% left_join(tokens2)  %>% left_join(tokens3)
 
+if (word != ""){
 tokens <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, part_of_speech = pos, token = word) %>%
-  left_join(tokens_)
+  left_join(tokens_)}
+else {tokens <- tokens_}
 
 return(list(utterances = data.table(utterances), speakers =data.table(speakers), tokens=data.table(tokens))) #return a list of dataframes
 }
@@ -63,21 +74,20 @@ return(list(utterances = data.table(utterances), speakers =data.table(speakers),
 #predictors:word_counts sent_lengths final_counts solo_counts concreteness frequency word_length valence babiness
 #level on which user wants their predictor e.g. target_child_id, speaker_id, transcript_id
 
-
-frequency<-function(tokens, column = "corpus_name"){ #target_child_id, speaker_id language
+frequency<-function(tokens, column = "language"){ #target_child_id, speaker_id corpus_name
+total<-nrow(tokens)  
 tokens_fr <- tokens %>% 
-  group_by(!!column, gloss, corpuscount)  %>% 
+  group_by(!!column, gloss)  %>% #corpuscount
     count()  %>% 
       rename(wordcount = n) %>% 
-        mutate(freq= wordcount/corpuscount) %>%  #to fix with speakercount, targetchildcount
+        mutate(freq= wordcount/total) %>%  #to fix with speakercount, targetchildcount, corpuscount
          mutate(logfreq= log(freq)) %>%
           ungroup() %>% 
             select(gloss, freq, logfreq)
 return(tokens_fr)
 } 
   
-
-mlu <- function(utterances, tokens, column = "corpus_name"){
+mlu <- function(utterances, tokens, column = "language"){
 utterances_mlu<- utterances %>%
     mutate(utt_length = sapply(strsplit(utterances$gloss, " "), length)) %>%
      select(id, utt_length) %>%  
@@ -90,14 +100,25 @@ tokens_mlu<- tokens %>%
 return(tokens_mlu)
 }
 
+wordlength <- function(tokens){
+tokens_length <- tokens %>%
+   mutate(wordcount= str_count(gloss)) %>%
+   distinct() %>%
+   select(gloss, wordcount)
+return(tokens_length)  
+}
+
 ```
 
 
 ```{r example,  message=FALSE, warning=FALSE}
 
-get_childes_metrics(args_, column = "corpus_name")
+args_<-list(lang = "ita", word="")
 
-######write.csv(tr,"/Users/lscpuser/Documents/coredata.csv" )  
+output<- get_childes_metrics(args_, uttlength = TRUE, freq = TRUE, wordlen = TRUE)
+
+output
+#write.csv(output,"/Users/lscpuser/Documents/output_.csv" )  
 
 ```
 
