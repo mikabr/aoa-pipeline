@@ -6,14 +6,16 @@ library(here)
 library(glue)
 library(broom)
 library(tidyverse)
-#TODO: Used anywhere?
-#library(langcog)
-
-#TODO: used anywhere?
-#.alpha <- 0.05
-set.seed(1000)
 
 # HELPER FUNCTIONS --------------
+
+#Residualize - do each of these get their own functions?
+get_final_freq <- function(uni_childes) {
+  return(lm(final_freq ~ requency, data = uni_childes)$residuals)
+}
+get_solo_freq <- function(uni_childes) {
+  return(lm(final_freq ~ requency, data = uni_childes)$residuals)
+}
 
 fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources %>% discard(~pred %in% .x) %>% unlist()
@@ -105,7 +107,7 @@ do_full_imputation <- function(model_data, pred_sources, max_steps) {
 
 #TEST/EXAMPLE CASE ------
 
-load(here("data/temp_saved_data/uni_joined.RData"))
+load(here("data/temp_saved_data/uni_joined.RData")) #this doesnt totally match the eng_data
 
 #The data we're reading in as predictors should already have this cleaned
 test_data <- uni_joined %>%
@@ -128,7 +130,6 @@ pred_sources <- list(
 
 test_imputed_data <- test_data %>% do_full_imputation(pred_sources, 20)
 
-
 #TEST 2, Adding new predictors (test w/ entropy)
 entropy_data <- read_csv(here("data/temp_saved_data/type_entropies.csv"))
 word_map <- read_csv(here("data/temp_saved_data/WSWG_50percentproducing_cleaned.csv")) %>% 
@@ -145,15 +146,15 @@ pred_sources_two <- list(
   "concreteness", "babiness", "num_phons"
 )
 
-test_imputed_data_entropy <- test_data_two %>% filter(language == "English (American)")%>% do_full_imputation(pred_sources_two, 20)
+test_imputed_data_entropy <- test_data_two %>% filter(language == "English (American)") %>% do_full_imputation(pred_sources_two, 20)
 
-# 2. Add back in wordbank data
-# uni_model_data <- model_data_imputed  %>%
-#   unnest() %>%
-#   group_by(language) %>%
-#   mutate_at(vars(predictors), funs(as.numeric(scale(.)))) %>%
-#   right_join(uni_joined %>% select(language, measure, uni_lemma, age, num_true,
-#                                    num_false)) %>%
-#   group_by(language, measure) %>%
-#   mutate(unscaled_age = age, age = scale(age),
-#          total = as.double(num_true + num_false), prop = num_true / total)
+#2.  Add back in wordbank data
+uni_model_data <- model_data_imputed  %>%
+  unnest() %>%
+  group_by(language) %>%
+  mutate_at(vars(predictors), funs(as.numeric(scale(.)))) %>%
+  right_join(uni_joined %>% select(language, measure, uni_lemma, age, num_true,
+                                   num_false)) %>%
+  group_by(language, measure) %>%
+  mutate(unscaled_age = age, age = scale(age),
+         total = as.double(num_true + num_false), prop = num_true / total)
