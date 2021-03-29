@@ -117,14 +117,102 @@ args_<-list(lang = "ita", word="")
 
 output<- get_childes_metrics(args_, uttlength = TRUE, freq = TRUE, wordlen = TRUE)
 
-output
-#write.csv(output,"/Users/lscpuser/Documents/output_.csv" )  
+names(output)[names(output) == "gloss"] <- "word"
+output$args[output$args == "ita"] <- "Italian"
+
+write.csv(output,"output_.csv" )  
 
 ```
 
+```{r stemming,  message=FALSE, warning=FALSE}
+#from mikabr/aoa_prediction
+
+uni_lemmas <-read.csv("/saved_data/uni_lemmas.RData")
 
 
+norm_lang <- function(lang)
+  lang %>% tolower() %>% strsplit(" ") %>% map_chr(~.x[1])
+
+source("stemmer.R")
+
+transforms <- c(
+  function(x) gsub("(.*) \\(.*\\)", "\\1", x),
+  function(x) gsub(" ", "_", x),
+  function(x) gsub(" ", "+", x),
+  function(x) gsub("(.+) \\1", "\\1", x)
+)
+
+apply_transforms <- function(str) {
+  transforms %>% map_chr(~.x(str))
+}
+
+special_case_files <- list.files("/predictors/childes/special_cases/")
+
+special_case_map <-  map_df(special_case_files, function(case_file) {
+  
+  lang <- case_file %>% strsplit(".csv") %>% unlist()
+  special_cases <- read_csv(file.path("/predictors/childes/special_cases/",
+                                      case_file),
+                            col_names = FALSE)
+  
+  map_df(1:nrow(special_cases), function(i) {
+    uni_lemma <- special_cases$X1[i]
+    options <- special_cases[i, 3:ncol(special_cases)] %>%
+      as.character() %>%
+      discard(is.na)
+    trans_opts <- map(options, apply_transforms) %>% unlist() %>% unique() #apply transforms to special cases
+    data_frame(language = lang,
+               uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
+               stem = c(trans_opts, stem(trans_opts, lang)))
+  })
+  
+})
+
+pattern_map <- uni_lemmas %>%
+  split(paste(.$language, .$uni_lemma, .$words)) %>%
+  map_df(function(uni_data) {
+    language <- uni_data$language %>% norm_lang()
+    uni_lemma <- uni_data$uni_lemma
+    options <- uni_data$words %>% strsplit(", ") %>% unlist() %>%
+      strsplit("/") %>% unlist()
+    options <- c(options, stem(options, language)) %>% unique() #stemming with Snowball
+    trans_opts <- map(options, apply_transforms) %>% unlist() %>% unique()
+    trans_opts <- c(trans_opts, stem(trans_opts, language)) %>% unique()
+    data_frame(language = rep(uni_data$language, length(trans_opts)),
+               uni_lemma = rep(uni_lemma, length(trans_opts)),
+               stem = trans_opts)
+  })
+
+case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
+
+```
+
+```{r map_cases,  message=FALSE, warning=FALSE}
+
+load_childes_data <- function(lang) {
+  read_csv(sprintf("output_.csv",
+                   norm_lang(lang))) %>%
+    filter(!is.na(word)) %>%
+    mutate(types = n(),
+           tokens = sum(wordcount),
+           stem = stem(word, norm_lang(lang)),
+           language = lang) %>%
+    full_join(case_map %>% filter(language == lang))
+}
+
+  #%>%
+   # group_by(uni_lemma, types, tokens) %>%
+    #summarise(MLU = weighted.mean(mean_sent_length, word_count, na.rm = TRUE),
+     #         word_count = sum(word_count, na.rm = TRUE),
+      #        MLU = ifelse(word_count < 10, NA, MLU),
+       #       final_count = sum(final_count, na.rm = TRUE),
+        #      solo_count = sum(solo_count, na.rm = TRUE),
+         #     language = lang)
+
+childes_data <- map_df(languages, load_childes_data)
+
+#write.csv(childes_data,"childes_data.csv" )  
 
 
-
+```
 
