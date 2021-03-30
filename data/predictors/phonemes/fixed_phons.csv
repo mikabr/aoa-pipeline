@@ -113,18 +113,18 @@
 "English (American)","vroom","vroom","v_iː_ɹ_uː_m","v_ɹ_uː_m"
 "English (American)","woof woof","woof woof","w_uː_f w_uː_f",
 "English (American)","yum yum","yum yum","j_ʌ_m j_ʌ_m",
-"Spanish","yum yum","¡am!","a_m",
-"Spanish","ouch","¡ay!","aɪ",
-"Spanish","baa baa","bee/mee","b_e_e, m_e_e","b_e, m_e"
-"Spanish","quack quack","cuacuá","k_w_a_k_w_a",
-"Spanish","woof woof","guaguá","ɡ_w_a_ɣ_w_a",
-"Spanish","meow","miau","m_j_aʊ",
-"Spanish","moo","muu","m_u_u","m_u"
-"Spanish","tweet tweet","pío pío","p_i__o p_i__o",
-"Spanish","honk honk","pipí (coche)","p_i_p_i",
-"Spanish","bang","¡pum!","p_u_m",
-"Spanish","cockadoodledoo","quiquiriquí","k_i_k_i_ɾ_i_k_i",
-"Spanish","choo choo","tutú","t_u_t_u",
+"Spanish (Mexican)","yum yum","¡am!","a_m",
+"Spanish (Mexican)","ouch","¡ay!","aɪ",
+"Spanish (Mexican)","baa baa","bee/mee","b_e_e, m_e_e","b_e, m_e"
+"Spanish (Mexican)","quack quack","cuacuá","k_w_a_k_w_a",
+"Spanish (Mexican)","woof woof","guaguá","ɡ_w_a_ɣ_w_a",
+"Spanish (Mexican)","meow","miau","m_j_aʊ",
+"Spanish (Mexican)","moo","muu","m_u_u","m_u"
+"Spanish (Mexican)","tweet tweet","pío pío","p_i__o p_i__o",
+"Spanish (Mexican)","honk honk","pipí (coche)","p_i_p_i",
+"Spanish (Mexican)","bang","¡pum!","p_u_m",
+"Spanish (Mexican)","cockadoodledoo","quiquiriquí","k_i_k_i_ɾ_i_k_i",
+"Spanish (Mexican)","choo choo","tutú","t_u_t_u",
 "Italian","choo choo","tuttù","t_ʊ_tː_u",
 "Italian","moo","muh","m_u",
 "Italian","grrr","grr","dʒ_i__ɛ_r_ɾ_e_ɛ_r_ɾ_e","dʒ_ɾ"
@@ -177,11 +177,10 @@
 "English (British)","vroom","vroom","v_iː_ɹ_uː_m","v_ɹ_uː_m"
 "English (British)","woof woof","woof","w_uː_f",
 "English (British)","yum yum","yum","j_ʌ_m",
-"Spanish","shh","shh","ɛ_s_e_a_tʃ_e_a_tʃ_e","ʃ"
+"Spanish (Mexican)","shh","shh","ɛ_s_e_a_tʃ_e_a_tʃ_e","ʃ"
 "Croatian","shh","psst-tiho",,"p_s_t"
 "Danish","shh","shh",,"ʃ"
 "Italian","shh","zitto/sch",,"dz_ˈi_tː_o, ʃ"
 "Swedish","shh","sch /hysch",,"ʃ, h_y_ʃ"
 "English (British)","shh","shh / hush / shush",,"ʃ, h_ʌ_ʃ, ʃ_ʌ_ʃ"
 "English (American)","shh","shh/shush/hush",,"ʃ, h_ʌ_ʃ, ʃ_ʌ_ʃ"
-"Spanish (Mexican)", "shh", "shh",,"ʃ"
