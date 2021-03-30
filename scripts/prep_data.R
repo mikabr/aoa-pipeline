@@ -89,7 +89,6 @@ do_lang_imputation <- function(language, data, pred_sources, max_steps) {
   return(imputed_data)
 }
 
-#takes in the data in the format 
 do_full_imputation <- function(model_data, pred_sources, max_steps) {
   #restrict to the sources in pred_sources
   #TODO: Catch cases where a predictor in the predictor set isnt in the data
@@ -158,3 +157,30 @@ uni_model_data <- model_data_imputed  %>%
   group_by(language, measure) %>%
   mutate(unscaled_age = age, age = scale(age),
          total = as.double(num_true + num_false), prop = num_true / total)
+
+# Test with joined data from new predictors code
+
+load(here("data/temp_saved_data/new_pipeline_uni_joined.rds"))
+
+#The data we're reading in as predictors should already have this cleaned
+test_data <- combined_joined %>%
+  #select out just the by lexical item data
+  unnest(cols = "items") %>%
+  select(-c(age, num_true, total, form, item_id)) %>%
+  distinct() %>%
+  #pull out categories from classes
+  mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other", lexical_class),
+         # collapse v, adj, adv into one category
+         lexical_category = lexical_category %>% as_factor() %>% 
+           #TODO: What to do if the languages selected don't have one of these - cant use fct collapse?
+           fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))) %>%
+  select(-lexical_class)
+
+#1. Specify predictors
+pred_sources <- list(
+  #c("frequency", "MLU", "final_frequency", "solo_frequency"),
+  c("valence", "arousal"), 
+  "concreteness", "babiness", "num_phons"
+)
+
+test_imputed_data <- test_data %>% do_full_imputation(pred_sources, 20)

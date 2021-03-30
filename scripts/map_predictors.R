@@ -1,11 +1,6 @@
 library(here)
 library(tidyverse)
 
-# uni_lemmas <- eng_data %>% unnest(cols = "items") %>%
-#   select(-c(measure, age, num_true, total)) %>%
-#   distinct()
-
-
 #most predictors are attached to unilemmas/underlying concepts (eg concreteness) and can be generalized across languages
 map_predictor <- function(data_source, predictor_csv, replacement_csv, variable_mapping) {
   #takes in a csv of predictor measures that may or may not map to uni_lemmas and maps them
@@ -67,29 +62,16 @@ clean_words <- function(word_set){
     unique()
 }
 
-lang_codes <- list(
-  "Croatian" = "hr",
-  "Danish" = "da",
-  "English (American)" = "en-us",
-  "French (Quebec)" = "fr",
-  "Italian" = "it",
-  "Norwegian" = "no",
-  "Russian" = "ru",
-  "Spanish (Mexican)" = "es",
-  "Swedish" = "sv",
-  "Turkish" = "tr"
-)
-
-get_ipa <- function(word, lang) {
-  lang_code <- lang_codes[[lang]]
-  system2("espeak", args = c("--ipa=3", "-v", "en-us", "-q", paste0('"', word, '"')), 
+get_ipa <- function(word, lang, lang_map) {
+  lang_code <- lang_map[[lang]]
+  system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')), 
           stdout=TRUE) %>%
     gsub("^ ", "", .) %>%
     gsub("[ˈˌ]", "", .)
 }
 
-get_phons <- function(words, lang) {
-  words %>% map_chr(function(word) word %>% get_ipa(lang))
+get_phons <- function(words, lang, lang_map) {
+  words %>% map_chr(function(word) word %>% get_ipa(lang, lang_map))
 }
 
 num_phons <- function(phon_words) {
@@ -114,7 +96,8 @@ num_chars <- function(words) {
   map_dbl(words, ~gsub("[[:punct:]]", "", .x) %>% nchar() %>% mean())
 }
 
-map_phonemes <- function(data_source){
+map_phonemes <- function(data_source, language_map){
+  #TODO: add bug check for a language missing from the language map
   #some words eg "cugino/a" need to be mapped to "cugino / cugina"
   fixed_words <- read_csv("data/predictors/phonemes/fixed_words.csv") %>%
     select(language, uni_lemma, definition, fixed_word) %>%
@@ -129,7 +112,7 @@ map_phonemes <- function(data_source){
     select(-fixed_word) %>%
     group_by(language) %>%
     #for each language, get the phonemes for each word 
-    mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y)))
+    mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, language_map)))
   
   fixed_phons <- read_csv("data/predictors/phonemes/fixed_phons.csv") %>%
     select(language, uni_lemma, definition, fixed_phon) %>%
@@ -151,26 +134,49 @@ map_phonemes <- function(data_source){
   return(uni_lengths)
 }
 
-eng_data <- readRDS(here("data/wordbank/english_(american).rds"))
+
+# Example -----
+combined_data <- rbind(readRDS(here("data/wordbank/croatian.rds")), 
+                       readRDS(here("data/wordbank/english_(american).rds")),
+                       readRDS(here("data/wordbank/spanish_(mexican).rds")),
+                       readRDS(here("data/wordbank/russian.rds")))
 
 babiness_csv <- here("data/predictors/babiness/babiness.csv")
 babiness_replace_csv <- here("data/predictors/babiness/babiness_replace.csv")
 babiness_map <- c(word = "word", babiness = "babyAVG")
 
-baby_unilemma <- map_predictor(eng_data, babiness_csv, babiness_replace_csv, babiness_map)
+baby_unilemma <- map_predictor(combined_data, babiness_csv, babiness_replace_csv, babiness_map)
 
 valence_csv <- here("data/predictors/valence/valence.csv")
 valence_replace_csv <- here("data/predictors/valence/valence_replace.csv")
 valence_mapping <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
 
-valence_unilemma <- map_predictor(eng_data, valence_csv, valence_replace_csv, valence_mapping)
+valence_unilemma <- map_predictor(combined_data, valence_csv, valence_replace_csv, valence_mapping)
 
 concreteness_csv <- here("data/predictors/concreteness/concreteness.csv")
 concreteness_replace_csv <- here("data/predictors/concreteness/concreteness_replace.csv")
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 
-conctreteness_unilemma <- map_predictor(eng_data, concreteness_csv, concreteness_replace_csv, concreteness_map)
+conctreteness_unilemma <- map_predictor(combined_data, concreteness_csv, 
+                                        concreteness_replace_csv, concreteness_map)
+#TODO: Need to download the correct Russian dictionary http://espeak.sourceforge.net/data/
+lang_code_map <- list(
+  "Croatian" = "hr",
+  "Danish" = "da",
+  "English (American)" = "en-us",
+  "French (Quebec)" = "fr",
+  "Italian" = "it",
+  "Norwegian" = "no",
+  "Russian" = "ru",
+  "Spanish (Mexican)" = "es",
+  "Swedish" = "sv",
+  "Turkish" = "tr"
+)
 
-phonemes_unilemma <- map_phonemes(eng_data)
+phonemes_unilemma <- map_phonemes(combined_data, lang_code_map)
 
-eng_joined <- eng_data %>% left_join(phonemes_unilemma) %>% left_join(baby_unilemma) %>% left_join(valence_unilemma) %>% left_join(conctreteness_unilemma)
+#something funky is happening with english arms - 2 phonemes instead of 3 because splitting at the underscore
+
+combined_joined <- combined_data %>% left_join(phonemes_unilemma) %>% left_join(baby_unilemma) %>% left_join(valence_unilemma) %>% left_join(conctreteness_unilemma)
+
+save(combined_joined, file = "data/temp_saved_data/new_pipeline_uni_joined.rds")
