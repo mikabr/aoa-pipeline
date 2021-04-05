@@ -1,7 +1,13 @@
 library(here)
-library(jglmm)
+library(stats)
 library(ggplot2)
+library(ggthemes)
+library(magrittr)
 source(here("scripts", "prep_data.R"))
+
+theme_set(papaja::theme_apa(base_family = "Source Sans Pro"))
+theme_update(strip.text.x = element_text(margin = margin(b = 8), face = "bold"),
+             strip.text.y = element_text(margin = margin(l = 8), face = "bold"))
 
 set.seed(1000)
 
@@ -29,34 +35,80 @@ new_test_data <- uni_joined %>%
   select(-lexical_classes)
 
 eng_word <- new_test_data %>% filter(language == "English (American)") %>% as_tibble 
-eng_wdbk <- readRDS(here("data/wordbank/english_(american).rds")) %>% as_tibble %>%
-  merge(., eng_word %>% select(uni_lemma, prop))
-eng_prop <- eng_word %>% mutate(total = num_true + num_false) %>% select(uni_lemma, prop, age, total) 
-sim_results <- tibble()
+eng_wdbk <- readRDS(here("data/wordbank/english_(american).rds")) %>% as_tibble
+eng_prop <- eng_word %>% mutate(total = num_true + num_false) %>% select(uni_lemma, measure, prop, age, total) 
+eng_prop_und <- eng_prop %>% filter(measure == "understands")
+eng_prop_pro <- eng_prop %>% filter(measure == "produces")
 
 # one simulation (i.e. one imputation)
-sim_one <- function() {
+sim_one <- function(prop_df) {
   eng_impt <- eng_word %>% do_full_imputation(pred_sources, 20) %>% `[[`(3) %>% `[[`(1)
-  eng_data <- merge(eng_prop, eng_impt, by = c("uni_lemma")) #%>% #, all.x = TRUE) %>%
+  eng_data <- merge(prop_df, eng_impt, by = c("uni_lemma")) #%>% #, all.x = TRUE) %>%
     #mutate(prop = num_true / total)
   
-  glm(effects_formula, data = eng_data, family = "binomial", weights = total) %>% .$coefficients
+  glm(effects_formula, data = eng_data, family = "binomial", weights = total)# %>% .$coefficients
 }
 
 # 100 simulations
-test <- replicate(100, sim_one()) %>% t() %>% as_tibble()
-std_devs <- sapply(test, sd)
+eng_sim_und <- replicate(100, sim_one(eng_prop_und), simplify = FALSE)
+eng_sim_pro <- replicate(100, sim_one(eng_prop_pro), simplify = FALSE)
+
+varnames <- rownames(eng_sim_und_coefs[[1]])
+measurenames <- colnames(eng_sim_und_coefs[[1]])
+
+get_coefs_val <- function(sim_coefs) {
+  coefs_data <- sim_coefs %>% as.data.frame() %>% rownames_to_column() %>%
+    pivot_longer(!rowname, names_to = "measure")
+  return(coefs_data$value)
+}
+
+get_coefs <- function(sim_df) {
+  coefs <- lapply(sim_df, function(x) {summary(x) %>% .$coefficients})
+  # a little bit hacky, but I couldn't figure out how to merge the lists properly otherwise
+  sapply(coefs, get_coefs_val) %>% as.data.frame() %>%
+    mutate(term = rep(varnames, each = 4),
+           measure = rep(measurenames, times = 20)) %>%
+    select(term, measure, everything()) %>%
+    pivot_longer(-c(term, measure), names_to = "sim", names_prefix = "V") %>%
+    pivot_wider(names_from = "measure", values_from = "value") %>%
+    mutate(signif = (p_value < .05))
+  colnames(coefs) <- c("term", "sim", "estimate", "std_error", "z_value", "p_value", "signif")
+  return(coefs)
+}
+
+eng_sim_und_coefs <- get_coefs(eng_sim_und)
+eng_sim_pro_coefs <- get_coefs(eng_sim_pro)
 
 # data and graphical output
-write_csv(test, "data/sim_data.csv")
+saveRDS(eng_sim_und, "data/eng_sim_und_data.rds")
+saveRDS(eng_sim_pro, "data/eng_sim_pro_data.rds")
 
-test_long <- test %>% mutate(sim = row_number()) %>%
-  pivot_longer(!sim, names_to = "coefficient")
+## coerce data into relevant format
+eng_sim_coefs_full <- rbind(eng_sim_und_coefs %>% mutate(measure = "Understands"),
+                            eng_sim_pro_coefs %>% mutate(measure = "Produces")) %>%
+  mutate(effect = factor(ifelse(grepl(":", term), "Interaction with age", "Main"), 
+                         levels = c("Main", "Interaction with age")),
+         term = sub("age:", "", .$term)) %>% 
+  filter(term != "(Intercept)", term != "age") %>%
+  mutate(term = factor(term, levels = c("arousal", "valence", "final_frequency", "babiness", "MLU", 
+                                   "solo_frequency", "concreteness", "num_phons", "frequency")),
+         measure = factor(measure, levels = c("Understands", "Produces")))
 
-dens_plot <- ggplot(data = test_long %>% filter(coefficient != "(Intercept)", !grepl(":", coefficient)), 
-                    aes(x = coefficient, y = value)) + 
-  geom_violin() +
-  guides(x = guide_axis(angle = 45)) #+
-  #stat_summary(fun.data = mean_cl_boot, geom = "pointrange", color = "red")
+term_labels = c("Arousal", "Valence", "Final frequency", "Babiness", "MLU-w", 
+                "Solo frequency", "Concreteness", "Number of Phonemes", "Frequency")
 
+ggplot(eng_sim_coefs_full, aes(x = estimate, y = term)) +
+  facet_grid(measure ~ effect, scales = "free",
+             labeller = as_labeller(label_caps)) +
+  geom_point(aes(colour = term), alpha = .2, size = .5, position = position_dodge2(width = .5)) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+  scale_colour_ptol(guide = FALSE) +
+  scale_shape_manual(values = c(19, 21), guide = FALSE) +
+  labs(y = "", x = "Coefficient estimate") + 
+  theme(legend.position = "none") +
+  scale_y_discrete(labels = term_labels) +
+  stat_summary(fun = mean, fun.min = mean, fun.max = mean, 
+               geom = "errorbar", width = .75, aes(color = term))
+
+ggsave(filename = "sim_new.png", width = 8, height = 5.6, device='png', dpi=300)
                
