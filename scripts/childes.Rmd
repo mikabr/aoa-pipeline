@@ -12,6 +12,10 @@ library(childesr)
 library(data.table)
 library(stringr)
 
+####TODOs: small case tokens, -solo in utterance -order (end, start of utterance)  -# number of reliazations 
+#### special cases for lemmatization
+
+
 ```
 
 ```{r main function, message=FALSE, warning=FALSE}
@@ -125,9 +129,7 @@ write.csv(output,"output_.csv" )
 ```
 
 ```{r stemming,  message=FALSE, warning=FALSE}
-#from mikabr/aoa_prediction
-
-uni_lemmas <-read.csv("/saved_data/uni_lemmas.RData")
+#adapted slightly from mikabr/aoa_prediction
 
 
 norm_lang <- function(lang)
@@ -168,6 +170,13 @@ special_case_map <-  map_df(special_case_files, function(case_file) {
   
 })
 
+loadRData <- function(fileName){
+#loads an RData file, and returns it
+    load(fileName)
+    get(ls()[ls() != "fileName"])
+}
+uni_lemmas <- loadRData("/saved_data/uni_lemmas.RData")
+
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
@@ -189,6 +198,8 @@ case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
 
 ```{r map_cases,  message=FALSE, warning=FALSE}
 
+lang = "italian" #to fix
+
 load_childes_data <- function(lang) {
   read_csv(sprintf("output_.csv",
                    norm_lang(lang))) %>%
@@ -209,9 +220,9 @@ load_childes_data <- function(lang) {
         #      solo_count = sum(solo_count, na.rm = TRUE),
          #     language = lang)
 
-childes_data <- map_df(languages, load_childes_data)
+childes_data <- map_df(lang, load_childes_data)
 
-#write.csv(childes_data,"childes_data.csv" )  
+write.csv(childes_data,"childes_data.csv" )  
 
 
 ```
