@@ -71,9 +71,8 @@ get_coefs <- function(sim_df) {
     select(term, measure, everything()) %>%
     pivot_longer(-c(term, measure), names_to = "sim", names_prefix = "V") %>%
     pivot_wider(names_from = "measure", values_from = "value") %>%
+    `colnames<-`(c("term", "sim", "estimate", "std_error", "z_value", "p_value", "signif")) %>%
     mutate(signif = (p_value < .05))
-  colnames(coefs) <- c("term", "sim", "estimate", "std_error", "z_value", "p_value", "signif")
-  return(coefs)
 }
 
 eng_sim_und_coefs <- get_coefs(eng_sim_und)
@@ -84,6 +83,18 @@ saveRDS(eng_sim_und, "data/eng_sim_und_data.rds")
 saveRDS(eng_sim_pro, "data/eng_sim_pro_data.rds")
 
 ## coerce data into relevant format
+bind_coefs <- function(und_coefs, pro_coefs) {
+  rbind(und_coefs %>% mutate(measure = "Understands"),
+        pro_coefs %>% mutate(measure = "Produces")) %>%
+    mutate(effect = factor(ifelse(grepl(":", term), "Interaction with age", "Main"), 
+                           levels = c("Main", "Interaction with age")),
+           term = sub("age:", "", .$term)) %>% 
+    filter(term != "(Intercept)", term != "age") %>%
+    mutate(term = factor(term, levels = c("arousal", "valence", "final_frequency", "babiness", "MLU", 
+                                          "solo_frequency", "concreteness", "num_phons", "frequency")),
+           measure = factor(measure, levels = c("Understands", "Produces")))
+}
+
 eng_sim_coefs_full <- rbind(eng_sim_und_coefs %>% mutate(measure = "Understands"),
                             eng_sim_pro_coefs %>% mutate(measure = "Produces")) %>%
   mutate(effect = factor(ifelse(grepl(":", term), "Interaction with age", "Main"), 
@@ -97,7 +108,7 @@ eng_sim_coefs_full <- rbind(eng_sim_und_coefs %>% mutate(measure = "Understands"
 term_labels = c("Arousal", "Valence", "Final frequency", "Babiness", "MLU-w", 
                 "Solo frequency", "Concreteness", "Number of Phonemes", "Frequency")
 
-ggplot(eng_sim_coefs_full, aes(x = estimate, y = term)) +
+coef_plot <- ggplot(eng_sim_coefs_full, aes(x = estimate, y = term)) +
   facet_grid(measure ~ effect, scales = "free",
              labeller = as_labeller(label_caps)) +
   geom_point(aes(colour = term), alpha = .2, size = .5, position = position_dodge2(width = .5)) +
@@ -111,4 +122,22 @@ ggplot(eng_sim_coefs_full, aes(x = estimate, y = term)) +
                geom = "errorbar", width = .75, aes(color = term))
 
 ggsave(filename = "sim_new.png", width = 8, height = 5.6, device='png', dpi=300)
+
+## add previously imputed data
+load(here("data", "temp_saved_data", "uni_model_data.RData"))
+eng_mod <- uni_model_data %>% ungroup() %>% filter(language == "English (American)") %>%
+  mutate(total = num_true + num_false) # %>%
+  # select(c(uni_lemma, measure, prop, age, total))
+eng_mod_und <- eng_mod %>% filter(measure == "understands") %>% 
+  glm(effects_formula, data = ., family = "binomial", weights = total)
+eng_mod_pro <- eng_mod %>% filter(measure == "produces") %>% 
+  glm(effects_formula, data = ., family = "binomial", weights = total)
+# eng_mod_und <- eng_mod %>% filter(measure == "understands") %>% sim_one()
+# eng_mod_pro <- eng_mod %>% filter(measure == "produces") %>% sim_one()
+eng_mod_und_coefs <- get_coefs(list(eng_mod_und))
+eng_mod_pro_coefs <- get_coefs(list(eng_mod_pro))
+
+eng_mod_coefs_full <- bind_coefs(eng_mod_und_coefs, eng_mod_pro_coefs)
+
+coef_plot + geom_point(data = eng_mod_coefs_full, size = .7)
                
