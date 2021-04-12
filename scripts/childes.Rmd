@@ -37,7 +37,9 @@ get_childes_metrics <- function(args_, column="language", freq=FALSE, uttlength=
   worder = order(data_$utterances, data_$tokens, column)
   }
   args = as.character(args_["lang"])
-  metrics <- full_join(wordcount, mlu, worder) %>% full_join(wlength) %>% distinct()
+  metrics <- full_join(mlu, worder) %>% full_join(wlength) %>% distinct()
+
+  #metrics <- full_join(wordcount, mlu, worder) %>% full_join(wlength) %>% distinct()
   output<- metrics %>% mutate(args = as.character(args_["lang"]))
   return(output)
 }  
@@ -151,7 +153,7 @@ return(tokens_final)
 
 args_<-list(lang = "ita", word="")
 
-output<- get_childes_metrics(args_, uttlength = TRUE, freq = TRUE, wordlen = TRUE, order = TRUE)
+output<- get_childes_metrics(args_, uttlength = TRUE, freq = FALSE, wordlen = TRUE, order = TRUE)
 
 names(output)[names(output) == "gloss"] <- "word"
 output$args[output$args == "ita"] <- "Italian"
@@ -247,10 +249,10 @@ load_childes_data <- function(lang) {
     filter(!is.na(word)) %>%
     summarise(NB_REALISATIONS=n(),
               FREQ=sum(freq, na.rm =TRUE),
-              MLU=weighted.mean(mlu, FREQ, na.rm = TRUE),
-              LAST=weighted.mean(last, FREQ, na.rm = TRUE),
-              FIRST=weighted.mean(first, FREQ, na.rm = TRUE),
-              OTHER=weighted.mean(other, FREQ, na.rm = TRUE) )} 
+              MLU=mean(mlu, na.rm = TRUE),
+              LAST=mean(last, na.rm = TRUE),
+              FIRST=mean(first, na.rm = TRUE),
+              OTHER=mean(other, na.rm = TRUE) )} 
               
   #  summarise(MLU = weighted.mean(mean_sent_length, word_count, na.rm = TRUE),
      #         word_count = sum(word_count, na.rm = TRUE),
