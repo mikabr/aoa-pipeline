@@ -12,9 +12,9 @@ library(childesr)
 library(data.table)
 library(stringr)
 
-####TODOs: lower case tokens, remove "a", -solo in utterance
+###add word characters metric 
 #### special cases for lemmatization
-####exclude barbie
+####exclude boccia/bocciata from mouth, barbie how to not consider a stem? remove "A"
 
 ```
 
@@ -25,7 +25,7 @@ word=""
 get_childes_metrics <- function(args_, column="language", freq=FALSE, uttlength=FALSE, wordlen = FALSE, order = FALSE ){
   data_<- do.call(get_data, args_)
   if (freq == TRUE){
-  wordcount = frequency(data_$tokens, column)
+  wordcount = frequency(data_$tokens)
   }
   if (uttlength == TRUE){
   mlu = mlu(data_$utterances, data_$tokens, column)
@@ -37,9 +37,8 @@ get_childes_metrics <- function(args_, column="language", freq=FALSE, uttlength=
   worder = order(data_$utterances, data_$tokens, column)
   }
   args = as.character(args_["lang"])
-  metrics <- full_join(mlu, worder) %>% full_join(wlength) %>% distinct()
 
-  #metrics <- full_join(wordcount, mlu, worder) %>% full_join(wlength) %>% distinct()
+  metrics <- full_join(wordcount, mlu) %>% full_join(wlength) %>% full_join(worder) %>% distinct()
   output<- metrics %>% mutate(args = as.character(args_["lang"]))
   return(output)
 }  
@@ -75,6 +74,8 @@ tokens <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_
 else {tokens <- tokens_}
 
 ####tolower tokens
+tokens$gloss <-tolower(tokens$gloss)
+utterances$gloss <-tolower(utterances$gloss)
 
 return(list(utterances = data.table(utterances), speakers =data.table(speakers), tokens=data.table(tokens))) #return a list of dataframes
 }
@@ -83,7 +84,6 @@ return(list(utterances = data.table(utterances), speakers =data.table(speakers),
 
 
 ```{r predictors,  message=FALSE, warning=FALSE}
-#predictors:word_counts sent_lengths final_counts solo_counts concreteness frequency word_length valence babiness
 #level on which user wants their predictor e.g. target_child_id, speaker_id, transcript_id
 
 frequency<-function(tokens, column = "language"){ #target_child_id, speaker_id corpus_name
@@ -121,28 +121,35 @@ return(tokens_length)
 }
 
 
+find_positions <- function(tokens_pos){
+tokens_pos_ <- tokens_pos %>%
+  mutate(utt_length = sapply(strsplit(tokens_pos$sentence, " "), length)) %>%
+  mutate(lastword=word(sentence, -1)) %>%
+  mutate(firstword=word(sentence, 1)) %>% 
+  mutate(order = ifelse(utt_length == 1, "solo", ifelse(as.character(lastword) == as.character(gloss),"last",ifelse(as.character(firstword) == as.character(gloss), "first", "other")))) 
+return(tokens_pos_)  
+}
+
 order <- function(utterances, tokens, column = "language"){
 utterances_pos <- utterances %>% 
   select(id, gloss) %>%
-  rename(sentence = gloss ) %>%
-  rename(utterance_id = id)
-tokens_pos <- tokens %>%
+    rename(sentence = gloss ) %>%
+    rename(utterance_id = id)
+tokens<- tokens %>%
   left_join(utterances_pos) %>%
-  select(id, gloss, sentence)
-tokens_pos_ <- tokens_pos %>%
-   mutate(lastword=word(sentence, -1)) %>%
-   mutate(firstword=word(sentence, 1)) %>% 
-   mutate(order = ifelse(as.character(lastword) == as.character(gloss),"last",ifelse(as.character(firstword) == as.character(gloss), "first", "other")))  #####fix when word repeats in utterance %>%
-tokens_count_ <- tokens_pos_  %>%
+    select(id, gloss, sentence)
+tokens_pos <- find_positions(tokens)
+tokens_count_ <- tokens_pos  %>% 
   count(gloss)
-tokens_final <- tokens_pos_  %>%
+tokens_final <- tokens_pos  %>%
   count(gloss, order) %>%
-  rename(ordergloss=n) %>% 
-  left_join(tokens_count_) %>%
-  mutate(last = ifelse(as.character(order) == "last",ordergloss/n, "NA")) %>%
-  mutate(first = ifelse(as.character(order) == "first",ordergloss/n, "NA")) %>%
-  mutate(other = ifelse(as.character(order) == "other",ordergloss/n, "NA")) %>%
-  select(gloss, last, first, other)
+    rename(ordergloss=n) %>% 
+      left_join(tokens_count_) %>%
+        mutate(solo = ifelse(as.character(order) == "solo",ordergloss,NA)) %>%
+        mutate(last = ifelse(as.character(order) == "last",ordergloss, NA)) %>%
+        mutate(first = ifelse(as.character(order) == "first",ordergloss, NA)) %>%
+        mutate(other = ifelse(as.character(order) == "other",ordergloss, NA)) %>%
+          select(gloss, solo, last, first, other, n)
 return(tokens_final)
 }
 
@@ -153,13 +160,12 @@ return(tokens_final)
 
 args_<-list(lang = "ita", word="")
 
-output<- get_childes_metrics(args_, uttlength = TRUE, freq = FALSE, wordlen = TRUE, order = TRUE)
+output<- get_childes_metrics(args_, uttlength = TRUE, freq = TRUE, wordlen = TRUE, order = TRUE)
 
 names(output)[names(output) == "gloss"] <- "word"
 output$args[output$args == "ita"] <- "Italian"
 
-#write.csv(output,"/Users/lscpuser/Documents/aoa-pipeline/scripts/output_.csv" )  
-write.csv(output,"/Users/lscpuser/Documents/output_1.csv" )  
+write.csv(output,"childes_metrics.csv" )  
 
 ```
 
@@ -183,12 +189,12 @@ apply_transforms <- function(str) {
   transforms %>% map_chr(~.x(str))
 }
 
-special_case_files <- list.files("/Users/lscpuser/Documents/aoa-prediction/aoa_unified/aoa_loading/predictors/childes/special_cases/")
+special_case_files <- list.files("childes/special_cases/")
 
 special_case_map <-  map_df(special_case_files, function(case_file) {
   
   lang <- case_file %>% strsplit(".csv") %>% unlist()
-  special_cases <- read_csv(file.path("/Users/lscpuser/Documents/aoa-prediction/aoa_unified/aoa_loading/predictors/childes/special_cases/",
+  special_cases <- read_csv(file.path("childes/special_cases/",
                                       case_file),
                             col_names = FALSE)
   
@@ -236,35 +242,38 @@ case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
 
 lang = "Italian" #to fix
 
+coalesce_by_column <- function(df) {
+    return(coalesce(df[1], df[2], df[3], df[4]))
+}
+
 load_childes_data <- function(lang) {
-  read_csv(sprintf("/Users/lscpuser/Documents/aoa-pipeline/scripts/output_.csv",
+  df <- read_csv(sprintf("childes_metrics.csv",
                    norm_lang(lang))) %>%
     filter(!is.na(word)) %>%
     mutate(types = n(),
-           tokens = sum(wordcount),
            stem = stem(word, norm_lang(lang))) %>%
     full_join(case_map %>% filter(language == lang)) %>%
     group_by(uni_lemma, language) %>%
     filter(!is.na(uni_lemma)) %>%
     filter(!is.na(word)) %>%
-    summarise(NB_REALISATIONS=n(),
-              FREQ=sum(freq, na.rm =TRUE),
-              MLU=mean(mlu, na.rm = TRUE),
-              LAST=mean(last, na.rm = TRUE),
-              FIRST=mean(first, na.rm = TRUE),
-              OTHER=mean(other, na.rm = TRUE) )} 
-              
-  #  summarise(MLU = weighted.mean(mean_sent_length, word_count, na.rm = TRUE),
-     #         word_count = sum(word_count, na.rm = TRUE),
-      #        MLU = ifelse(word_count < 10, NA, MLU),
-       #       final_count = sum(final_count, na.rm = TRUE),
-        #      solo_count = sum(solo_count, na.rm = TRUE),
-         #     language = lang)
-
+    group_by(word) %>%
+    summarise_all(coalesce_by_column) %>%
+    group_by(uni_lemma) %>%
+    summarise(nb_realisations=n(),
+              words = list(unique(word)),
+              word_count = sum(n, na.rm = TRUE),
+              character_count = mean(wordcount, na.rm = TRUE),
+              mean_freq=sum(freq, na.rm =TRUE),
+              mean_mlu=mean(mlu, na.rm = TRUE),
+              mean_solo=sum(solo, na.rm = TRUE)/word_count,
+              mean_last=sum(last, na.rm = TRUE)/word_count,       #!!!!! for >1 words not 100% total
+              mean_first=sum(first, na.rm = TRUE)/word_count,
+              mean_other=sum(other, na.rm = TRUE)/word_count)}  
+    
 childes_data <- map_df(lang, load_childes_data)
+childes_data$words <- vapply(childes_data$words, paste, collapse = ", ", character(1L))
 
-
-write.csv(childes_data,"/Users/lscpuser/Documents/childes_data_1.csv" )  
+write.csv(childes_data,"unilemma_metrics.csv" )  
 
 
 ```
