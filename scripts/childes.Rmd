@@ -12,7 +12,7 @@ library(childesr)
 library(data.table)
 library(stringr)
 
-###add word characters metric 
+####weighted average?
 #### special cases for lemmatization
 ####exclude boccia/bocciata from mouth, barbie how to not consider a stem? remove "A"
 
@@ -23,7 +23,13 @@ library(stringr)
 word=""
 
 get_childes_metrics <- function(args_, column="language", freq=FALSE, uttlength=FALSE, wordlen = FALSE, order = FALSE ){
+  wordcount <- data.frame()
+  mlu <- data.frame()
+  wlength <- data.frame()
+  worder <-  data.frame()
+  
   data_<- do.call(get_data, args_)
+  
   if (freq == TRUE){
   wordcount = frequency(data_$tokens)
   }
@@ -39,7 +45,11 @@ get_childes_metrics <- function(args_, column="language", freq=FALSE, uttlength=
   args = as.character(args_["lang"])
 
   metrics <- full_join(wordcount, mlu) %>% full_join(wlength) %>% full_join(worder) %>% distinct()
+ 
   output<- metrics %>% mutate(args = as.character(args_["lang"]))
+  names(output)[names(output) == "gloss"] <- "word"
+
+  write.csv(output,"childes_metrics.csv" )   
   return(output)
 }  
 ```
@@ -59,7 +69,7 @@ get_data<-function(lang = NULL,
 speakers<-get_speaker_statistics(corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex)
 
 utterances <-get_utterances(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex)
-####tolower utterances
+
 tokens_ <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, token="*")
 
 tokens1<-tokens_ %>% group_by(corpus_name) %>%  count()  %>% rename(corpuscount = n)
@@ -73,11 +83,10 @@ tokens <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_
 
 else {tokens <- tokens_}
 
-####tolower tokens
 tokens$gloss <-tolower(tokens$gloss)
 utterances$gloss <-tolower(utterances$gloss)
 
-return(list(utterances = data.table(utterances), speakers =data.table(speakers), tokens=data.table(tokens))) #return a list of dataframes
+return(list(utterances = data.table(utterances), speakers =data.table(speakers), tokens=data.table(tokens))) 
 }
 ```
 
@@ -156,19 +165,6 @@ return(tokens_final)
 ```
 
 
-```{r example,  message=FALSE, warning=FALSE}
-
-args_<-list(lang = "ita", word="")
-
-output<- get_childes_metrics(args_, uttlength = TRUE, freq = TRUE, wordlen = TRUE, order = TRUE)
-
-names(output)[names(output) == "gloss"] <- "word"
-output$args[output$args == "ita"] <- "Italian"
-
-write.csv(output,"childes_metrics.csv" )  
-
-```
-
 ```{r stemming,  message=FALSE, warning=FALSE}
 #adapted slightly from mikabr/aoa_prediction
 library(SnowballC)
@@ -217,8 +213,9 @@ loadRData <- function(fileName){
     load(fileName)
     get(ls()[ls() != "fileName"])
 }
-uni_lemmas <- loadRData("_uni_lemmas.RData")
 
+load_unilemmas <- function(){
+uni_lemmas <- loadRData("_uni_lemmas.RData")
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
@@ -233,9 +230,9 @@ pattern_map <- uni_lemmas %>%
                uni_lemma = rep(uni_lemma, length(trans_opts)),
                stem = trans_opts)
   })
-
 case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
-
+return(case_map)
+}
 ```
 
 ```{r map_cases,  message=FALSE, warning=FALSE}
@@ -252,7 +249,7 @@ load_childes_data <- function(lang) {
     filter(!is.na(word)) %>%
     mutate(types = n(),
            stem = stem(word, norm_lang(lang))) %>%
-    full_join(case_map %>% filter(language == lang)) %>%
+    full_join(load_unilemmas() %>% filter(language == lang)) %>%
     group_by(uni_lemma, language) %>%
     filter(!is.na(uni_lemma)) %>%
     filter(!is.na(word)) %>%
@@ -266,15 +263,25 @@ load_childes_data <- function(lang) {
               mean_freq=sum(freq, na.rm =TRUE),
               mean_mlu=mean(mlu, na.rm = TRUE),
               mean_solo=sum(solo, na.rm = TRUE)/word_count,
-              mean_last=sum(last, na.rm = TRUE)/word_count,       #!!!!! for >1 words not 100% total
+              mean_last=sum(last, na.rm = TRUE)/word_count,     
               mean_first=sum(first, na.rm = TRUE)/word_count,
               mean_other=sum(other, na.rm = TRUE)/word_count)}  
     
+prepare_unilemmas <- function(lang){
 childes_data <- map_df(lang, load_childes_data)
 childes_data$words <- vapply(childes_data$words, paste, collapse = ", ", character(1L))
-
-write.csv(childes_data,"unilemma_metrics.csv" )  
-
+write.csv(childes_data,"unilemma_metrics.csv" ) 
+return(childes_data)
+}
 
 ```
 
+```{r example_commands,  message=FALSE, warning=FALSE}
+args_<-list(lang = "ita", word="")
+
+childes_metrics<- get_childes_metrics(args_, uttlength = TRUE, freq = TRUE, wordlen = TRUE, order = TRUE)
+
+unilemma_metrics<-prepare_unilemmas("Italian")
+
+
+```
