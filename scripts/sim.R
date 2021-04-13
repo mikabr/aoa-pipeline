@@ -43,8 +43,7 @@ eng_prop_pro <- eng_prop %>% filter(measure == "produces")
 # one simulation (i.e. one imputation)
 sim_one <- function(prop_df) {
   eng_impt <- eng_word %>% do_full_imputation(pred_sources, 20) %>% `[[`(3) %>% `[[`(1)
-  eng_data <- merge(prop_df, eng_impt, by = c("uni_lemma")) #%>% #, all.x = TRUE) %>%
-    #mutate(prop = num_true / total)
+  eng_data <- merge(prop_df, eng_impt, by = c("uni_lemma"))
   
   glm(effects_formula, data = eng_data, family = "binomial", weights = total)# %>% .$coefficients
 }
@@ -53,8 +52,8 @@ sim_one <- function(prop_df) {
 eng_sim_und <- replicate(100, sim_one(eng_prop_und), simplify = FALSE)
 eng_sim_pro <- replicate(100, sim_one(eng_prop_pro), simplify = FALSE)
 
-varnames <- rownames(eng_sim_und_coefs[[1]])
-measurenames <- colnames(eng_sim_und_coefs[[1]])
+varnames <- c("(Intercept)", "age", predictors, paste("age:", predictors, sep = ""))
+measurenames <- c("estimate", "std_error", "z_value", "p_value")
 
 get_coefs_val <- function(sim_coefs) {
   coefs_data <- sim_coefs %>% as.data.frame() %>% rownames_to_column() %>%
@@ -71,7 +70,6 @@ get_coefs <- function(sim_df) {
     select(term, measure, everything()) %>%
     pivot_longer(-c(term, measure), names_to = "sim", names_prefix = "V") %>%
     pivot_wider(names_from = "measure", values_from = "value") %>%
-    `colnames<-`(c("term", "sim", "estimate", "std_error", "z_value", "p_value", "signif")) %>%
     mutate(signif = (p_value < .05))
 }
 
@@ -125,19 +123,17 @@ ggsave(filename = "sim_new.png", width = 8, height = 5.6, device='png', dpi=300)
 
 ## add previously imputed data
 load(here("data", "temp_saved_data", "uni_model_data.RData"))
-eng_mod <- uni_model_data %>% ungroup() %>% filter(language == "English (American)") %>%
+uni_model_data %<>% ungroup()
+eng_mod <- uni_model_data %>% filter(language == "English (American)") %>%
   mutate(total = num_true + num_false) # %>%
   # select(c(uni_lemma, measure, prop, age, total))
 eng_mod_und <- eng_mod %>% filter(measure == "understands") %>% 
   glm(effects_formula, data = ., family = "binomial", weights = total)
 eng_mod_pro <- eng_mod %>% filter(measure == "produces") %>% 
   glm(effects_formula, data = ., family = "binomial", weights = total)
-# eng_mod_und <- eng_mod %>% filter(measure == "understands") %>% sim_one()
-# eng_mod_pro <- eng_mod %>% filter(measure == "produces") %>% sim_one()
 eng_mod_und_coefs <- get_coefs(list(eng_mod_und))
 eng_mod_pro_coefs <- get_coefs(list(eng_mod_pro))
 
 eng_mod_coefs_full <- bind_coefs(eng_mod_und_coefs, eng_mod_pro_coefs)
 
 coef_plot + geom_point(data = eng_mod_coefs_full, size = .7)
-               
