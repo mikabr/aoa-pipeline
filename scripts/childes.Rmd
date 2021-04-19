@@ -3,8 +3,6 @@ title: "childes_pipeline"
 output: html_document
 ---
 
-https://rpubs.com/gloukatou/739504
-
 ```{r, message=FALSE, warning=FALSE}
 
 library(tidyverse)
@@ -34,8 +32,8 @@ convert_lang <- function(lang){
 }
 
 pattern_replace <- function(x){
-pat <- c("jap", "cro", "man", "can", "dut", "gre", "ses", "slo", "far", "ser", "ber")
-replace <- c("jpn", "hrv", "zho", "yue", "nld", "ell", "sot", "slv", "fas", "srp", "taq")
+pat <- c("jap", "cro", "man", "can", "dut", "gre", "ses", "slo", "far", "ser", "ber", "fre")
+replace <- c("jpn", "hrv", "zho", "yue", "nld", "ell", "sot", "slv", "fas", "srp", "taq", "fra")
 for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
 return(x)
 }
@@ -264,14 +262,20 @@ return(case_map)
 
 ```{r map_cases,  message=FALSE, warning=FALSE}
 
-
+uni_lang <- function(x){
+pat <- c("French")
+replace <- c("French (Quebec)")
+for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
+return(x)
+}
 
 load_childes_data <- function(lang) {
   df <- read_csv(sprintf("childes_metrics.csv",
                    norm_lang(lang))) %>%
     filter(!is.na(word)) %>%
     mutate(stem = stem(word, norm_lang(lang))) %>%
-    full_join(load_unilemmas() %>% filter(language == lang)) %>%
+    full_join(load_unilemmas() %>% filter(language == uni_lang(lang)), by = "stem") %>%
+    rename(language = language.y) %>%
     group_by(uni_lemma, language) %>%
     filter(!is.na(uni_lemma)) %>%
     filter(!is.na(word)) %>%
@@ -304,7 +308,7 @@ return(childes_data)
 ```{r call_functions,  message=FALSE, warning=FALSE}
 lang="Italian"
 
-childes_metrics<- get_childes_metrics(lang, corpus = "Tonelli", word = "", speaker_role = NULL, speaker_role_exclude = "Target_Child", target_child ="Elisa", child_age = NULL, child_sex = NULL, uttlength = TRUE , freq = TRUE , charlen = TRUE , order = TRUE)
+childes_metrics<- get_childes_metrics(lang, corpus = "Tonelli", word = "", speaker_role = NULL, speaker_role_exclude = "Target_Child", target_child ="", child_age = NULL, child_sex = NULL, uttlength = TRUE , freq = TRUE , charlen = TRUE , order = TRUE)
 
 unilemma_metrics<-prepare_unilemmas(lang)
 
