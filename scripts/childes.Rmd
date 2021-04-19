@@ -14,62 +14,68 @@ library(stringr)
 library(SnowballC)
 source("stemmer.R")
 
-####weighted average?
+
+#####################################
+
+#####################################
+
 #### special cases for lemmatization - matching part of speech e.g. arrabbiato
 ####exclude boccia/bocciata from mouth, barbie how to not consider a stem? remove "A"
-####fix parameters
-#####fix language name
 
 ```
 
 ```{r main function, message=FALSE, warning=FALSE}
 
-word = ""
-metrics <- data.frame(matrix(ncol=1,nrow=0, dimnames=list(NULL, c("gloss")))) %>%
-    mutate(gloss = as.character(gloss))
+
+convert_lang <- function(lang){
+   lang <- substr(lang, start = 1, stop = 3) %>% tolower() 
+   lang <- pattern_replace(lang)   
+   return(lang)
+}
+
+pattern_replace <- function(x){
+pat <- c("jap", "cro", "man", "can", "dut", "gre", "ses", "slo", "far", "ser", "ber")
+replace <- c("jpn", "hrv", "zho", "yue", "nld", "ell", "sot", "slv", "fas", "srp", "taq")
+for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
+return(x)
+}
 
 get_childes_metrics <- function(lang = NULL,
                    corpus = NULL,
                    speaker_role = NULL, 
                    speaker_role_exclude = "Target_Child", 
+                   target_child = "",
                    child_age = NULL, 
                    child_sex = NULL, 
                    pos = NULL, 
                    word = "",
-                   column="language", 
                    freq=TRUE, 
                    uttlength=TRUE, 
-                   wordlen = TRUE, 
+                   charlen = TRUE, 
                    order = TRUE ){
   
-  args_<-list(lang, corpus, speaker_role, speaker_role_exclude, child_age, child_sex, pos, word)
- 
+  args_<-list(convert_lang(lang), corpus, speaker_role, speaker_role_exclude, target_child, child_age, child_sex, pos, word)
   data_<- do.call(get_data, args_)
   
-  if (freq == TRUE){
-  wordcount = frequency(data_$tokens)
-  metrics <- full_join(metrics, wordcount)
-  }
+  metrics <- data.frame(matrix(ncol=1,nrow=0, dimnames=list(NULL, c("gloss")))) %>%
+    mutate(gloss = as.character(gloss))
   
-  if (uttlength == TRUE){
-  mlu = mlu(data_$utterances, data_$tokens, column)
-  metrics <- full_join(metrics, mlu)
-  }
+ total <- nrow(data_$tokens)
+ if (freq == TRUE){ metrics <- full_join(metrics, frequency(data_$tokens, total)) }
   
-  if (wordlen == TRUE){
-  wlength = wordlength( data_$tokens)
-  metrics <- full_join(metrics, wlength)
-  }
+ if (uttlength == TRUE){ metrics <- full_join(metrics, mlu(data_$utterances, data_$tokens)) }
   
-  if (order == TRUE){
-  worder = order(data_$utterances, data_$tokens, column)
-  metrics <- full_join(metrics, worder)
-  }
+ if (order == TRUE){ metrics <- full_join(metrics, find_order(data_$utterances, data_$tokens)) }
   
-  childes_metrics <- metrics %>% 
+ if (charlen == TRUE){ 
+   metrics <- metrics %>%
+     mutate(charactercount = str_count(gloss))}
+  
+ childes_metrics <- metrics %>% 
     distinct() %>%
       mutate(language = lang) %>%
-        rename(word = gloss)
+         mutate(totalcount =  total) %>%
+            rename(word = gloss)
 
 
   write.csv(childes_metrics,"childes_metrics.csv" )   
@@ -80,45 +86,33 @@ get_childes_metrics <- function(lang = NULL,
 
 ```{r get data,  message=FALSE, warning=FALSE}
 
-group_by_column <- function(df, column){
-  df <- df %>%
-  group_by_(column) %>%  
-    count() 
-}
-
 get_data <- function(lang = NULL,
                    corpus = NULL,
                    speaker_role = NULL, 
                    speaker_role_exclude = "Target_Child", 
+                   target_child = "",
                    child_age = NULL, 
                    child_sex = NULL, 
                    pos = NULL, 
                    word)
                    {
 
-utterances <-get_utterances(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex)
+utterances <-get_utterances(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex) %>%
+  mutate(gloss = tolower(gloss)) 
 
-tokens_ <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, token="*")
-
-tokens1<- group_by_column(tokens_, "corpus_name") %>%
-      rename(corpuscount = n)
-tokens2<- group_by_column(tokens_, "speaker_role") %>%
-      rename(speakercount = n)
-tokens3<- group_by_column(tokens_, "target_child_name") %>%
-      rename(targetchildcount = n)
-
-tokens_all <- tokens_ %>% left_join(tokens1)  %>% left_join(tokens2)  %>% left_join(tokens3)
+tokens_ <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, token="*") 
 
 if (word != ""){
-tokens <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, part_of_speech = pos, token = word) %>%
-  left_join(tokens_all)}
-else {tokens <- tokens_all}
-
-tokens$gloss <-tolower(tokens$gloss)
-utterances$gloss <-tolower(utterances$gloss)
+  tokens <-get_tokens(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex, part_of_speech = pos, token = word)
+} else {tokens <- tokens_ }
 
 tokens <- tokens %>%
-  select(id, gloss, language, corpus_name, speaker_role, target_child_name, target_child_age, target_child_sex, utterance_id, corpuscount, speakercount, targetchildcount)
+  mutate(gloss = tolower(gloss))
+  
+if (target_child != ""){
+  tokens <- tokens %>%
+    filter(target_child_name == target_child)
+} else {}
 
 return(list(utterances = data.table(utterances), tokens=data.table(tokens))) 
 }
@@ -126,63 +120,40 @@ return(list(utterances = data.table(utterances), tokens=data.table(tokens)))
 
 
 ```{r predictors,  message=FALSE, warning=FALSE}
-#level on which user wants their predictor e.g. target_child_id, speaker_id, transcript_id
 
-
-adjust_level <- function(tokens){
-if (column == "target_child_name"){
-tokens$levelname <- tokens$target_child_name
-tokens$levelcount<- tokens$targetchildcount
-}  else if (column == "speaker_role"){
-tokens$levelname <- tokens$speaker_role
-tokens$levelcount<- tokens$speakercount
-}  else if (column == "corpus_name"){
-tokens$levelname<- tokens$corpus_name
-tokens$levelcount<- tokens$corpuscount
-}  else {
-tokens$levelname <- tokens$language
-tokens$levelcount<- nrow(tokens) 
-}
-return(tokens)
-}
-
-
-frequency<-function(tokens, column = "language"){ 
-tokens <- adjust_level(tokens)
+frequency<-function(tokens, total){ 
 tokens_grouped <- tokens %>%
-    select(levelname, gloss, levelcount)  %>% #corpuscount
-      group_by(levelname, gloss) %>%
+    select(gloss)  %>% 
+      group_by(gloss) %>%
       count()  %>% 
         rename(wordcount = n) 
 tokens_divide <- tokens %>% 
     left_join(tokens_grouped) %>%
-      mutate(rawfreq=wordcount/levelcount) %>%
-          select(gloss, rawfreq, wordcount, levelcount, levelname)
+      mutate(freq=wordcount/total) %>%
+        select(gloss, wordcount, freq)
 return(tokens_divide)
 } 
-  
-mlu <- function(utterances, tokens, column = "language"){
+
+space_clitics <- function(gloss){
+  gloss <- gsub("'", "' ", gloss)
+  gloss <- gsub("  ", " ", gloss)     
+return(gloss) 
+}
+
+mlu <- function(utterances, tokens){
 utterances_mlu<- utterances %>%
+  mutate(gloss = space_clitics(gloss)) %>%
     mutate(utt_length = sapply(strsplit(utterances$gloss, " "), length)) %>%
      select(id, utt_length) %>%  
       rename(utterance_id = id)
-tokens <- adjust_level(tokens)
 tokens_mlu <- tokens %>% 
     left_join(utterances_mlu) %>%
-     group_by(levelname, gloss)  %>% 
+    select(gloss, utt_length) %>%
+     group_by(gloss)  %>% 
       summarise(mlu = mean(utt_length)) %>% 
         select(gloss, mlu)
 return(tokens_mlu)
 }
-
-wordlength <- function(tokens){
-tokens_length <- tokens %>%
-   mutate(wordcount= str_count(gloss)) %>%
-   distinct() %>%
-   select(gloss, wordcount)
-return(tokens_length)  
-}
-
 
 find_positions <- function(tokens_pos){
 tokens_pos_ <- tokens_pos %>%
@@ -193,26 +164,33 @@ tokens_pos_ <- tokens_pos %>%
 return(tokens_pos_)  
 }
 
-order <- function(utterances, tokens, column = "language"){
+coalesce_by_column <- function(df) {
+    return(coalesce(df[1], df[2], df[3], df[4]))
+}
+
+find_order <- function(utterances, tokens){
 utterances_pos <- utterances %>% 
-  select(id, gloss) %>%
-    rename(sentence = gloss ) %>%
-    rename(utterance_id = id)
+    select(id, gloss) %>%
+      mutate(gloss = space_clitics(gloss)) %>%
+        rename(sentence = gloss) %>%
+        rename(utterance_id = id)
 tokens<- tokens %>%
   left_join(utterances_pos) %>%
     select(id, gloss, sentence)
 tokens_pos <- find_positions(tokens)
 tokens_count_ <- tokens_pos  %>% 
-  count(gloss)
+  count(gloss) %>% 
+    rename(wordcount=n)
 tokens_final <- tokens_pos  %>%
   count(gloss, order) %>%
-    rename(ordergloss=n) %>% 
+    rename(ordercount=n) %>% 
       left_join(tokens_count_) %>%
-        mutate(solo = ifelse(as.character(order) == "solo",ordergloss,NA)) %>%
-        mutate(last = ifelse(as.character(order) == "last",ordergloss, NA)) %>%
-        mutate(first = ifelse(as.character(order) == "first",ordergloss, NA)) %>%
-        mutate(other = ifelse(as.character(order) == "other",ordergloss, NA)) %>%
-          select(gloss, solo, last, first, other, n)
+        mutate(solo = ifelse(as.character(order) == "solo",ordercount,NA)) %>%
+        mutate(last = ifelse(as.character(order) == "last",ordercount, NA)) %>%
+        mutate(first = ifelse(as.character(order) == "first",ordercount, NA)) %>%
+        select(gloss, solo, last, first) %>%
+          group_by(gloss) %>% 
+            summarise_all(coalesce_by_column)
 return(tokens_final)
 }
 
@@ -220,13 +198,10 @@ return(tokens_final)
 
 
 ```{r stemming,  message=FALSE, warning=FALSE}
-#adapted slightly from mikabr/aoa_prediction
-
+#adapted from mikabr/aoa_prediction
 
 norm_lang <- function(lang)
   lang %>% tolower() %>% strsplit(" ") %>% map_chr(~.x[1])
-
-
 
 transforms <- c(
   function(x) gsub("(.*) \\(.*\\)", "\\1", x),
@@ -253,17 +228,15 @@ special_case_map <-  map_df(special_case_files, function(case_file) {
     options <- special_cases[i, 3:ncol(special_cases)] %>%
       as.character() %>%
       discard(is.na)
-    trans_opts <- map(options, apply_transforms) %>% unlist() %>% unique() #apply transforms to special cases
-    data_frame(language = lang,
+      trans_opts <- map(options, apply_transforms) %>% unlist() %>% unique() #apply transforms to special cases
+      data_frame(language = lang,
                uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
                stem = c(trans_opts, stem(trans_opts, lang)))
   })
   
 }) 
-#not forget to add () in croatian.py
 
 loadRData <- function(fileName){
-#loads an RData file, and returns it
     load(fileName)
     get(ls()[ls() != "fileName"])
 }
@@ -291,50 +264,49 @@ return(case_map)
 
 ```{r map_cases,  message=FALSE, warning=FALSE}
 
-lang = "Italian" #to fix
 
-coalesce_by_column <- function(df) {
-    return(coalesce(df[1], df[2], df[3], df[4]))
-}
 
 load_childes_data <- function(lang) {
   df <- read_csv(sprintf("childes_metrics.csv",
                    norm_lang(lang))) %>%
     filter(!is.na(word)) %>%
-    mutate(types = n(),
-           stem = stem(word, norm_lang(lang))) %>%
+    mutate(stem = stem(word, norm_lang(lang))) %>%
     full_join(load_unilemmas() %>% filter(language == lang)) %>%
     group_by(uni_lemma, language) %>%
     filter(!is.na(uni_lemma)) %>%
     filter(!is.na(word)) %>%
-    group_by(word) %>%
-    summarise_all(coalesce_by_column) %>%
+    group_by(word) 
+  df_by_lemma <- df %>% 
     group_by(uni_lemma) %>%
-    summarise(nb_realisations=n(),
-              words = list(unique(word)),
-              word_count = sum(n, na.rm = TRUE),
-              character_count = mean(wordcount, na.rm = TRUE),
-              mean_freq=sum(freq, na.rm =TRUE),
-              mean_mlu=mean(mlu, na.rm = TRUE),
-              mean_solo=sum(solo, na.rm = TRUE)/word_count,
-              mean_last=sum(last, na.rm = TRUE)/word_count,     
-              mean_first=sum(first, na.rm = TRUE)/word_count,
-              mean_other=sum(other, na.rm = TRUE)/word_count)}  
+    summarise(nb_realisations_lemma=n(),
+              words_lemma = list(unique(word)),
+              sum_wordcount_lemma = sum(wordcount, na.rm = TRUE),
+              mean_character_count_lemma = mean(charactercount, na.rm = TRUE), 
+              sum_freq=sum(freq, na.rm =TRUE),
+              mean_mlu_lemma=mean(mlu, na.rm = TRUE),
+              sum_solo_lemma=sum(solo, na.rm = TRUE),
+              sum_last_lemma=sum(last, na.rm = TRUE),     
+              sum_first_lemma=sum(first, na.rm = TRUE))
+  df_total <- left_join(df, df_by_lemma) 
+  return(df_total)
+  }  
     
 prepare_unilemmas <- function(lang){
 childes_data <- map_df(lang, load_childes_data)
-childes_data$words <- vapply(childes_data$words, paste, collapse = ", ", character(1L))
+childes_data$words_lemma <- vapply(childes_data$words_lemma, paste, collapse = ", ", character(1L))
 write.csv(childes_data,"unilemma_metrics.csv" ) 
+
 return(childes_data)
 }
 
 ```
 
-```{r example_commands,  message=FALSE, warning=FALSE}
+```{r call_functions,  message=FALSE, warning=FALSE}
+lang="Italian"
 
-childes_metrics<- get_childes_metrics(lang = "ita", word="", uttlength = TRUE, freq = TRUE, wordlen = TRUE, order = TRUE)
+childes_metrics<- get_childes_metrics(lang, corpus = "Tonelli", word = "", speaker_role = NULL, speaker_role_exclude = "Target_Child", target_child ="Elisa", child_age = NULL, child_sex = NULL, uttlength = TRUE , freq = TRUE , charlen = TRUE , order = TRUE)
 
-unilemma_metrics<-prepare_unilemmas("Italian")
-
+unilemma_metrics<-prepare_unilemmas(lang)
 
 ```
+
