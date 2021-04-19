@@ -12,18 +12,9 @@ library(stringr)
 library(SnowballC)
 source("stemmer.R")
 
-
-#####################################
-
-#####################################
-
-#### special cases for lemmatization - matching part of speech e.g. arrabbiato
-####exclude boccia/bocciata from mouth, barbie how to not consider a stem? remove "A"
-
 ```
 
 ```{r main function, message=FALSE, warning=FALSE}
-
 
 convert_lang <- function(lang){
    lang <- substr(lang, start = 1, stop = 3) %>% tolower() 
