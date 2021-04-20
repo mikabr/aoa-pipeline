@@ -29,6 +29,7 @@ eng_data
 ```{r}
 # use individual functions to read data from db for each form, potentially
 # making changes in between steps
+source("scripts/wordbank.R")
 eng_wg <- create_inst_data("English (American)", "WG")
 eng_ws <- create_inst_data("English (American)", "WS")
 eng_wg_summary <- collapse_inst_data(eng_wg)
@@ -37,9 +38,121 @@ eng_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 eng_summary
 ```
 
+#preprocess and load multiple languages
+```{r message=FALSE}
+
+#TODO: French (Quebec) doesn't work?
+target_langs <- c("Croatian", "Danish", "English (American)",
+  "Italian", "Norwegian", "Russian", "Spanish (Mexican)", "Swedish", "Turkish")
+
+#lapply(target_langs, create_lang_data)
+
+hr_data <- readRDS("data/wordbank/croatian.rds")
+da_data <- readRDS("data/wordbank/danish.rds")
+eng_data <- readRDS("data/wordbank/english_(american).rds")
+it_data <- readRDS("data/wordbank/italian.rds")
+no_data <- readRDS("data/wordbank/norwegian.rds")
+es_data <- readRDS("data/wordbank/spanish_(mexican).rds")
+sv_data <- readRDS("data/wordbank/swedish.rds")
+tr_data <- readRDS("data/wordbank/turkish.rds")
+ru_data <- readRDS("data/wordbank/russian.rds")
+lang_data <- rbind(hr_data, da_data, eng_data, it_data, no_data, es_data, sv_data, tr_data, ru_data)
+```
+
+Use `map_predictors.R` to merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions
+
+```{r message=FALSE}
+#map in the predictors non-corpus predictors
+source("scripts/map_predictors.R")
+
+target_data <- lang_data
+
+babiness_csv <- here("data/predictors/babiness/babiness.csv")
+babiness_replace_csv <- here("data/predictors/babiness/babiness_replace.csv")
+babiness_map <- c(word = "word", babiness = "babyAVG")
+
+baby_unilemma <- map_predictor(target_data, babiness_csv, babiness_replace_csv, babiness_map)
+
+valence_csv <- here("data/predictors/valence/valence.csv")
+valence_replace_csv <- here("data/predictors/valence/valence_replace.csv")
+valence_mapping <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
+
+valence_unilemma <- map_predictor(target_data, valence_csv, valence_replace_csv, valence_mapping)
+
+concreteness_csv <- here("data/predictors/concreteness/concreteness.csv")
+concreteness_replace_csv <- here("data/predictors/concreteness/concreteness_replace.csv")
+concreteness_map <- c(word = "Word", concreteness = "Conc.M")
+
+conctreteness_unilemma <- map_predictor(target_data, concreteness_csv, 
+                                        concreteness_replace_csv, concreteness_map)
+
+#TODO: should this be specified here, or do we assume people will specify it themselves?
+lang_code_map <- list(
+  "Croatian" = "hr",
+  "Danish" = "da",
+  "English (American)" = "en-us",
+  "French (Quebec)" = "fr",
+  "Italian" = "it",
+  "Norwegian" = "no",
+  "Russian" = "ru",
+  "Spanish (Mexican)" = "es",
+  "Swedish" = "sv",
+  "Turkish" = "tr"
+)
+
+phonemes_unilemma <- map_phonemes(target_data, lang_code_map)
+
+uni_joined <- target_data %>% 
+  left_join(phonemes_unilemma) %>% 
+  left_join(baby_unilemma) %>% 
+  left_join(valence_unilemma) %>% 
+  left_join(conctreteness_unilemma)
+```
+
+Add CHILDES predictors
+
+```{r}
+
+
+```
+
+
+Residualize solo freq and final freq
+
+```{r}
+
+
+```
+
+
+```{r impute}
+source("scripts/prep_data.R")
+
+prepped_data <- uni_joined %>%
+  #select out just the by lexical item data
+  unnest(cols = "items") %>%
+  select(-c(age, num_true, total, form, item_id)) %>%
+  distinct() %>%
+  #pull out categories from classes
+  mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other", lexical_class),
+         # collapse v, adj, adv into one category
+         lexical_category = lexical_category %>% as_factor() %>% 
+           #TODO: What to do if the languages selected don't have one of these - cant use fct collapse?
+           fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))) %>%
+  select(-lexical_class)
+
+pred_sources <- list(
+  #c("frequency", "MLU", "final_frequency", "solo_frequency"),
+  c("valence", "arousal"), 
+  "concreteness", "babiness", "num_phons"
+)
+
+imputed_data <- prepped_data %>% do_full_imputation(pred_sources, 20)
+```
+
 ```{r}
 # quick viz of item trajectories
-eng_summary %>%
+lang_data %>%
   mutate(prop = num_true / total,
          measure = fct_relevel(measure, "understands")) %>%
 ggplot(aes(x = age, y = prop)) +

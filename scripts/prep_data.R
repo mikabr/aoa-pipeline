@@ -9,13 +9,14 @@ library(tidyverse)
 
 # HELPER FUNCTIONS --------------
 
-#Residualize - do each of these get their own functions?
+#Residualize - do each of these get their own functions? w/ an argument
 get_final_freq <- function(uni_childes) {
   return(lm(final_freq ~ requency, data = uni_childes)$residuals)
 }
 get_solo_freq <- function(uni_childes) {
   return(lm(final_freq ~ requency, data = uni_childes)$residuals)
 }
+
 
 fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources %>% discard(~pred %in% .x) %>% unlist()
@@ -103,84 +104,3 @@ do_full_imputation <- function(model_data, pred_sources, max_steps) {
                                                             pred_sources, max_steps)))
   return(imputed_data)
 }
-
-#TEST/EXAMPLE CASE ------
-
-load(here("data/temp_saved_data/uni_joined.RData")) #this doesnt totally match the eng_data
-
-#The data we're reading in as predictors should already have this cleaned
-test_data <- uni_joined %>%
-  #select out just the by lexical item data
-  select(-c(age, num_true, num_false, prop)) %>%
-  distinct() %>%
-  #pull out categories from classes
-  mutate(lexical_category = if_else(str_detect(lexical_classes, ","), "other", lexical_classes),
-         # collapse v, adj, adv into one category
-         lexical_category = lexical_category %>% as_factor() %>% 
-           fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))) %>%
-  select(-lexical_classes)
-
-#1. Specify predictors
-pred_sources <- list(
-  c("frequency", "MLU", "final_frequency", "solo_frequency"),
-  c("valence", "arousal"), 
-  "concreteness", "babiness", "num_phons"
-)
-
-test_imputed_data <- test_data %>% do_full_imputation(pred_sources, 20)
-
-#TEST 2, Adding new predictors (test w/ entropy)
-entropy_data <- read_csv(here("data/temp_saved_data/type_entropies.csv"))
-word_map <- read_csv(here("data/temp_saved_data/WSWG_50percentproducing_cleaned.csv")) %>% 
-  rename(wordtype = type) %>% rename(word_type = wordtype)
-entropy_data <- entropy_data %>% left_join(word_map) %>% mutate(language = "English (American)")
-
-test_data_two <- test_data %>%left_join(entropy_data %>% select(language, uni_lemma, child_entropy, adult_entropy))
-
-#1. Specify predictors
-pred_sources_two <- list(
-  c("frequency", "MLU", "final_frequency", "solo_frequency"),
-  c("valence", "arousal"), 
-  c("adult_entropy", "child_entropy"),
-  "concreteness", "babiness", "num_phons"
-)
-
-test_imputed_data_entropy <- test_data_two %>% filter(language == "English (American)") %>% do_full_imputation(pred_sources_two, 20)
-
-#2.  Add back in wordbank data
-uni_model_data <- model_data_imputed  %>%
-  unnest() %>%
-  group_by(language) %>%
-  mutate_at(vars(predictors), funs(as.numeric(scale(.)))) %>%
-  right_join(uni_joined %>% select(language, measure, uni_lemma, age, num_true,
-                                   num_false)) %>%
-  group_by(language, measure) %>%
-  mutate(unscaled_age = age, age = scale(age),
-         total = as.double(num_true + num_false), prop = num_true / total)
-
-# Test with joined data from new predictors code
-
-load(here("data/temp_saved_data/new_pipeline_uni_joined.rds"))
-
-#The data we're reading in as predictors should already have this cleaned
-test_data <- combined_joined %>%
-  #select out just the by lexical item data
-  unnest(cols = "items") %>%
-  select(-c(age, num_true, total, form, item_id)) %>%
-  distinct() %>%
-  #pull out categories from classes
-  mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other", lexical_class),
-         # collapse v, adj, adv into one category
-         lexical_category = lexical_category %>% as_factor() %>% 
-           #TODO: What to do if the languages selected don't have one of these - cant use fct collapse?
-           fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))) %>%
-  select(-lexical_class)
-
-#1. Specify predictors
-pred_sources <- list(
-  #c("frequency", "MLU", "final_frequency", "solo_frequency"),
-  c("valence", "arousal"), 
-  "concreteness", "babiness", "num_phons"
-)
-
-test_imputed_data <- test_data %>% do_full_imputation(pred_sources, 20)
