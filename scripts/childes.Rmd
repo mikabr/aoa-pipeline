@@ -41,9 +41,10 @@ get_childes_metrics <- function(lang = NULL,
                    freq=TRUE, 
                    uttlength=TRUE, 
                    charlen = TRUE, 
-                   order = TRUE ){
+                   order = TRUE,
+                   clean = TRUE){
   
-  args_<-list(convert_lang(lang), corpus, speaker_role, speaker_role_exclude, target_child, child_age, child_sex, pos, word)
+  args_<-list(convert_lang(lang), corpus, speaker_role, speaker_role_exclude, target_child, child_age, child_sex, pos, word, clean)
   data_<- do.call(get_data, args_)
   
   metrics <- data.frame(matrix(ncol=1,nrow=0, dimnames=list(NULL, c("gloss")))) %>%
@@ -82,8 +83,9 @@ get_data <- function(lang = NULL,
                    target_child = "",
                    child_age = NULL, 
                    child_sex = NULL, 
-                   pos = NULL, 
-                   word)
+                   pos = NULL,
+                   word,
+                   clean = TRUE)
                    {
 
 utterances <-get_utterances(language = lang, corpus = corpus, role = speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex = child_sex) %>%
@@ -102,6 +104,15 @@ if (target_child != ""){
   tokens <- tokens %>%
     filter(target_child_name == target_child)
 } else {}
+
+if (clean == TRUE ){
+  annot <- c("xxx", "yyy", "www") 
+  annotUtt <- filter(tokens, gloss %in% annot) 
+  annotUttID<- unique(annotUtt$utterance_id) 
+  utterances <- filter(utterances, !(id  %in% annotUttID)) #remove utterances with annotations - incomplete
+  tokens <-  filter(tokens, !(gloss  %in% annot)) #remove tokens with annotations
+     
+}
 
 return(list(utterances = data.table(utterances), tokens=data.table(tokens))) 
 }
