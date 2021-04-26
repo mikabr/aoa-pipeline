@@ -1,8 +1,6 @@
 # Gets stems for a list of words in a given language.
-# Uses Snowball if it is available, otherwise uses a special case 
-stemmer
-# So far: Croatian (uses Steven Koch's implementation of the Zagreb 
-Stemer)
+# Uses Snowball if it is available, otherwise uses a special case stemmer
+# So far: Croatian (uses Steven Koch's implementation of the Zagreb Stemer)
 #croatian_path <- file.path(getwd(), "croatian.py")
 
 stem <- function(words, language) {
@@ -17,7 +15,7 @@ stem <- function(words, language) {
     word_chunks <- split(words, ceiling(seq_along(words) / chunk_size))
     purrr::map(word_chunks, function(word_chunk) {
       system2("python", args = 
-c("/Users/lscpuser/Documents/aoa-prediction/aoa_unified/aoa_loading/croatian.py", 
+c("scripts/croatian.py", 
 sprintf('"%s"', word_chunk)),
               stdout = TRUE)
     }) %>% unlist()
