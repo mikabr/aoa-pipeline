@@ -5,7 +5,7 @@ library(data.table)
 library(stringr)
 library(SnowballC)
 library(glue)
-source("/Users/lscpuser/Documents/aoa-pipeline/scripts/stemmer.R")
+source("scripts/stemmer.R")
 
 
 convert_lang <- function(lang){
@@ -238,7 +238,7 @@ loadRData <- function(fileName){
 }
 load_unilemmas <- function(){
 print(glue("Mapping tokens to uni_lemmas..."))  
-uni_lemmas <- loadRData("/Users/lscpuser/Documents/aoa-pipeline/data/_uni_lemmas.RData")
+uni_lemmas <- loadRData("data/_uni_lemmas.RData")
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
