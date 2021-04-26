@@ -4,7 +4,8 @@ library(childesr)
 library(data.table)
 library(stringr)
 library(SnowballC)
-source("stemmer.R")
+library(glue)
+source("/Users/lscpuser/Documents/aoa-pipeline/scripts/stemmer.R")
 
 
 convert_lang <- function(lang){
@@ -63,8 +64,10 @@ find_order(data_$utterances, data_$tokens)) }
       mutate(language = lang) %>%
          mutate(totalcount =  total) %>%
             rename(word = gloss)
-  write.csv(childes_metrics,"childes_metrics.csv" )   
-  return(childes_metrics)
+  write.csv(childes_metrics, paste0("childes_metrics_", lang,".csv" )) 
+
+unilemma_metrics<-prepare_unilemmas(lang)  
+return(unilemma_metrics)  
 }  
 
 
@@ -80,10 +83,13 @@ get_data <- function(lang = NULL,
                    word,
                    clean = TRUE)
                    {
+print(glue("Getting utterances for {lang}..."))
 utterances <-get_utterances(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex) %>%
   mutate(gloss = tolower(gloss)) 
+
+print(glue("Getting tokens for {lang}..."))
 tokens_ <-get_tokens(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex, token="*") 
@@ -103,10 +109,8 @@ if (clean == TRUE ){
   annot <- c("xxx", "yyy", "www") 
   annotUtt <- filter(tokens, gloss %in% annot) 
   annotUttID<- unique(annotUtt$utterance_id) 
-  utterances <- filter(utterances, !(id  %in% annotUttID)) #remove 
-utterances with annotations - incomplete
-  tokens <-  filter(tokens, !(gloss  %in% annot)) #remove tokens with 
-annotations
+  utterances <- filter(utterances, !(id  %in% annotUttID)) #remove utterances with annotations - incomplete
+  tokens <-  filter(tokens, !(gloss  %in% annot)) #remove tokens with annotations
      
 }
 return(list(utterances = data.table(utterances), 
@@ -115,6 +119,7 @@ tokens=data.table(tokens)))
 
 
 frequency<-function(tokens, total){ 
+print(glue("Measuring frequency..."))
 tokens_grouped <- tokens %>%
     select(gloss)  %>% 
       group_by(gloss) %>%
@@ -122,8 +127,8 @@ tokens_grouped <- tokens %>%
         rename(wordcount = n) 
 tokens_divide <- tokens %>% 
     left_join(tokens_grouped) %>%
-      mutate(freq=wordcount/total) %>%
-        select(gloss, wordcount, freq)
+      mutate(frequency_word=wordcount) %>%
+        select(gloss, wordcount, frequency_word)
 return(tokens_divide)
 } 
 space_clitics <- function(gloss){
@@ -132,21 +137,22 @@ space_clitics <- function(gloss){
 return(gloss) 
 }
 mlu <- function(utterances, tokens){
+print(glue("Measuring mean utterance length..."))
 utterances_mlu<- utterances %>%
   mutate(gloss = space_clitics(gloss)) %>%
-    mutate(utt_length = sapply(strsplit(utterances$gloss, " "), length)) 
-%>%
+    mutate(utt_length = sapply(strsplit(utterances$gloss, " "), length)) %>%
      select(id, utt_length) %>%  
       rename(utterance_id = id)
 tokens_mlu <- tokens %>% 
     left_join(utterances_mlu) %>%
     select(gloss, utt_length) %>%
      group_by(gloss)  %>% 
-      summarise(mlu = mean(utt_length)) %>% 
-        select(gloss, mlu)
+      summarise(mlu_word = mean(utt_length)) %>% 
+        select(gloss, mlu_word)
 return(tokens_mlu)
 }
 find_positions <- function(tokens_pos){
+print(glue("Finding positions in utterance..."))
 tokens_pos_ <- tokens_pos %>%
   mutate(utt_length = sapply(strsplit(tokens_pos$sentence, " "), 
 length)) %>%
@@ -178,13 +184,13 @@ tokens_final <- tokens_pos  %>%
   count(gloss, order) %>%
     rename(ordercount=n) %>% 
       left_join(tokens_count_) %>%
-        mutate(solo = ifelse(as.character(order) == 
+        mutate(solo_word = ifelse(as.character(order) == 
 "solo",ordercount,NA)) %>%
-        mutate(last = ifelse(as.character(order) == "last",ordercount, 
+        mutate(final_word = ifelse(as.character(order) == "last",ordercount, 
 NA)) %>%
-        mutate(first = ifelse(as.character(order) == "first",ordercount, 
+        mutate(initial_word = ifelse(as.character(order) == "first",ordercount, 
 NA)) %>%
-        select(gloss, solo, last, first) %>%
+        select(gloss, solo_word, final_word, initial_word) %>%
           group_by(gloss) %>% 
             summarise_all(coalesce_by_column)
 return(tokens_final)
@@ -231,7 +237,8 @@ loadRData <- function(fileName){
     get(ls()[ls() != "fileName"])
 }
 load_unilemmas <- function(){
-uni_lemmas <- loadRData("_uni_lemmas.RData")
+print(glue("Mapping tokens to uni_lemmas..."))  
+uni_lemmas <- loadRData("/Users/lscpuser/Documents/aoa-pipeline/data/_uni_lemmas.RData")
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
@@ -253,19 +260,23 @@ return(case_map)
 }
 
 uni_lang <- function(x){
-pat <- c("French")
+x <- gsub("[()]","",as.character(x))
+x <- gsub(" ","_",as.character(x))
+pat <- c("French_French")
 replace <- c("French (Quebec)")
-for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
-return(x)
+for(i in seq_along(pat)) x_<- gsub(pat[i], replace[i], x)
+return(x_)
 }
+
 load_childes_data <- function(lang) {
-  df <- read_csv(sprintf("childes_metrics.csv",
+  name <- paste0("childes_metrics_", lang, ".csv")
+  df <- read_csv(sprintf(name,
                    norm_lang(lang))) %>%
     filter(!is.na(word)) %>%
     mutate(stem = stem(word, norm_lang(lang))) %>%
     full_join(load_unilemmas() %>% filter(language == uni_lang(lang)), 
 by = "stem") %>%
-    rename(language = language.y) %>%
+    rename(language = language.x) %>%
     group_by(uni_lemma, language) %>%
     filter(!is.na(uni_lemma)) %>%
     filter(!is.na(word)) %>%
@@ -277,11 +288,12 @@ by = "stem") %>%
               sum_wordcount_lemma = sum(wordcount, na.rm = TRUE),
               mean_character_count_lemma = mean(charactercount, na.rm = 
 TRUE), 
-              sum_freq=sum(freq, na.rm =TRUE),
-              mean_mlu_lemma=mean(mlu, na.rm = TRUE),
-              sum_solo_lemma=sum(solo, na.rm = TRUE),
-              sum_last_lemma=sum(last, na.rm = TRUE),     
-              sum_first_lemma=sum(first, na.rm = TRUE))
+              frequency=sum(frequency_word, na.rm =TRUE),
+              MLU=mean(mlu_word, na.rm = TRUE),
+              solo_frequency=sum(solo_word, na.rm = TRUE),
+              final_frequency=sum(final_word, na.rm = TRUE),     
+              initial_frequency=sum(initial_word, na.rm = TRUE))
+  print(glue("Grouping predictors across uni_lemmas..."))  
   df_total <- left_join(df, df_by_lemma) 
   return(df_total)
   }  
@@ -290,7 +302,7 @@ prepare_unilemmas <- function(lang){
 childes_data <- map_df(lang, load_childes_data)
 childes_data$words_lemma <- vapply(childes_data$words_lemma, paste, 
 collapse = ", ", character(1L))
-write.csv(childes_data,"unilemma_metrics.csv" ) 
+write.csv(childes_data, paste0("unilemma_metrics_", lang,".csv" ) ) 
 return(childes_data)
 }
 
