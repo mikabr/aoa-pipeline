@@ -112,8 +112,19 @@ uni_joined <- target_data %>%
 Add CHILDES predictors
 
 ```{r}
+source("scripts/childes.R")
+target_langs <- c( "Croatian") #Italian French (French) Russian - !!! stemming from wordbank cyrillic vs stemmer latin
 
+childes_predictors <- lapply(target_langs, get_childes_metrics) %>%
+  bind_rows()
 
+clean_childes_predictors <- childes_predictors %>%
+  ungroup() %>%
+  select(uni_lemma, MLU, frequency, solo_frequency, initial_frequency, final_frequency, nb_realisations_lemma, mean_character_count_lemma, totalcount) %>%
+  distinct()
+
+uni_joined_ <- uni_joined %>%
+  left_join(clean_childes_predictors)
 ```
 
 
