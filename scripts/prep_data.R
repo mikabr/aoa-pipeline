@@ -2,11 +2,6 @@
 ## data prep -- scaling, imputation, etc
 ##...................................
 
-library(here)
-library(glue)
-library(broom)
-library(tidyverse)
-
 # HELPER FUNCTIONS --------------
 
 #Residualize - do each of these get their own functions? w/ an argument
@@ -22,7 +17,7 @@ fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources %>% discard(~pred %in% .x) %>% unlist()
   x_str <- xs %>% paste(collapse = " + ")
   lm(as.formula(glue("{pred} ~ {x_str}")), data = d) %>%
-    augment(newdata = d) %>%
+    broom::augment(newdata = d) %>%
     select(uni_lemma, lexical_category, .fitted)
 }
 

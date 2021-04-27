@@ -1,13 +1,10 @@
-library(here)
-library(tidyverse)
-
 #most predictors are attached to unilemmas/underlying concepts (eg concreteness) and can be generalized across languages
-map_predictor <- function(data_source, predictor_csv, replacement_csv, variable_mapping) {
+map_predictor <- function(uni_lemmas, predictor, variable_mapping) {
   #takes in a csv of predictor measures that may or may not map to uni_lemmas and maps them
-  predictor_data <- read_csv(predictor_csv)
-  replacements <- read_csv(replacement_csv)
+  predictor_data <- read_csv(glue("data/predictors/{predictor}/{predictor}.csv"))
+  replacements <- read_csv(glue("data/predictors/{predictor}/{predictor}_replace.csv"))
   predictors <- discard(names(variable_mapping), ~. == "word")
-  uni_lemmas <- data_source %>% distinct(language, uni_lemma)
+  # uni_lemmas <- data_source %>% distinct(language, uni_lemma)
   #clean the predictors
   renamed_predictors <- predictor_data %>% 
     rename(all_of(variable_mapping)) %>% 
@@ -27,138 +24,32 @@ map_predictor <- function(data_source, predictor_csv, replacement_csv, variable_
     left_join(renamed_predictors) %>%
     select(-word) %>%
     group_by(language, uni_lemma) %>%
-    summarize(across({{ predictors }}, mean))
+    summarize(across({{ predictors }}, mean)) %>%
+    ungroup()
   
   return(uni_lemma_predictors)
 }
 
-#some predictors are sensitive to the word, not the uni-lemma. Eg pronounciation
-#For these cases, we get the predictor by word and then average by uni-lemma (eg a vs an)
-
-# https://github.com/mikabr/aoa-prediction/blob/67764a7a4dfdd743278b8a56d042d25723dbdec7/aoa_unified/aoa_loading/aoa_loading.Rmd#L339
-
-# clean_words(c("dog", "dog / cat", "dog (animal)", "(a) dog", "dog*", "dog(go)", "(a)dog", " dog ", "Cat"))
-clean_words <- function(word_set){
-  word_set %>%
-    # dog / doggo -> c("dog", "doggo")
-    strsplit("/") %>% flatten_chr() %>%
-    # dog (animal) | (a) dog
-    strsplit(" \\(.*\\)|\\(.*\\) ") %>% flatten_chr() %>%
-    # dog* | dog? | dog! | ¡dog! | dog's
-    gsub("[*?!¡']", "", .) %>%
-    # dog(go) | (a)dog
-    map_if(
-      # if "dog(go)"
-      ~grepl("\\(.*\\)", .x),
-      # replace with "dog" and "doggo"
-      ~c(sub("\\(.*\\)", "", .x),
-         sub("(.*)\\((.*)\\)", "\\1\\2", .x))
-    ) %>%
-    flatten_chr() %>%
-    # trim
-    gsub("^ +| +$", "", .) %>%
-    keep(nchar(.) > 0) %>%
-    tolower() %>%
-    unique()
-}
-
-get_ipa <- function(word, lang, lang_map) {
-  lang_code <- lang_map[[lang]]
-  system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')), 
-          stdout=TRUE) %>%
-    gsub("^ ", "", .) %>%
-    gsub("[ˈˌ]", "", .)
-}
-
-get_phons <- function(words, lang, lang_map) {
-  words %>% map_chr(function(word) word %>% get_ipa(lang, lang_map))
-}
-
-num_phons <- function(phon_words) {
-  phon_words %>% map_dbl(function(phon_word) {
-    phon_word %>%
-      map_dbl(~.x %>% str_replace("r", "_r") %>%
-                str_replace("l", "_l") %>%#add _ before r and l?
-                str_split("[_ \\-]+") %>% unlist() %>%
-                keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) %>% length()) %>%
-      mean()
-  })
-}
-
-str_phons <- function(phon_words) {
-  phon_words %>% map(function(phon_word) {
-    phon_word %>%
-      map_chr(~.x %>% str_replace("r", "_r") %>%
-              str_replace("l", "_l") %>% 
-                str_replace("ɹ", "_ɹ") %>% str_split("[_ \\-]+") %>% unlist() %>%
-                keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) %>%
-                paste(collapse = ""))
-  })
-}
-
-num_chars <- function(words) {
-  map_dbl(words, ~gsub("[[:punct:]]", "", .x) %>% nchar() %>% mean())
-}
-
-map_phonemes <- function(data_source, language_map){
-  #TODO: add bug check for a language missing from the language map
-  #some words eg "cugino/a" need to be mapped to "cugino / cugina"
-  fixed_words <- read_csv("data/predictors/phonemes/fixed_words.csv") %>%
-    select(language, uni_lemma, definition, fixed_word) %>%
-    filter(!is.na(uni_lemma), !is.na(fixed_word))
-  
-  uni_cleaned <- data_source %>%
-    unnest(cols = "items") %>%
-    distinct(language, uni_lemma, definition) %>%
-    left_join(fixed_words) %>%
-    mutate(fixed_definition = ifelse(is.na(fixed_word), definition, fixed_word),
-           cleaned_words = map(fixed_definition, clean_words)) %>%
-    select(-fixed_word) %>%
-    group_by(language) %>%
-    #for each language, get the phonemes for each word 
-    mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, language_map)))
-  
-  fixed_phons <- read_csv("data/predictors/phonemes/fixed_phons.csv") %>%
-    select(language, uni_lemma, definition, fixed_phon) %>%
-    filter(!is.na(uni_lemma), !is.na(fixed_phon)) %>%
-    mutate(fixed_phon = strsplit(fixed_phon, ", "))
-  
-  uni_phons_fixed <- uni_cleaned %>% 
-    left_join(fixed_phons) %>%
-    mutate(phons = if_else(map_lgl(fixed_phon, is.null), phons, fixed_phon),
-           str_phons = str_phons(phons)) %>%
-    select(-fixed_phon)
-  
-  # get lengths
-  uni_lengths <- uni_phons_fixed %>% mutate(num_char = num_chars(cleaned_words),
-                                            num_phon = num_phons(phons)) %>%
-    group_by(language, uni_lemma) %>%
-    summarize(num_chars = mean(num_char),
-              num_phons = mean(num_phon))
-  return(uni_lengths)
-}
-
-
 # Example -----
-# combined_data <- rbind(readRDS(here("data/wordbank/croatian.rds")), 
-#                        readRDS(here("data/wordbank/english_(american).rds")),
-#                        readRDS(here("data/wordbank/spanish_(mexican).rds")),
-#                        readRDS(here("data/wordbank/russian.rds")))
+# combined_data <- rbind(readRDS("data/wordbank/croatian.rds"), 
+#                        readRDS("data/wordbank/english_(american).rds"),
+#                        readRDS("data/wordbank/spanish_(mexican).rds"),
+#                        readRDS("data/wordbank/russian.rds"))
 # 
-# babiness_csv <- here("data/predictors/babiness/babiness.csv")
-# babiness_replace_csv <- here("data/predictors/babiness/babiness_replace.csv")
+# babiness_csv <- "data/predictors/babiness/babiness.csv"
+# babiness_replace_csv <- "data/predictors/babiness/babiness_replace.csv"
 # babiness_map <- c(word = "word", babiness = "babyAVG")
 # 
 # baby_unilemma <- map_predictor(combined_data, babiness_csv, babiness_replace_csv, babiness_map)
 # 
-# valence_csv <- here("data/predictors/valence/valence.csv")
-# valence_replace_csv <- here("data/predictors/valence/valence_replace.csv")
+# valence_csv <- "data/predictors/valence/valence.csv"
+# valence_replace_csv <- "data/predictors/valence/valence_replace.csv"
 # valence_mapping <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
 # 
 # valence_unilemma <- map_predictor(combined_data, valence_csv, valence_replace_csv, valence_mapping)
 # 
-# concreteness_csv <- here("data/predictors/concreteness/concreteness.csv")
-# concreteness_replace_csv <- here("data/predictors/concreteness/concreteness_replace.csv")
+# concreteness_csv <- "data/predictors/concreteness/concreteness.csv"
+# concreteness_replace_csv <- "data/predictors/concreteness/concreteness_replace.csv"
 # concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 # 
 # conctreteness_unilemma <- map_predictor(combined_data, concreteness_csv, 

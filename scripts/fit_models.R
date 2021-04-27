@@ -1,11 +1,8 @@
-library(here)
-library(glue)
-library(broom)
-library(tidyverse)
-library(jglmm)
+# library(broom)
+# library(jglmm)
 
-options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
-jglmm_setup()
+# options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
+# jglmm_setup()
 
 # `df` must have the following columns:
 #   language, measure,
@@ -51,17 +48,17 @@ fit_models <- function(df, predictors, lex_effects = TRUE, formula = NULL,
 }
 
 ####### TEST CASE
-load(here("data", "temp_saved_data", "uni_model_data.RData"))
-uni_model_data <- uni_model_data %>% ungroup()
-
-eng_model_data <- uni_model_data %>% 
-  filter(language == "English (American)") %>%
-  mutate(total = num_true + num_false)
-
-predictors <- list(
-  c("frequency", "MLU", "final_frequency", "solo_frequency"),
-  c("valence", "arousal"), 
-  "concreteness", "babiness", "num_phons"
-) %>% unlist()
-
-eng_models <- fit_models(eng_model_data, predictors)
+# load("data/temp_saved_data/uni_model_data.RData")
+# uni_model_data <- uni_model_data %>% ungroup()
+# 
+# eng_model_data <- uni_model_data %>% 
+#   filter(language == "English (American)") %>%
+#   mutate(total = num_true + num_false)
+# 
+# predictors <- list(
+#   c("frequency", "MLU", "final_frequency", "solo_frequency"),
+#   c("valence", "arousal"), 
+#   "concreteness", "babiness", "num_phons"
+# ) %>% unlist()
+# 
+# eng_models <- fit_models(eng_model_data, predictors)

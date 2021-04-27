@@ -1,12 +1,9 @@
-library(tidyverse)
-library(glue)
-library(wordbankr)
-
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
-  print(glue("Getting administraions for {language} {form}..."))
+  print(glue("Getting administrations for {language} {form}..."))
   
-  admins <- get_administration_data(language = language, form = form,
-                                    original_ids = TRUE)
+  admins <- wordbankr::get_administration_data(language = language,
+                                               form = form,
+                                               original_ids = TRUE)
   
   if (exclude_longitudinal) {
     # take earliest administration for any child with multiple administrations
@@ -23,7 +20,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
 
 get_inst_words <- function(language, form) {
   print(glue("Getting words for {language} {form}..."))
-  get_item_data(language = language, form = form) %>%
+  wordbankr::get_item_data(language = language, form = form) %>%
     filter(type == "word") %>%
     select(language, form, lexical_class, category, uni_lemma, definition,
            item_id, num_item_id)
@@ -32,11 +29,11 @@ get_inst_words <- function(language, form) {
 get_inst_data <- function(language, form, admins, items) {
   print(glue("Getting data for {language} {form}..."))
   
-  get_instrument_data(language = language,
-                      form = form,
-                      items = items$item_id,
-                      administrations = admins,
-                      iteminfo = items) %>%
+  wordbankr::get_instrument_data(language = language,
+                                 form = form,
+                                 items = items$item_id,
+                                 administrations = admins,
+                                 iteminfo = items) %>%
     mutate(produces = !is.na(value) & value == "produces",
            understands = !is.na(value) &
              (value == "understands" | value == "produces")) %>%
@@ -97,12 +94,16 @@ combine_form_data <- function(inst_summaries) {
 create_inst_data <- function(language, form) {
   inst_admins <- get_inst_admins(language, form)
   inst_words <- get_inst_words(language, form)
-  inst_data <- get_inst_data(language, form, inst_admins, inst_words)
+  get_inst_data(language, form, inst_admins, inst_words)
+}
+
+normalize_language <- function(language) {
+  language %>% str_replace(" ", "_") %>% str_to_lower()
 }
 
 create_lang_data <- function(language, write = TRUE) {
   lang <- language # for filter name scope issues
-  insts <- get_instruments()
+  insts <- wordbankr::get_instruments()
   forms <- insts %>% filter(language == lang) %>% pull(form)
   
   lang_datas <- map(forms, partial(create_inst_data, language = language))
@@ -110,7 +111,7 @@ create_lang_data <- function(language, write = TRUE) {
   lang_summary <- combine_form_data(lang_summaries)
   
   if (write) {
-    lang_label <- language %>% str_replace(" ", "_") %>% str_to_lower()
+    lang_label <- normalize_language(language)
     saveRDS(lang_summary, file = glue("data/wordbank/{lang_label}.rds"))
   }
 }

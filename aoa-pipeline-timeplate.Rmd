@@ -4,7 +4,20 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(dplyr.summarise.inform = FALSE)
+
+# load libraries
+library(tidyverse)
+library(glue)
+
+# load functions
+walk(list.files("scripts", pattern = "*.R", full.names = TRUE), source)
+
+# set up julia
+library(jglmm)
+options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
+jglmm_setup()
 ```
 
 This template provides the structure for how to fit age of acquisition (AoA) prediction models, using data and scripts in this repository.
@@ -18,18 +31,38 @@ The general steps are:
 
 # Wordbank data
 
-Example of getting Wordbank data for English:
-
+Loading cached Wordbank data for English:
 ```{r}
-# read in cached data
 eng_data <- readRDS("data/wordbank/english_(american).rds")
 eng_data
 ```
 
+Loading cached Wordbank data for multiple languages:
 ```{r}
-# use individual functions to read data from db for each form, potentially
-# making changes in between steps
-source("scripts/wordbank.R")
+target_langs <- c("Croatian", "Danish", "English (American)",
+                  "French (Quebecois)", "Italian", "Norwegian", "Russian",
+                  "Spanish (Mexican)", "Swedish", "Turkish")
+
+lang_data <- map_df(target_langs, function(lang) {
+  message(glue("Loading data for {lang}..."))
+  lang_str <- normalize_language(lang)
+  readRDS(glue("data/wordbank/{lang_str}.rds"))
+})
+```
+
+Creating saved Wordbank data for English:
+```{r, eval=FALSE}
+create_lang_data("English (American)")
+```
+
+Creating saved Wordbank data for many languages:
+```{r, eval=FALSE}
+walk(target_langs, create_lang_data)
+```
+
+
+Creating saved Wordbank data one step at a time (potentially making changes between steps):
+```{r}
 eng_wg <- create_inst_data("English (American)", "WG")
 eng_ws <- create_inst_data("English (American)", "WS")
 eng_wg_summary <- collapse_inst_data(eng_wg)
@@ -38,90 +71,68 @@ eng_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 eng_summary
 ```
 
-#preprocess and load multiple languages
-```{r message=FALSE}
-
-#TODO: French (Quebec) doesn't work?
-target_langs <- c("Croatian", "Danish", "English (American)",
-  "Italian", "Norwegian", "Russian", "Spanish (Mexican)", "Swedish", "Turkish")
-
-#lapply(target_langs, create_lang_data)
-
-hr_data <- readRDS("data/wordbank/croatian.rds")
-da_data <- readRDS("data/wordbank/danish.rds")
-eng_data <- readRDS("data/wordbank/english_(american).rds")
-it_data <- readRDS("data/wordbank/italian.rds")
-no_data <- readRDS("data/wordbank/norwegian.rds")
-es_data <- readRDS("data/wordbank/spanish_(mexican).rds")
-sv_data <- readRDS("data/wordbank/swedish.rds")
-tr_data <- readRDS("data/wordbank/turkish.rds")
-ru_data <- readRDS("data/wordbank/russian.rds")
-lang_data <- rbind(hr_data, da_data, eng_data, it_data, no_data, es_data, sv_data, tr_data, ru_data)
+```{r}
+# quick viz of item trajectories
+# lang_data %>%
+#   mutate(prop = num_true / total,
+#          measure = fct_relevel(measure, "understands")) %>%
+# ggplot(aes(x = age, y = prop)) +
+#   facet_grid(cols = vars(measure), rows = vars(language),
+#              scales = "free_x", space = "free_x",
+#              labeller = as_labeller(str_to_sentence)) +
+#   geom_smooth(aes(colour = uni_lemma, weight = total), alpha = 0.1, size = 0.1,
+#               se = FALSE, method = "glm", method.args = list(family = "binomial")) +
+#   scale_colour_discrete(guide = FALSE) +
+#   scale_x_continuous(breaks = seq(8, 30, 4)) +
+#   labs(x = "Age (months)", y = "Proportion of children")
 ```
 
-Use `map_predictors.R` to merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions
 
-```{r message=FALSE}
-#map in the predictors non-corpus predictors
-source("scripts/map_predictors.R")
+# Predictors
 
-target_data <- lang_data
+Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
-babiness_csv <- here("data/predictors/babiness/babiness.csv")
-babiness_replace_csv <- here("data/predictors/babiness/babiness_replace.csv")
+```{r}
+uni_lemmas <- lang_data %>%
+  distinct(language, uni_lemma, items) %>%
+  unnest(items) %>%
+  select(-form) %>%
+  nest(items = -c(language, uni_lemma))
+
 babiness_map <- c(word = "word", babiness = "babyAVG")
+babiness <- uni_lemmas %>% map_predictor("babiness", babiness_map)
 
-baby_unilemma <- map_predictor(target_data, babiness_csv, babiness_replace_csv, babiness_map)
+valence_map <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
+valence <- uni_lemmas %>% map_predictor("valence", valence_map)
 
-valence_csv <- here("data/predictors/valence/valence.csv")
-valence_replace_csv <- here("data/predictors/valence/valence_replace.csv")
-valence_mapping <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
-
-valence_unilemma <- map_predictor(target_data, valence_csv, valence_replace_csv, valence_mapping)
-
-concreteness_csv <- here("data/predictors/concreteness/concreteness.csv")
-concreteness_replace_csv <- here("data/predictors/concreteness/concreteness_replace.csv")
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
+conctreteness <- uni_lemmas %>% map_predictor("concreteness", concreteness_map)
+```
 
-conctreteness_unilemma <- map_predictor(target_data, concreteness_csv, 
-                                        concreteness_replace_csv, concreteness_map)
+```{r}
+# TODO: requires espeak
+# http://espeak.sourceforge.net
+phonemes <- uni_lemmas %>% map_phonemes()
 
-#TODO: should this be specified here, or do we assume people will specify it themselves?
-lang_code_map <- list(
-  "Croatian" = "hr",
-  "Danish" = "da",
-  "English (American)" = "en-us",
-  "French (Quebec)" = "fr",
-  "Italian" = "it",
-  "Norwegian" = "no",
-  "Russian" = "ru",
-  "Spanish (Mexican)" = "es",
-  "Swedish" = "sv",
-  "Turkish" = "tr"
-)
-
-phonemes_unilemma <- map_phonemes(target_data, lang_code_map)
-
-uni_joined <- target_data %>% 
-  left_join(phonemes_unilemma) %>% 
-  left_join(baby_unilemma) %>% 
-  left_join(valence_unilemma) %>% 
-  left_join(conctreteness_unilemma)
+uni_joined <- uni_lemmas %>% 
+  # left_join(phonemes, by = c("language", "uni_lemma")) %>%
+  left_join(babiness, by = c("language", "uni_lemma")) %>% 
+  left_join(valence, by = c("language", "uni_lemma")) %>% 
+  left_join(conctreteness, by = c("language", "uni_lemma"))
 ```
 
 Add CHILDES predictors
 
 ```{r}
-source("scripts/childes.R")
-target_langs <- c( "Croatian") #Italian French (French) Russian - !!! stemming from wordbank cyrillic vs stemmer latin
+target_langs <- c("Italian") #Italian French (French) Russian - !!! stemming from wordbank cyrillic vs stemmer latin
 
-childes_predictors <- lapply(target_langs, get_childes_metrics) %>%
-  bind_rows()
+childes_predictors <- map_df(target_langs, get_childes_metrics)
 
 clean_childes_predictors <- childes_predictors %>%
-  ungroup() %>%
-  select(uni_lemma, MLU, frequency, solo_frequency, initial_frequency, final_frequency, nb_realisations_lemma, mean_character_count_lemma, totalcount) %>%
-  distinct()
+  # ungroup() %>%
+  distinct(uni_lemma, MLU, frequency, solo_frequency, initial_frequency,
+           final_frequency, nb_realisations_lemma, mean_character_count_lemma,
+           totalcount)
 
 uni_joined_ <- uni_joined %>%
   left_join(clean_childes_predictors)
@@ -137,8 +148,6 @@ Residualize solo freq and final freq
 
 
 ```{r impute}
-source("scripts/prep_data.R")
-
 prepped_data <- uni_joined %>%
   #select out just the by lexical item data
   unnest(cols = "items") %>%
@@ -159,19 +168,4 @@ pred_sources <- list(
 )
 
 imputed_data <- prepped_data %>% do_full_imputation(pred_sources, 20)
-```
-
-```{r}
-# quick viz of item trajectories
-lang_data %>%
-  mutate(prop = num_true / total,
-         measure = fct_relevel(measure, "understands")) %>%
-ggplot(aes(x = age, y = prop)) +
-  facet_grid(cols = vars(measure), scales = "free_x", space = "free_x",
-             labeller = as_labeller(str_to_sentence)) +
-  geom_smooth(aes(colour = uni_lemma, weight = total), alpha = 0.1, size = 0.1,
-              se = FALSE, method = "glm", method.args = list(family = "binomial")) +
-  scale_colour_discrete(guide = FALSE) +
-  scale_x_continuous(breaks = seq(8, 30, 4)) +
-  labs(x = "Age (months)", y = "Proportion of children")
 ```
