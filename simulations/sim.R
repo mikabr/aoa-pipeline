@@ -11,7 +11,14 @@ theme_update(strip.text.x = element_text(margin = margin(b = 8), face = "bold"),
 
 set.seed(1000)
 
+load(here("data/temp_saved_data/new_pipeline_uni_joined.rds"))
+
 # define effects formulas (note: only lex_effects_formula is used)
+pred_sources <- list(
+  #c("frequency", "MLU", "final_frequency", "solo_frequency"),
+  c("valence", "arousal"), 
+  "concreteness", "babiness", "num_phons"
+)
 predictors <- unlist(pred_sources)
 
 effects <- paste("age", predictors, sep = " * ")
