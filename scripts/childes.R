@@ -30,6 +30,9 @@ get_childes_metrics <- function(lang = NULL,
                    order = TRUE,
                    clean = TRUE){
   
+ file_ <-paste0( childes_data, "childes_metrics_{norm_lang}.csv")
+ if(!file.exists(file_))
+  {  
   args_<-list(convert_lang(lang), corpus, speaker_role, 
 speaker_role_exclude, target_child, child_age, child_sex, pos, word, 
 clean)
@@ -62,7 +65,10 @@ find_order(data_$utterances, data_$tokens)) }
  norm_lang <- normalize_language(lang)
  write_csv(childes_metrics,
            file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
-
+} else { 
+  childes_metrics <- read.csv(file_)  
+}  
+   
 unilemma_metrics<-prepare_unilemmas(lang)  
 return(unilemma_metrics)  
 }  
@@ -261,7 +267,7 @@ uni_lang <- function(x){
 x <- gsub("[()]","",as.character(x))
 x <- gsub(" ","_",as.character(x))
 pat <- c("French_French")
-replace <- c("French (Quebec)")
+replace <- c("French")
 for(i in seq_along(pat)) x_<- gsub(pat[i], replace[i], x)
 return(x_)
 }
