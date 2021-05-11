@@ -3,6 +3,7 @@ source("scripts/stemmer.R")
 childes_path <- "data/childes"
 
 file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
+file_u <- file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv"))
 print(glue("Checking whether {file_} exists..."))
 
 convert_lang <- function(lang){
@@ -33,7 +34,7 @@ get_childes_metrics <- function(lang = NULL,
                    uttlength=TRUE, 
                    charlen = TRUE, 
                    order = TRUE,
-                   clean = TRUE){
+                   clean = FALSE){
   
  if(!file.exists(file_))
   {  
@@ -76,8 +77,15 @@ find_order(data_$utterances, data_$tokens)) }
   print(glue("{file_} exists. Retrieving data from file"))
   
 }  
-   
-unilemma_metrics<-prepare_unilemmas(lang)
+  if(!file.exists(file_u))
+  {  
+    print(glue("{file_u} doesn't exist. Retrieving unilemmas..."))
+    unilemma_metrics<-prepare_unilemmas(lang)
+ } else {
+    unilemma_metrics <- read.csv(file_u)  
+    print(glue("{file_u} exists. Retrieving data from file"))
+    
+}
 return(unilemma_metrics)  
 }  
 
@@ -92,7 +100,7 @@ get_data <- function(lang = NULL,
                    child_sex = NULL, 
                    pos = NULL,
                    word,
-                   clean = TRUE)
+                   clean = FALSE)
                    {
 print(glue("Getting utterances for {lang}..."))
 utterances <- childesr::get_utterances(language = lang, corpus = corpus, role = 
@@ -122,10 +130,8 @@ if (clean == TRUE ){
   annotUttID<- unique(annotUtt$utterance_id) 
   utterances <- filter(utterances, !(id  %in% annotUttID)) #remove utterances with annotations - incomplete
   tokens <-  filter(tokens, !(gloss  %in% annot)) #remove tokens with annotations
-     
 }
-# return(list(utterances = data.table(utterances), 
-# tokens=data.table(tokens))) 
+
 return(list(utterances = tibble(utterances), 
             tokens = tibble(tokens))) 
 }
@@ -149,6 +155,7 @@ space_clitics <- function(gloss){
   gloss <- gsub("  ", " ", gloss)     
 return(gloss) 
 }
+
 mlu <- function(utterances, tokens){
 print(glue("Measuring mean utterance length..."))
 utterances_mlu<- utterances %>%
@@ -164,6 +171,7 @@ tokens_mlu <- tokens %>%
         select(gloss, mlu_word)
 return(tokens_mlu)
 }
+
 find_positions <- function(tokens_pos){
 print(glue("Finding positions in utterance..."))
 tokens_pos_ <- tokens_pos %>%

@@ -129,7 +129,7 @@ uni_joined <- uni_lemmas %>%
 Add CHILDES predictors
 
 ```{r}
-## A more fine-grained search can be done for each language with this command: childes_predictors<- get_childes_metrics(lang, corpus, word, speaker_role, speaker_role_exclude, target_child, child_age = NULL, child_sex, uttlength=TRUE, freq=TRUE, charlen=TRUE, order=TRUE)
+## A more fine-grained search can be done for each language with this command: childes_predictors<- get_childes_metrics(lang, corpus, word, speaker_role, speaker_role_exclude, target_child, child_age = NULL, child_sex, uttlength=TRUE, freq=TRUE, charlen=TRUE, order=TRUE, clean=FALSE)
 
 childes_predictors <- map_df(target_langs, get_childes_metrics) 
 
