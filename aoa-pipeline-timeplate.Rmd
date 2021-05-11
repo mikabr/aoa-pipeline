@@ -42,7 +42,7 @@ Loading cached Wordbank data for multiple languages:
 #target_langs <- c("Croatian", "Danish", "English (American)",
           #        "French (Quebecois)", "Italian", "Norwegian", "Russian",
            #       "Spanish (Mexican)", "Swedish", "Turkish")
-target_langs <- c("Spanish (Mexican)")
+target_langs <- c("English (American)", "French (Quebecois)")
 
 
 lang_data <- map_df(target_langs, function(lang) {
@@ -61,8 +61,8 @@ create_lang_data("English (American)")
 Creating saved Wordbank data for many languages:
 ```{r, eval=FALSE}
 walk(target_langs, create_lang_data)
-```
 
+```
 
 Creating saved Wordbank data one step at a time (potentially making changes between steps):
 ```{r}
@@ -110,6 +110,7 @@ valence <- uni_lemmas %>% map_predictor("valence", valence_map)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas %>% map_predictor("concreteness", concreteness_map)
+
 ```
 
 ```{r}

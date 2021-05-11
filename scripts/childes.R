@@ -244,6 +244,8 @@ loadRData <- function(fileName){
 load_unilemmas <- function(){
 print(glue("Mapping tokens to uni_lemmas..."))  
 uni_lemmas <- loadRData("data/wordbank/_uni_lemmas.RData")
+uni_lemmas <- uni_lemmas %>%
+  mutate(language = ifelse(language== "French (Quebec)", "French (Quebecois)", language))
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
@@ -266,7 +268,7 @@ return(case_map)
 }
 
 stem_replace <- function(x){
-  pat <- c("spanish_mexican", "french_quebec", "english_american")
+  pat <- c("spanish_mexican", "french_quebecois", "english_american")
   replace <- c("spanish", "french", "english")
   for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
   return(x)
