@@ -2,9 +2,7 @@
 source("scripts/stemmer.R")
 childes_path <- "data/childes"
 
-file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
-file_u <- file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv"))
-print(glue("Checking whether {file_} exists..."))
+
 
 convert_lang <- function(lang){
    lang <- substr(lang, start = 1, stop = 3) %>% tolower() 
@@ -35,8 +33,13 @@ get_childes_metrics <- function(lang = NULL,
                    charlen = TRUE, 
                    order = TRUE,
                    clean = FALSE){
+
+norm_lang <- normalize_language(lang)  
+file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
+file_u <- file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv"))
+print(glue("Checking whether {file_} exists..."))
   
- if(!file.exists(file_))
+if(!file.exists(file_))
   {  
 print(glue("{file_} doesn't exist. Retrieving data from CHILDES..."))
    
@@ -69,7 +72,6 @@ find_order(data_$utterances, data_$tokens)) }
          mutate(totalcount =  total) %>%
             rename(word = gloss)
  
- norm_lang <- normalize_language(lang)
  write_csv(childes_metrics,
            file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
 } else { 
