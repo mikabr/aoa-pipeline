@@ -1,6 +1,6 @@
 # library(data.table)
 source("scripts/stemmer.R")
-childes_path <- "data/childes/"
+childes_path <- "data/childes"
 
 convert_lang <- function(lang){
    lang <- substr(lang, start = 1, stop = 3) %>% tolower() 
@@ -30,7 +30,7 @@ get_childes_metrics <- function(lang = NULL,
                    order = TRUE,
                    clean = TRUE){
   
- file_ <-paste0( childes_path, "childes_metrics_{norm_lang}.csv")
+ file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
  if(!file.exists(file_))
   {  
   args_<-list(convert_lang(lang), corpus, speaker_role, 
