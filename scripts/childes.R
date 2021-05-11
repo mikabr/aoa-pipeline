@@ -2,11 +2,15 @@
 source("scripts/stemmer.R")
 childes_path <- "data/childes"
 
+file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
+print(glue("Checking whether {file_} exists..."))
+
 convert_lang <- function(lang){
    lang <- substr(lang, start = 1, stop = 3) %>% tolower() 
    lang <- pattern_replace(lang)   
    return(lang)
 }
+
 pattern_replace <- function(x){
 pat <- c("jap", "cro", "man", "can", "dut", "gre", "ses", "slo", "far", 
 "ser", "ber", "fre")
@@ -15,6 +19,7 @@ replace <- c("jpn", "hrv", "zho", "yue", "nld", "ell", "sot", "slv",
 for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
 return(x)
 }
+
 get_childes_metrics <- function(lang = NULL,
                    corpus = NULL,
                    speaker_role = NULL, 
@@ -30,9 +35,10 @@ get_childes_metrics <- function(lang = NULL,
                    order = TRUE,
                    clean = TRUE){
   
- file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
  if(!file.exists(file_))
   {  
+print(glue("{file_} doesn't exist. Retrieving data from CHILDES..."))
+   
   args_<-list(convert_lang(lang), corpus, speaker_role, 
 speaker_role_exclude, target_child, child_age, child_sex, pos, word, 
 clean)
@@ -67,6 +73,8 @@ find_order(data_$utterances, data_$tokens)) }
            file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
 } else { 
   childes_metrics <- read.csv(file_)  
+  print(glue("{file_} exists. Retrieving data from file"))
+  
 }  
    
 unilemma_metrics<-prepare_unilemmas(lang)

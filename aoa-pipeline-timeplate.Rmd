@@ -42,7 +42,7 @@ Loading cached Wordbank data for multiple languages:
 #target_langs <- c("Croatian", "Danish", "English (American)",
           #        "French (Quebecois)", "Italian", "Norwegian", "Russian",
            #       "Spanish (Mexican)", "Swedish", "Turkish")
-target_langs <- c("English (American)", "French (Quebecois)")
+target_langs <- c("Spanish (Mexican)")
 
 
 lang_data <- map_df(target_langs, function(lang) {
@@ -129,7 +129,11 @@ uni_joined <- uni_lemmas %>%
 Add CHILDES predictors
 
 ```{r}
-childes_predictors <- map_df(target_langs, get_childes_metrics) %>%
+## A more fine-grained search can be done for each language with this command: childes_predictors<- get_childes_metrics(lang, corpus, word, speaker_role, speaker_role_exclude, target_child, child_age = NULL, child_sex, uttlength=TRUE, freq=TRUE, charlen=TRUE, order=TRUE)
+
+childes_predictors <- map_df(target_langs, get_childes_metrics) 
+
+childes_predictors <- childes_predictors %>%
   # ungroup() %>%
   distinct(uni_lemma, MLU, frequency, solo_frequency, initial_frequency,
            final_frequency, nb_realisations_lemma, mean_character_count_lemma,
