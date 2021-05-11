@@ -1,0 +1,866 @@
+word,wordcount,frequency_word,mlu_word,solo_word,final_word,initial_word,charactercount,language,totalcount,stem,language.y,uni_lemma,nb_realisations_lemma,words_lemma,sum_wordcount_lemma,mean_character_count_lemma,frequency,MLU,solo_frequency,final_frequency,initial_frequency
+se,3096,3096,NA,409,749,526,2,Danish,194787,se,Danish,see,1,se,3096,2,3096,NA,409,749,526
+du,7917,7917,NA,98,354,930,2,Danish,194787,du,Danish,you,1,du,7917,2,7917,NA,98,354,930
+hvad,5322,5322,NA,1307,393,2502,4,Danish,194787,hvad,Danish,what,1,hvad,5322,4,5322,NA,1307,393,2502
+det,10741,10741,NA,110,1870,3768,3,Danish,194787,det,Danish,that,2,"det, dette",10743,4,10743,6.5,110,1870,3768
+det,10741,10741,NA,110,1870,3768,3,Danish,194787,det,Danish,this,5,"det, den, denne, dens, dette",18040,4,18040,6.549910873440285,225,3243,5130
+kaffe,59,59,NA,1,38,1,5,Danish,194787,kaf,Danish,coffee,2,"kaffe, kaffen",66,5.5,66,5.571428571428571,1,41,1
+jeg,3033,3033,NA,28,188,721,3,Danish,194787,jeg,Danish,i,1,jeg,3033,3,3033,NA,28,188,721
+tørre,40,40,6.525,2,5,4,5,Danish,194787,tør,Danish,dry (description),5,"tørre, tør, tørret, tørrer, tørres",54,5.2,54,6.336607142857143,3,6,6
+munden,46,46,7.260869565217392,1,34,NA,6,Danish,194787,mund,Danish,mouth,2,"munden, mund",68,5,68,6.289525691699605,1,49,0
+have,959,959,NA,10,123,6,4,Danish,194787,hav,Danish,garden,4,"have, haver, hav, haven",963,4.25,963,7.666666666666667,10,126,6
+hagesmæk,2,2,8,NA,NA,NA,8,Danish,194787,hagesmæk,Danish,bib,1,hagesmæk,2,8,2,8,0,0,0
+på,2075,2075,NA,32,613,84,2,Danish,194787,på,Danish,on,1,på,2075,2,2075,NA,32,613,84
+den,7218,7218,NA,115,1371,1350,3,Danish,194787,den,Danish,it,3,"den, denne, dens",7297,4,7297,6.574866310160427,115,1373,1362
+den,7218,7218,NA,115,1371,1350,3,Danish,194787,den,Danish,this,5,"det, den, denne, dens, dette",18040,4,18040,6.549910873440285,225,3243,5130
+ikke,4883,4883,NA,136,817,265,4,Danish,194787,ikk,Danish,not,2,"ikke, ikkke",4884,4.5,4884,8,136,817,265
+der,4651,4651,NA,193,1395,913,3,Danish,194787,der,Danish,there,2,"der, deres",4664,4,4664,7.769230769230769,193,1395,913
+banan,11,11,5.454545454545454,1,5,NA,5,Danish,194787,banan,Danish,banana,2,"banan, bananer",12,6,12,3.727272727272727,1,6,0
+få,422,422,NA,4,11,7,2,Danish,194787,få,Danish,get,1,få,422,2,422,NA,4,11,7
+nu,1705,1705,NA,39,273,779,2,Danish,194787,nu,Danish,now,1,nu,1705,2,1705,NA,39,273,779
+vil,765,765,NA,4,5,412,3,Danish,194787,vil,Danish,wanna,2,"vil, ville",792,4,792,7.592592592592593,4,6,414
+ned,435,435,NA,10,162,13,3,Danish,194787,ned,Danish,down,3,"ned, nede, neden",531,4,531,7.333333333333333,11,167,25
+mere,423,423,NA,9,234,12,4,Danish,194787,mer,Danish,more,2,"mere, mer",427,3.5,427,1.75,12,235,12
+i,1991,1991,NA,32,224,98,1,Danish,194787,i,Danish,in,4,"i, inden, inde, ind",2287,3.25,2287,NA,38,259,115
+tak,292,292,1.5787671232876712,225,22,41,3,Danish,194787,tak,Danish,thank you,2,"tak, take",293,3.5,293,2.2893835616438354,225,22,42
+hej,224,224,1.7455357142857142,131,43,43,3,Danish,194787,hej,Danish,hi,1,hej,224,3,224,1.7455357142857142,131,43,43
+noget,1150,1150,NA,6,489,22,5,Danish,194787,nog,Danish,some,3,"noget, nogle, nogen",1773,5,1773,NA,14,592,35
+spise,104,104,NA,3,19,1,5,Danish,194787,spis,Danish,eat,4,"spise, spises, spiser, spis",196,5.25,196,4.966265060240964,4,33,25
+god,96,96,NA,1,18,1,3,Danish,194787,god,Danish,good,2,"god, gode",114,3.5,114,7.166666666666667,1,21,1
+anden,222,222,NA,4,38,NA,5,Danish,194787,and,Danish,duck,4,"anden, andet, and, anders",369,4.75,369,6.217391304347826,5,94,2
+mad,62,62,NA,1,33,1,3,Danish,194787,mad,Danish,feed,2,"mad, maden",65,4,65,7.666666666666667,1,34,2
+mad,62,62,NA,1,33,1,3,Danish,194787,mad,Danish,food,2,"mad, maden",65,4,65,7.666666666666667,1,34,2
+ja,6154,6154,NA,3961,386,1784,2,Danish,194787,ja,Danish,yes,1,ja,6154,2,6154,NA,3961,386,1784
+nej,2152,2152,NA,983,86,1066,3,Danish,194787,nej,Danish,no,1,nej,2152,3,2152,NA,983,86,1066
+op,586,586,NA,20,246,33,2,Danish,194787,op,Danish,up,2,"op, oppe",677,3,677,NA,21,252,47
+lege,250,250,NA,5,28,1,4,Danish,194787,leg,Danish,play,5,"lege, leger, leget, leg, legen",369,4.4,369,5.96236559139785,7,45,8
+dag,85,85,NA,2,62,NA,3,Danish,194787,dag,Danish,day,2,"dag, dagen",89,4,89,4.75,2,66,0
+bordet,108,108,NA,2,86,NA,6,Danish,194787,bord,Danish,table,3,"bordet, bord, borde",136,5,136,5,5,105,1
+kasse,29,29,6.103448275862069,NA,16,1,5,Danish,194787,kas,Danish,box,6,"kasse, kassen, æsken, kasserne, kasser, æsk",120,5.5,120,7.256245210727969,2,83,1
+tæppet,11,11,6.909090909090909,NA,7,NA,6,Danish,194787,tæp,Danish,carpet,2,"tæppet, tæppe",16,5.5,16,6.154545454545454,0,10,0
+putter,26,26,7.346153846153846,NA,NA,3,6,Danish,194787,put,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+kassen,73,73,NA,1,58,NA,6,Danish,194787,kas,Danish,box,6,"kasse, kassen, æsken, kasserne, kasser, æsk",120,5.5,120,7.256245210727969,2,83,1
+bjørnen,10,10,3.4,1,5,1,7,Danish,194787,bjørn,Danish,bear,2,"bjørnen, bjørn",54,6,54,3.9386363636363635,5,40,1
+inden,14,14,NA,1,NA,1,5,Danish,194787,ind,Danish,in,4,"i, inden, inde, ind",2287,3.25,2287,NA,38,259,115
+tom,39,39,NA,3,29,NA,3,Danish,194787,tom,Danish,empty,2,"tom, tomme",40,4,40,4,3,30,0
+væk,195,195,NA,13,134,11,3,Danish,194787,væk,Danish,all gone,3,"væk, vække, vækker",197,4.666666666666667,197,13,13,134,11
+væk,195,195,NA,13,134,11,3,Danish,194787,væk,Danish,away,3,"væk, vække, vækker",197,4.666666666666667,197,13,13,134,11
+bilen,147,147,NA,4,65,21,5,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+putte,109,109,NA,3,1,3,5,Danish,194787,put,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+mig,428,428,NA,1,192,NA,3,Danish,194787,mig,Danish,me,1,mig,428,3,428,NA,1,192,0
+hvor,1082,1082,NA,49,1,753,4,Danish,194787,hvor,Danish,where (question),1,hvor,1082,4,1082,NA,49,1,753
+vent,58,58,3.810344827586207,5,5,25,4,Danish,194787,vent,Danish,wait,3,"vent, vente, venter",112,5,112,6.4288451012588945,6,13,25
+tager,179,179,NA,4,2,12,5,Danish,194787,tag,Danish,take,5,"tager, tage, tag, taget, tages",628,4.4,628,7.311046511627907,11,35,47
+fast,107,107,NA,3,66,NA,4,Danish,194787,fast,Danish,aunt,3,"fast, moster, mosters",118,5.666666666666667,118,4.333333333333333,3,68,2
+nogle,331,331,NA,3,44,5,5,Danish,194787,nogl,Danish,some,3,"noget, nogle, nogen",1773,5,1773,NA,14,592,35
+tage,336,336,NA,5,17,3,4,Danish,194787,tag,Danish,take,5,"tager, tage, tag, taget, tages",628,4.4,628,7.311046511627907,11,35,47
+løve,30,30,4.4,1,26,NA,4,Danish,194787,løv,Danish,lion,4,"løve, løven, løver, løvens",45,5,45,6.633333333333334,3,33,0
+sammen,211,211,NA,1,114,8,6,Danish,194787,sam,Danish,same,2,"sammen, samme",247,5.5,247,7.916666666666667,1,126,9
+løven,11,11,NA,2,5,NA,5,Danish,194787,løv,Danish,lion,4,"løve, løven, løver, løvens",45,5,45,6.633333333333334,3,33,0
+lille,465,465,NA,9,34,20,5,Danish,194787,lil,Danish,little (description),1,lille,465,5,465,NA,9,34,20
+sætte,335,335,NA,8,4,7,5,Danish,194787,sæt,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+æble,14,14,6.142857142857143,NA,8,NA,4,Danish,194787,æbl,Danish,apple,3,"æble, æblet, æbler",20,4.666666666666667,20,5.5476190476190474,1,13,0
+siger,527,527,5.072106261859583,NA,61,51,5,Danish,194787,sig,Danish,say,3,"siger, sig, sige",918,4,918,5.707540734235577,2,126,60
+bid,11,11,4.818181818181818,4,3,NA,3,Danish,194787,bid,Danish,bite,5,"bid, bidder, bide, bider, bides",126,4.6,126,5.9248709315375985,7,34,13
+af,774,774,NA,12,251,14,2,Danish,194787,af,Danish,off,1,af,774,2,774,NA,12,251,14
+tæppe,5,5,5.4,NA,3,NA,5,Danish,194787,tæp,Danish,carpet,2,"tæppet, tæppe",16,5.5,16,6.154545454545454,0,10,0
+lukke,31,31,NA,2,4,1,5,Danish,194787,luk,Danish,close,5,"lukke, lukkes, lukker, lukket, luk",65,5.2,65,4.476648351648352,2,15,4
+andet,121,121,NA,1,37,2,5,Danish,194787,and,Danish,duck,4,"anden, andet, and, anders",369,4.75,369,6.217391304347826,5,94,2
+ud,588,588,NA,9,226,19,2,Danish,194787,ud,Danish,out,1,ud,588,2,588,NA,9,226,19
+cykel,20,20,5.2,NA,16,NA,5,Danish,194787,cykel,Danish,bicycle,1,cykel,20,5,20,5.2,0,16,0
+får,174,174,NA,3,13,11,3,Danish,194787,får,Danish,sheep,3,"får, fårene, fåret",177,4.666666666666667,177,3.5,3,16,11
+sætter,84,84,NA,5,1,1,6,Danish,194787,sæt,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+rød,81,81,4.617283950617284,5,33,3,3,Danish,194787,rød,Danish,red,3,"rød, røde, rødder",143,4.333333333333333,143,7.3086419753086425,6,47,7
+skål,11,11,2.4545454545454546,5,NA,4,4,Danish,194787,skål,Danish,bowl,2,"skål, skålen",12,5,12,4.7272727272727275,5,0,4
+hånden,48,48,NA,2,37,1,6,Danish,194787,hånd,Danish,hand,2,"hånden, hånd",84,5,84,5.916666666666667,2,65,1
+tung,16,16,4.9375,1,10,NA,4,Danish,194787,tung,Danish,tongue,4,"tung, tunge, tungen, tungt",51,5,51,4.895833333333333,3,31,1
+min,121,121,NA,2,26,8,3,Danish,194787,min,Danish,mine,3,"min, mine, mit",157,3.3333333333333335,157,6.814814814814815,3,32,9
+kop,44,44,NA,2,24,1,3,Danish,194787,kop,Danish,cup,6,"kop, koppen, kruset, kopper, krus, kopperne",85,5.5,85,5.919607843137255,3,54,3
+bil,83,83,NA,3,63,NA,3,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+under,55,55,7.472727272727273,1,8,NA,5,Danish,194787,und,Danish,under,3,"under, underligt, underlig",63,7.333333333333333,63,8.89090909090909,1,10,0
+træk,20,20,NA,5,2,10,4,Danish,194787,træk,Danish,pull,4,"træk, trække, trækkes, trækker",211,6,211,6,10,31,14
+farligt,11,11,5.2727272727272725,NA,4,NA,7,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+drikke,59,59,7.1525423728813555,NA,20,2,6,Danish,194787,drik,Danish,drink (action),3,"drikke, drikker, drik",79,5.666666666666667,79,7.013810420590081,0,22,6
+mælk,50,50,4.96,1,39,1,4,Danish,194787,mælk,Danish,milk,2,"mælk, mælken",52,5,52,6.48,1,39,1
+stolen,61,61,5.754098360655738,1,42,1,6,Danish,194787,stol,Danish,chair,4,"stolen, stol, stole, stolene",134,5.5,134,5.973692054278767,2,89,3
+træt,41,41,5.219512195121951,NA,25,NA,4,Danish,194787,træt,Danish,tired,2,"træt, trætte",42,5,42,5.609756097560975,0,25,0
+hoppe,31,31,NA,2,16,2,5,Danish,194787,hop,Danish,jump,4,"hoppe, hopper, hop, hops",129,4.5,129,2.5509171410499683,53,38,7
+musen,114,114,NA,9,41,15,5,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+mus,102,102,NA,4,80,1,3,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+sig,149,149,NA,2,37,6,3,Danish,194787,sig,Danish,say,3,"siger, sig, sige",918,4,918,5.707540734235577,2,126,60
+hund,125,125,NA,4,87,1,4,Danish,194787,hund,Danish,dog,4,"hund, hunden, hunde, hundene",338,5.5,338,8.661740558292284,9,188,24
+hunden,203,203,4.990147783251231,4,96,22,6,Danish,194787,hund,Danish,dog,4,"hund, hunden, hunde, hundene",338,5.5,338,8.661740558292284,9,188,24
+køre,274,274,NA,7,67,1,4,Danish,194787,kør,Danish,drive,3,"køre, kører, kør",433,4,433,5.121598639455782,8,79,33
+løbe,35,35,NA,2,3,NA,4,Danish,194787,løb,Danish,run,5,"løbe, løb, løbende, løbet, løber",100,4.8,100,11.333333333333334,3,13,3
+bange,38,38,NA,2,10,1,5,Danish,194787,bang,Danish,scared,2,"bange, bang",48,4.5,48,2,8,12,3
+hvordan,124,124,7.75,1,6,55,7,Danish,194787,hvordan,Danish,how,1,hvordan,124,7,124,7.75,1,6,55
+dukken,174,174,4.896551724137931,2,108,4,6,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+sød,81,81,NA,2,59,NA,3,Danish,194787,sød,Danish,cute,2,"sød, søde",85,3.5,85,5.75,2,60,0
+dukke,50,50,4.52,2,32,3,5,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+bolden,95,95,NA,3,52,3,6,Danish,194787,bold,Danish,ball,3,"bolden, bold, bolde",178,5,178,2.75,7,117,3
+bold,79,79,NA,4,62,NA,4,Danish,194787,bold,Danish,ball,3,"bolden, bold, bolde",178,5,178,2.75,7,117,3
+håret,10,10,5.9,NA,7,NA,5,Danish,194787,hår,Danish,hair,2,"håret, hår",70,4,70,5.9,4,43,0
+klodser,37,37,4.675675675675675,4,20,2,7,Danish,194787,klods,Danish,block,4,"klodser, klods, klodserne, klodsen",84,7,84,5.908049353701528,4,45,3
+klods,23,23,5.956521739130435,NA,18,NA,5,Danish,194787,klod,Danish,block,4,"klodser, klods, klodserne, klodsen",84,7,84,5.908049353701528,4,45,3
+hvem,284,284,4.890845070422535,6,3,204,4,Danish,194787,hvem,Danish,who,1,hvem,284,4,284,4.890845070422535,6,3,204
+klodserne,14,14,6.5,NA,7,1,9,Danish,194787,klods,Danish,block,4,"klodser, klods, klodserne, klodsen",84,7,84,5.908049353701528,4,45,3
+fin,55,55,NA,1,24,1,3,Danish,194787,fin,Danish,fine,2,"fin, fine",76,3.5,76,7.285714285714286,1,25,4
+slut,28,28,4.928571428571429,5,13,3,4,Danish,194787,slut,Danish,finish,2,"slut, slutte",29,5,29,6.964285714285714,5,13,3
+din,212,212,NA,3,25,17,3,Danish,194787,din,Danish,your,3,"din, dine, dit",285,3.3333333333333335,285,6.758620689655173,4,29,20
+strømpe,3,3,8.333333333333334,NA,NA,NA,7,Danish,194787,strømp,Danish,sock,5,"strømpe, sok, strømper, sokker, strømpen",21,6.4,21,7.550000000000001,2,9,0
+falder,86,86,6.104651162790698,NA,7,18,6,Danish,194787,fald,Danish,fall,5,"falder, faldt, faldet, falde, fald",230,5.2,230,6.682940347797972,1,27,36
+hårdt,17,17,NA,1,10,NA,5,Danish,194787,hård,Danish,hard,4,"hårdt, hårdere, hårde, hård",27,5.25,27,6.266666666666667,1,18,0
+sige,242,242,6.3429752066115705,NA,28,3,4,Danish,194787,sig,Danish,say,3,"siger, sig, sige",918,4,918,5.707540734235577,2,126,60
+rosin,1,1,6,NA,1,NA,5,Danish,194787,rosin,Danish,raisin,1,rosin,1,5,1,6,0,1,0
+spises,4,4,6,NA,4,NA,6,Danish,194787,spis,Danish,eat,4,"spise, spises, spiser, spis",196,5.25,196,4.966265060240964,4,33,25
+gynge,15,15,5.466666666666667,NA,9,NA,5,Danish,194787,gyng,Danish,swing (action),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+gynge,15,15,5.466666666666667,NA,9,NA,5,Danish,194787,gyng,Danish,swing (object),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+bog,101,101,NA,2,55,NA,3,Danish,194787,bog,Danish,book,2,"bog, bogen",131,4,131,6.766666666666667,3,74,0
+dyr,50,50,7.62,2,33,NA,3,Danish,194787,dyr,Danish,animal,2,"dyr, dyrene",62,4.5,62,6.976666666666667,2,38,1
+bamsen,132,132,4.454545454545454,2,66,17,6,Danish,194787,bams,Danish,teddybear,6,"bamsen, bamse, bamme, bamer, bam, bamsens",194,5.166666666666667,194,3.8909090909090907,8,105,18
+kat,70,70,NA,4,52,1,3,Danish,194787,kat,Danish,cat,4,"kat, katten, kattens, katte",178,5.25,178,5.57516339869281,7,94,23
+ko,26,26,4.6923076923076925,NA,22,NA,2,Danish,194787,ko,Danish,cow,1,ko,26,2,26,4.6923076923076925,0,22,0
+grise,15,15,5.2,NA,9,NA,5,Danish,194787,gris,Danish,pig,4,"grise, gris, grisen, griser",168,5.25,168,3.7666666666666666,8,83,25
+bamse,54,54,NA,5,37,NA,5,Danish,194787,bams,Danish,teddybear,6,"bamsen, bamse, bamme, bamer, bam, bamsens",194,5.166666666666667,194,3.8909090909090907,8,105,18
+hane,7,7,4.142857142857143,2,4,NA,4,Danish,194787,han,Danish,his,3,"hane, han, hans",1102,3.6666666666666665,1102,5.738095238095238,8,88,184
+tog,87,87,7.804597701149425,1,33,2,3,Danish,194787,tog,Danish,train,4,"tog, toget, togene, toge",263,4.5,263,6.268199233716475,8,94,22
+katten,102,102,4.7254901960784315,3,38,22,6,Danish,194787,kat,Danish,cat,4,"kat, katten, kattens, katte",178,5.25,178,5.57516339869281,7,94,23
+ost,4,4,5,NA,4,NA,3,Danish,194787,ost,Danish,cheese,2,"ost, osten",5,4,5,5.5,0,4,0
+bidder,1,1,10,NA,NA,NA,6,Danish,194787,bid,Danish,bite,5,"bid, bidder, bide, bider, bides",126,4.6,126,5.9248709315375985,7,34,13
+stol,57,57,5.631578947368421,NA,40,1,4,Danish,194787,stol,Danish,chair,4,"stolen, stol, stole, stolene",134,5.5,134,5.973692054278767,2,89,3
+mor,272,272,NA,5,97,24,3,Danish,194787,mor,Danish,mommy,5,"mor, moren, more, mors, morens",392,4.4,392,6.669209431345354,5,139,49
+put,23,23,4.086956521739131,NA,NA,20,3,Danish,194787,put,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+klodsen,10,10,6.5,NA,NA,NA,7,Danish,194787,klods,Danish,block,4,"klodser, klods, klodserne, klodsen",84,7,84,5.908049353701528,4,45,3
+blå,83,83,NA,4,39,3,3,Danish,194787,blå,Danish,blue,1,blå,83,3,83,NA,4,39,3
+hende,116,116,NA,1,42,7,5,Danish,194787,hend,Danish,her,2,"hende, hendes",138,5.5,138,NA,2,43,9
+ham,154,154,7.285714285714286,NA,49,19,3,Danish,194787,ham,Danish,hammer,3,"ham, hammer, hammeren",167,5.666666666666667,167,6.669312169312169,0,57,19
+han,1029,1029,NA,5,68,179,3,Danish,194787,han,Danish,his,3,"hane, han, hans",1102,3.6666666666666665,1102,5.738095238095238,8,88,184
+egern,37,37,4.675675675675675,3,27,1,5,Danish,194787,egern,Danish,squirrel,3,"egern, egernet, egernets",71,6.666666666666667,71,4.839808558558558,3,41,2
+trække,159,159,NA,3,25,3,6,Danish,194787,træk,Danish,pull,4,"træk, trække, trækkes, trækker",211,6,211,6,10,31,14
+hopper,34,34,5.088235294117647,NA,12,3,6,Danish,194787,hop,Danish,jump,4,"hoppe, hopper, hop, hops",129,4.5,129,2.5509171410499683,53,38,7
+giver,32,32,NA,1,1,2,5,Danish,194787,giv,Danish,give,4,"giver, give, giv, givet",137,4.25,137,6.943589743589744,1,5,18
+koppen,34,34,4.264705882352941,1,27,1,6,Danish,194787,kop,Danish,cup,6,"kop, koppen, kruset, kopper, krus, kopperne",85,5.5,85,5.919607843137255,3,54,3
+forsigtig,23,23,4.260869565217392,6,9,1,9,Danish,194787,forsig,Danish,careful,3,"forsigtig, forsigtige, forsigtigt",38,9.666666666666666,38,3.9221014492753623,10,16,2
+egernet,32,32,5.84375,NA,14,1,7,Danish,194787,egern,Danish,squirrel,3,"egern, egernet, egernets",71,6.666666666666667,71,4.839808558558558,3,41,2
+nede,87,87,NA,1,5,11,4,Danish,194787,ned,Danish,down,3,"ned, nede, neden",531,4,531,7.333333333333333,11,167,25
+lukkes,4,4,5,NA,1,NA,6,Danish,194787,luk,Danish,close,5,"lukke, lukkes, lukker, lukket, luk",65,5.2,65,4.476648351648352,2,15,4
+stor,133,133,NA,3,34,5,4,Danish,194787,stor,Danish,big,2,"stor, store",201,4.5,201,NA,4,44,6
+faldt,53,53,4.811320754716981,NA,4,17,5,Danish,194787,fald,Danish,fall,5,"falder, faldt, faldet, falde, fald",230,5.2,230,6.682940347797972,1,27,36
+muh,23,23,2.608695652173913,10,11,1,3,Danish,194787,muh,Danish,moo,1,muh,23,3,23,2.608695652173913,10,11,1
+telefon,10,10,NA,3,4,NA,7,Danish,194787,telefon,Danish,telephone,2,"telefon, telefonen",14,8,14,3.5,3,7,0
+næse,44,44,NA,2,30,NA,4,Danish,194787,næs,Danish,nose,3,"næse, næsen, næser",88,4.666666666666667,88,7.392857142857142,3,60,0
+finger,8,8,NA,1,5,NA,6,Danish,194787,fing,Danish,finger,2,"finger, fingeren",16,7,16,6.25,1,8,0
+sok,5,5,6.2,NA,1,NA,3,Danish,194787,sok,Danish,sock,5,"strømpe, sok, strømper, sokker, strømpen",21,6.4,21,7.550000000000001,2,9,0
+åbne,42,42,NA,2,8,NA,4,Danish,194787,åbn,Danish,open (action),5,"åbne, åbnet, åbnes, åbn, åbner",62,4.4,62,5.129166666666666,2,18,1
+døren,33,33,NA,3,15,1,5,Danish,194787,dør,Danish,door,5,"døren, dør, døre, dørens, dørene",58,4.8,58,6.598684210526316,5,29,1
+papir,46,46,NA,3,26,1,5,Danish,194787,papir,Danish,paper,2,"papir, papiret",59,6,59,7.538461538461538,3,30,2
+vise,184,184,NA,1,6,NA,4,Danish,194787,vis,Danish,show,4,"vise, vises, viser, vis",208,4.25,208,8.664102564102564,2,6,1
+hop,62,62,1.564516129032258,49,10,2,3,Danish,194787,hop,Danish,jump,4,"hoppe, hopper, hop, hops",129,4.5,129,2.5509171410499683,53,38,7
+denne,68,68,7.0588235294117645,NA,2,11,5,Danish,194787,den,Danish,it,3,"den, denne, dens",7297,4,7297,6.574866310160427,115,1373,1362
+denne,68,68,7.0588235294117645,NA,2,11,5,Danish,194787,den,Danish,this,5,"det, den, denne, dens, dette",18040,4,18040,6.549910873440285,225,3243,5130
+hjælpe,117,117,NA,1,9,NA,6,Danish,194787,hjælp,Danish,help,3,"hjælpe, hjælper, hjælp",140,6,140,5.088888888888889,2,12,2
+nogen,292,292,NA,5,59,8,5,Danish,194787,nog,Danish,some,3,"noget, nogle, nogen",1773,5,1773,NA,14,592,35
+farlig,14,14,5.642857142857143,NA,5,1,6,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+slå,27,27,7,NA,7,1,3,Danish,194787,slå,Danish,hit,1,slå,27,3,27,7,0,7,1
+alle,145,145,8.50344827586207,NA,2,20,4,Danish,194787,all,Danish,all,2,"alle, allerede",151,6,151,6.418390804597701,0,5,20
+åbnet,2,2,6.5,NA,1,NA,5,Danish,194787,åbn,Danish,open (action),5,"åbne, åbnet, åbnes, åbn, åbner",62,4.4,62,5.129166666666666,2,18,1
+gå,173,173,NA,7,17,8,2,Danish,194787,gå,Danish,walk,1,gå,173,2,173,NA,7,17,8
+sove,87,87,NA,2,48,2,4,Danish,194787,sov,Danish,sleep,5,"sove, sover, sov, sovet, sovs",165,4.2,165,5.274875621890548,2,74,20
+inde,92,92,NA,1,3,11,4,Danish,194787,ind,Danish,in,4,"i, inden, inde, ind",2287,3.25,2287,NA,38,259,115
+kører,147,147,5.993197278911564,NA,12,25,5,Danish,194787,kør,Danish,drive,3,"køre, kører, kør",433,4,433,5.121598639455782,8,79,33
+ind,190,190,NA,4,32,5,3,Danish,194787,ind,Danish,in,4,"i, inden, inde, ind",2287,3.25,2287,NA,38,259,115
+hjem,33,33,8.484848484848484,NA,15,NA,4,Danish,194787,hjem,Danish,home,2,"hjem, hjemme",61,5,61,7.367424242424242,0,24,3
+lukker,13,13,5.6923076923076925,NA,1,NA,6,Danish,194787,luk,Danish,close,5,"lukke, lukkes, lukker, lukket, luk",65,5.2,65,4.476648351648352,2,15,4
+søvnig,5,5,4,NA,3,NA,6,Danish,194787,søvn,Danish,sleepy,2,"søvnig, søvn",6,5,6,5,0,3,0
+samme,36,36,7.916666666666667,NA,12,1,5,Danish,194787,sam,Danish,same,2,"sammen, samme",247,5.5,247,7.916666666666667,1,126,9
+røde,59,59,NA,1,12,4,4,Danish,194787,rød,Danish,red,3,"rød, røde, rødder",143,4.333333333333333,143,7.3086419753086425,6,47,7
+røre,32,32,6.40625,NA,4,NA,4,Danish,194787,rør,Danish,touch,3,"røre, rører, rør",37,4,37,6.579861111111111,0,5,0
+tag,66,66,NA,2,3,32,3,Danish,194787,tag,Danish,take,5,"tager, tage, tag, taget, tages",628,4.4,628,7.311046511627907,11,35,47
+faldet,19,19,7.315789473684211,NA,1,1,6,Danish,194787,fald,Danish,fall,5,"falder, faldt, faldet, falde, fald",230,5.2,230,6.682940347797972,1,27,36
+lampen,2,2,3.5,NA,2,NA,6,Danish,194787,lamp,Danish,lamp,2,"lampen, lampe",6,5.5,6,2.625,2,3,0
+hue,30,30,6.666666666666667,1,17,NA,3,Danish,194787,hue,Danish,hat,1,hue,30,3,30,6.666666666666667,1,17,0
+trøjen,7,7,4.857142857142857,NA,2,NA,6,Danish,194787,trøj,Danish,sweater,2,"trøjen, trøje",10,5.5,10,4.761904761904762,0,3,0
+bukserne,24,24,5.416666666666667,NA,8,2,8,Danish,194787,buks,Danish,pants,2,"bukserne, bukser",54,7,54,5.416666666666667,3,19,3
+armene,2,2,4,NA,NA,NA,6,Danish,194787,arm,Danish,arm,4,"armene, arme, arm, armen",36,4.5,36,5.7875,0,18,3
+hovedet,64,64,NA,1,32,1,7,Danish,194787,hoved,Danish,head,5,"hovedet, hoved, hovede, hovederne, hoveder",96,6.8,96,5.26,3,53,1
+ben,49,49,5.571428571428571,1,31,1,3,Danish,194787,ben,Danish,leg,3,"ben, benene, benet",78,4.666666666666667,78,6.543040293040293,1,45,2
+kilde,6,6,2.3333333333333335,2,NA,2,5,Danish,194787,kild,Danish,tickle,3,"kilde, kilder, kilden",10,5.666666666666667,10,3,2,1,4
+dine,44,44,NA,1,3,NA,4,Danish,194787,din,Danish,your,3,"din, dine, dit",285,3.3333333333333335,285,6.758620689655173,4,29,20
+ville,27,27,7.592592592592593,NA,1,2,5,Danish,194787,vil,Danish,wanna,2,"vil, ville",792,4,792,7.592592592592593,4,6,414
+elefant,23,23,5,NA,19,NA,7,Danish,194787,elefant,Danish,elephant,4,"elefant, elefanter, elefanten, elefanterne",43,9,43,4.925,2,28,3
+åbnes,12,12,5.416666666666667,NA,8,NA,5,Danish,194787,åbn,Danish,open (action),5,"åbne, åbnet, åbnes, åbn, åbner",62,4.4,62,5.129166666666666,2,18,1
+falde,22,22,NA,1,3,NA,5,Danish,194787,fald,Danish,fall,5,"falder, faldt, faldet, falde, fald",230,5.2,230,6.682940347797972,1,27,36
+synge,59,59,NA,1,10,NA,5,Danish,194787,syng,Danish,sing,4,"synge, synges, synger, syng",80,5.25,80,6.5,2,18,5
+give,75,75,7.6,NA,3,2,4,Danish,194787,giv,Danish,give,4,"giver, give, giv, givet",137,4.25,137,6.943589743589744,1,5,18
+tørstig,30,30,NA,2,20,NA,7,Danish,194787,tørst,Danish,thirsty,1,tørstig,30,7,30,NA,2,20,0
+tegne,246,246,NA,1,70,11,5,Danish,194787,tegn,Danish,draw,5,"tegne, tegn, tegnet, tegner, tegnes",315,5.4,315,6.337359098228664,3,83,22
+spiser,83,83,4.698795180722891,1,10,20,6,Danish,194787,spis,Danish,eat,4,"spise, spises, spiser, spis",196,5.25,196,4.966265060240964,4,33,25
+tør,7,7,7.571428571428571,NA,NA,1,3,Danish,194787,tør,Danish,dry (description),5,"tørre, tør, tørret, tørrer, tørres",54,5.2,54,6.336607142857143,3,6,6
+strømper,6,6,NA,2,2,NA,8,Danish,194787,strømp,Danish,sock,5,"strømpe, sok, strømper, sokker, strømpen",21,6.4,21,7.550000000000001,2,9,0
+bord,27,27,NA,3,19,1,4,Danish,194787,bord,Danish,table,3,"bordet, bord, borde",136,5,136,5,5,105,1
+billeder,19,19,6.842105263157895,NA,8,NA,8,Danish,194787,billed,Danish,picture,4,"billeder, billede, billedet, billederne",61,8.25,61,6.972368421052631,3,25,0
+hest,62,62,NA,2,44,NA,4,Danish,194787,hest,Danish,horse,4,"hest, hesten, heste, hestene",156,5.5,156,6.333333333333334,6,86,13
+morgen,15,15,8.466666666666667,NA,10,NA,6,Danish,194787,morg,Danish,morning,3,"morgen, morgenen, morges",23,6.666666666666667,23,8.28888888888889,0,16,0
+synges,1,1,8,NA,1,NA,6,Danish,194787,syng,Danish,sing,4,"synge, synges, synger, syng",80,5.25,80,6.5,2,18,5
+regnen,2,2,3,NA,1,1,6,Danish,194787,regn,Danish,rain,4,"regnen, regner, regnet, regne",15,5.75,15,6.628571428571428,0,5,1
+ude,119,119,NA,2,16,14,3,Danish,194787,ude,Danish,out of,1,ude,119,3,119,NA,2,16,14
+juice,25,25,5.24,2,18,NA,5,Danish,194787,juic,Danish,juice,2,"juice, juicen",31,5.5,31,5.453333333333333,3,21,0
+appelsin,2,2,5,NA,1,NA,8,Danish,194787,appelsin,Danish,orange (food),3,"appelsin, appelsinerne, appelsiner",8,10,8,6.666666666666667,0,4,0
+allerede,6,6,4.333333333333333,NA,3,NA,8,Danish,194787,all,Danish,all,2,"alle, allerede",151,6,151,6.418390804597701,0,5,20
+taget,43,43,8.372093023255815,NA,13,NA,5,Danish,194787,tag,Danish,take,5,"tager, tage, tag, taget, tages",628,4.4,628,7.311046511627907,11,35,47
+fald,50,50,8.5,NA,12,NA,4,Danish,194787,fald,Danish,fall,5,"falder, faldt, faldet, falde, fald",230,5.2,230,6.682940347797972,1,27,36
+vente,42,42,6.642857142857143,NA,5,NA,5,Danish,194787,vent,Danish,wait,3,"vent, vente, venter",112,5,112,6.4288451012588945,6,13,25
+benene,16,16,6.75,NA,11,NA,6,Danish,194787,ben,Danish,leg,3,"ben, benene, benet",78,4.666666666666667,78,6.543040293040293,1,45,2
+varmen,2,2,5,NA,2,NA,6,Danish,194787,varm,Danish,hot,4,"varmen, varm, varmere, varme",32,5.5,32,4.901785714285714,0,26,0
+hjælper,18,18,5.777777777777778,NA,2,NA,7,Danish,194787,hjælp,Danish,help,3,"hjælpe, hjælper, hjælp",140,6,140,5.088888888888889,2,12,2
+sættes,30,30,6.433333333333334,NA,2,2,6,Danish,194787,sæt,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+flaske,5,5,7,NA,4,NA,6,Danish,194787,flask,Danish,bottle,3,"flaske, flasken, flasker",11,6.666666666666667,11,6.916666666666667,1,8,0
+store,68,68,NA,1,10,1,5,Danish,194787,stor,Danish,big,2,"stor, store",201,4.5,201,NA,4,44,6
+ride,14,14,6.785714285714286,NA,3,4,4,Danish,194787,rid,Danish,ride,3,"ride, ridder, rider",18,5,18,5.7063492063492065,0,3,4
+bluse,10,10,6.6,NA,5,1,5,Danish,194787,blus,Danish,shirt,2,"bluse, blusen",15,5.5,15,6.6,0,6,1
+arbejdet,3,3,4.333333333333333,NA,3,NA,8,Danish,194787,arbejd,Danish,work (place),4,"arbejdet, arbejde, arbejder, arbejdes",12,7.75,12,4.058333333333334,0,11,1
+forsigtige,3,3,NA,1,2,NA,10,Danish,194787,forsig,Danish,careful,3,"forsigtig, forsigtige, forsigtigt",38,9.666666666666666,38,3.9221014492753623,10,16,2
+bolde,4,4,2.75,NA,3,NA,5,Danish,194787,bold,Danish,ball,3,"bolden, bold, bolde",178,5,178,2.75,7,117,3
+bide,30,30,6.3,1,11,NA,4,Danish,194787,bid,Danish,bite,5,"bid, bidder, bide, bider, bides",126,4.6,126,5.9248709315375985,7,34,13
+sutte,5,5,7.4,NA,1,NA,5,Danish,194787,sut,Danish,pacifier,5,"sutte, sut, sutten, sutter, suttet",50,5.2,50,9.915574229691877,4,30,1
+næsen,42,42,5.785714285714286,1,28,NA,5,Danish,194787,næs,Danish,nose,3,"næse, næsen, næser",88,4.666666666666667,88,7.392857142857142,3,60,0
+bukser,30,30,NA,3,11,1,6,Danish,194787,buks,Danish,pants,2,"bukserne, bukser",54,7,54,5.416666666666667,3,19,3
+tages,4,4,6.25,NA,NA,NA,5,Danish,194787,tag,Danish,take,5,"tager, tage, tag, taget, tages",628,4.4,628,7.311046511627907,11,35,47
+sparke,15,15,7.4,NA,3,NA,6,Danish,194787,spark,Danish,kick,4,"sparke, sparker, sparket, spark",57,6.25,57,5.606944444444444,1,12,23
+smider,8,8,5.5,NA,NA,4,6,Danish,194787,smid,Danish,throw,4,"smider, smid, smide, smides",26,5.25,26,5.758333333333333,0,0,5
+puste,16,16,5.375,2,7,NA,5,Danish,194787,pust,Danish,blow,3,"puste, pust, puster",18,5,18,4.791666666666667,2,7,1
+kruset,1,1,7,NA,1,NA,6,Danish,194787,krus,Danish,cup,6,"kop, koppen, kruset, kopper, krus, kopperne",85,5.5,85,5.919607843137255,3,54,3
+beskidt,13,13,6.461538461538462,1,8,NA,7,Danish,194787,beskid,Danish,dirty,1,beskidt,13,7,13,6.461538461538462,1,8,0
+vand,68,68,7.544117647058823,NA,32,NA,4,Danish,194787,vand,Danish,water (beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+vand,68,68,7.544117647058823,NA,32,NA,4,Danish,194787,vand,Danish,water (not beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+leger,93,93,6.924731182795699,NA,12,5,5,Danish,194787,leg,Danish,play,5,"lege, leger, leget, leg, legen",369,4.4,369,5.96236559139785,7,45,8
+ballon,5,5,3.4,1,4,NA,6,Danish,194787,ballon,Danish,balloon,3,"ballon, balloner, ballonen",13,7.333333333333333,13,4.466666666666667,5,5,0
+bagved,26,26,5.461538461538462,3,18,1,6,Danish,194787,bagved,Danish,back (location),1,bagved,26,6,26,5.461538461538462,3,18,1
+legetøj,12,12,5.666666666666667,1,7,NA,7,Danish,194787,legetøj,Danish,toy (object),3,"legetøj, legetøjs, legetøjet",15,8,15,5.722222222222222,1,8,0
+vov,23,23,2.130434782608696,14,5,2,3,Danish,194787,vov,Danish,woof woof,1,vov,23,3,23,2.130434782608696,14,5,2
+mjav,1,1,3,NA,1,NA,4,Danish,194787,mjav,Danish,meow,2,"mjav, mjaver",2,5,2,2.5,0,1,1
+varm,28,28,4.607142857142857,NA,23,NA,4,Danish,194787,varm,Danish,hot,4,"varmen, varm, varmere, varme",32,5.5,32,4.901785714285714,0,26,0
+gris,64,64,NA,3,48,NA,4,Danish,194787,gris,Danish,pig,4,"grise, gris, grisen, griser",168,5.25,168,3.7666666666666666,8,83,25
+grisen,86,86,NA,4,25,25,6,Danish,194787,gris,Danish,pig,4,"grise, gris, grisen, griser",168,5.25,168,3.7666666666666666,8,83,25
+trøje,3,3,4.666666666666667,NA,1,NA,5,Danish,194787,trøj,Danish,sweater,2,"trøjen, trøje",10,5.5,10,4.761904761904762,0,3,0
+pust,1,1,4,NA,NA,1,4,Danish,194787,pust,Danish,blow,3,"puste, pust, puster",18,5,18,4.791666666666667,2,7,1
+hurtig,5,5,5.6,NA,2,NA,6,Danish,194787,hurt,Danish,fast,3,"hurtig, hurtigt, hurtigere",29,7.333333333333333,29,7.05,0,11,0
+kikke,4,4,6.5,NA,NA,NA,5,Danish,194787,kik,Danish,cracker,1,kikke,4,5,4,6.5,0,0,0
+arme,8,8,6.25,NA,6,2,4,Danish,194787,arm,Danish,arm,4,"armene, arme, arm, armen",36,4.5,36,5.7875,0,18,3
+skubbe,32,32,5.8125,NA,9,NA,6,Danish,194787,skub,Danish,push,5,"skubbe, skubbet, skubber, skub, skubbes",94,6.2,94,4.290343137254902,1,13,20
+sæt,71,71,4.788732394366197,NA,1,39,3,Danish,194787,sæt,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+giraf,12,12,4.333333333333333,NA,10,NA,5,Danish,194787,giraf,Danish,giraffe,3,"giraf, giraffen, giraffer",19,7,19,4.333333333333333,0,17,0
+oppe,91,91,NA,1,6,14,4,Danish,194787,opp,Danish,up,2,"op, oppe",677,3,677,NA,21,252,47
+senere,7,7,6.714285714285714,NA,7,NA,6,Danish,194787,sen,Danish,later,1,senere,7,6,7,6.714285714285714,0,7,0
+kosten,3,3,7.666666666666667,NA,2,NA,6,Danish,194787,kost,Danish,broom,3,"kosten, kost, koste",5,5,5,7.222222222222222,0,2,0
+gyng,1,1,1,1,NA,NA,4,Danish,194787,gyng,Danish,swing (action),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+gyng,1,1,1,1,NA,NA,4,Danish,194787,gyng,Danish,swing (object),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+græder,92,92,NA,3,25,20,6,Danish,194787,græd,Danish,cry,2,"græder, græd",95,5,95,5.666666666666667,3,25,20
+knappes,6,6,4.666666666666667,NA,2,NA,7,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+av,108,108,2.2685185185185186,60,16,30,2,Danish,194787,av,Danish,ouch,1,av,108,2,108,2.2685185185185186,60,16,30
+tegn,13,13,NA,1,NA,7,4,Danish,194787,tegn,Danish,draw,5,"tegne, tegn, tegnet, tegner, tegnes",315,5.4,315,6.337359098228664,3,83,22
+knappe,8,8,5,NA,1,NA,6,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+kig,32,32,4.5,3,6,13,3,Danish,194787,kig,Danish,look,4,"kig, kigge, kigger, kigget",295,5,295,6.155797101449275,7,53,20
+fræk,7,7,4.285714285714286,NA,4,NA,4,Danish,194787,fræk,Danish,bad,2,"fræk, frække",10,5,10,3.8095238095238093,0,5,1
+ødelægger,13,13,6.6923076923076925,NA,NA,1,9,Danish,194787,ødelæg,Danish,break,3,"ødelægger, ødelægge, ødelægges",31,8.666666666666666,31,6.819004524886878,0,4,1
+tunge,24,24,5.75,1,15,NA,5,Danish,194787,tung,Danish,tongue,4,"tung, tunge, tungen, tungt",51,5,51,4.895833333333333,3,31,1
+blomsten,3,3,4.666666666666667,NA,3,NA,8,Danish,194787,blomst,Danish,flower,4,"blomsten, blomst, blomster, blomsterne",53,8,53,4.26010101010101,8,34,1
+arbejde,5,5,5.4,NA,5,NA,7,Danish,194787,arbejd,Danish,work (place),4,"arbejdet, arbejde, arbejder, arbejdes",12,7.75,12,4.058333333333334,0,11,1
+fine,21,21,7.285714285714286,NA,1,3,4,Danish,194787,fin,Danish,fine,2,"fin, fine",76,3.5,76,7.285714285714286,1,25,4
+fingeren,8,8,6.25,NA,3,NA,8,Danish,194787,fing,Danish,finger,2,"finger, fingeren",16,7,16,6.25,1,8,0
+skovl,11,11,5.7272727272727275,NA,7,NA,5,Danish,194787,skovl,Danish,shovel,2,"skovl, skovlen",15,6,15,5.363636363636363,0,9,0
+dit,29,29,6.758620689655173,NA,1,3,3,Danish,194787,dit,Danish,your,3,"din, dine, dit",285,3.3333333333333335,285,6.758620689655173,4,29,20
+hår,60,60,NA,4,36,NA,3,Danish,194787,hår,Danish,hair,2,"håret, hår",70,4,70,5.9,4,43,0
+sulten,2,2,6,NA,1,NA,6,Danish,194787,sult,Danish,hungry,1,sulten,2,6,2,6,0,1,0
+kigge,186,186,NA,4,40,NA,5,Danish,194787,kig,Danish,look,4,"kig, kigge, kigger, kigget",295,5,295,6.155797101449275,7,53,20
+benet,13,13,7.3076923076923075,NA,3,1,5,Danish,194787,ben,Danish,leg,3,"ben, benene, benet",78,4.666666666666667,78,6.543040293040293,1,45,2
+kyse,1,1,1,1,NA,NA,4,Danish,194787,kys,Danish,kiss,6,"kyse, kys, kysser, kysse, kysses, kysset",57,5,57,3.959126984126984,2,25,3
+lære,13,13,7,NA,1,NA,4,Danish,194787,lær,Danish,teacher,2,"lære, lærer",18,4.5,18,8.1,0,3,0
+telefonen,4,4,3.5,NA,3,NA,9,Danish,194787,telefon,Danish,telephone,2,"telefon, telefonen",14,8,14,3.5,3,7,0
+bade,7,7,6.428571428571429,NA,5,NA,4,Danish,194787,bad,Danish,bath,2,"bade, bad",22,3.5,22,6.314285714285715,0,19,0
+bad,15,15,6.2,NA,14,NA,3,Danish,194787,bad,Danish,bath,2,"bade, bad",22,3.5,22,6.314285714285715,0,19,0
+tænde,12,12,6.166666666666667,NA,1,NA,5,Danish,194787,tænd,Danish,tooth,6,"tænde, tændt, tænderne, tænder, tændes, tændte",40,6,40,6.386111111111111,0,20,0
+toget,171,171,NA,7,59,20,5,Danish,194787,tog,Danish,train,4,"tog, toget, togene, toge",263,4.5,263,6.268199233716475,8,94,22
+æsken,9,9,7.111111111111111,1,7,NA,5,Danish,194787,æsk,Danish,box,6,"kasse, kassen, æsken, kasserne, kasser, æsk",120,5.5,120,7.256245210727969,2,83,1
+ingen,64,64,NA,1,3,1,5,Danish,194787,ing,Danish,none,1,ingen,64,5,64,NA,1,3,1
+balloner,6,6,2.5,4,NA,NA,8,Danish,194787,ballon,Danish,balloon,3,"ballon, balloner, ballonen",13,7.333333333333333,13,4.466666666666667,5,5,0
+sko,44,44,6.136363636363637,2,26,NA,3,Danish,194787,sko,Danish,shoe,1,sko,44,3,44,6.136363636363637,2,26,0
+kolde,3,3,6.666666666666667,NA,NA,NA,5,Danish,194787,kold,Danish,cold,4,"kolde, koldt, kold, koldere",16,5.25,16,5.223809523809524,0,11,0
+læse,203,203,NA,3,46,1,4,Danish,194787,læs,Danish,read,4,"læse, læser, læsse, læs",225,4.25,225,5.611111111111111,3,47,3
+bogen,30,30,6.766666666666667,1,19,NA,5,Danish,194787,bog,Danish,book,2,"bog, bogen",131,4,131,6.766666666666667,3,74,0
+kaniner,12,12,5.916666666666667,1,6,NA,7,Danish,194787,kanin,Danish,bunny,6,"kaniner, kanin, kaninen, kanins, kaninens, kaninerne",78,7,78,5.394936204146731,8,42,4
+klapvogn,9,9,4.333333333333333,NA,6,NA,8,Danish,194787,klapvogn,Danish,stroller,3,"klapvogn, barnevognen, barnevogn",15,9.333333333333334,15,5.666666666666667,0,11,0
+and,23,23,5.434782608695652,NA,19,NA,3,Danish,194787,and,Danish,duck,4,"anden, andet, and, anders",369,4.75,369,6.217391304347826,5,94,2
+rap,17,17,2.5294117647058822,5,11,NA,3,Danish,194787,rap,Danish,quack quack,4,"rap, rappen, rapper, rapperen",20,5.75,20,3.6323529411764706,5,12,1
+blomst,20,20,4.25,2,17,NA,6,Danish,194787,blomst,Danish,flower,4,"blomsten, blomst, blomster, blomsterne",53,8,53,4.26010101010101,8,34,1
+bamme,1,1,2,NA,1,NA,5,Danish,194787,bam,Danish,teddybear,6,"bamsen, bamse, bamme, bamer, bam, bamsens",194,5.166666666666667,194,3.8909090909090907,8,105,18
+giv,26,26,4.730769230769231,NA,1,14,3,Danish,194787,giv,Danish,give,4,"giver, give, giv, givet",137,4.25,137,6.943589743589744,1,5,18
+giraffen,6,6,4.666666666666667,NA,6,NA,8,Danish,194787,giraf,Danish,giraffe,3,"giraf, giraffen, giraffer",19,7,19,4.333333333333333,0,17,0
+nøglen,4,4,3.75,NA,4,NA,6,Danish,194787,nøgl,Danish,keys,3,"nøglen, nøgle, nøgler",12,5.666666666666667,12,4.938888888888889,0,9,0
+danse,26,26,3.8461538461538463,7,7,3,5,Danish,194787,dans,Danish,dance,2,"danse, danser",30,5.5,30,3.7980769230769234,7,8,3
+far,84,84,4.9523809523809526,3,34,9,3,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+puttes,2,2,5.5,NA,NA,NA,6,Danish,194787,put,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+smid,1,1,3,NA,NA,1,4,Danish,194787,smid,Danish,throw,4,"smider, smid, smide, smides",26,5.25,26,5.758333333333333,0,0,5
+tegnet,23,23,7.956521739130435,NA,9,NA,6,Danish,194787,tegn,Danish,draw,5,"tegne, tegn, tegnet, tegner, tegnes",315,5.4,315,6.337359098228664,3,83,22
+glasset,3,3,10,NA,1,NA,7,Danish,194787,glas,Danish,glass,2,"glasset, glas",6,5.5,6,9.666666666666668,0,3,0
+drikker,18,18,6.888888888888889,NA,2,2,7,Danish,194787,drik,Danish,drink (action),3,"drikke, drikker, drik",79,5.666666666666667,79,7.013810420590081,0,22,6
+mer,4,4,1.75,3,1,NA,3,Danish,194787,mer,Danish,more,2,"mere, mer",427,3.5,427,1.75,12,235,12
+våd,12,12,5.583333333333333,NA,8,NA,3,Danish,194787,våd,Danish,wet (description),2,"våd, våde",14,3.5,14,9.041666666666666,0,8,0
+hvorfor,203,203,5.270935960591133,7,5,158,7,Danish,194787,hvorfor,Danish,why,1,hvorfor,203,7,203,5.270935960591133,7,5,158
+fut,14,14,4.642857142857143,3,5,3,3,Danish,194787,fut,Danish,choo choo,2,"fut, futte",18,4,18,5.946428571428571,3,6,3
+æblet,4,4,4,NA,4,NA,5,Danish,194787,æbl,Danish,apple,3,"æble, æblet, æbler",20,4.666666666666667,20,5.5476190476190474,1,13,0
+smide,15,15,7.533333333333333,NA,NA,NA,5,Danish,194787,smid,Danish,throw,4,"smider, smid, smide, smides",26,5.25,26,5.758333333333333,0,0,5
+jakke,11,11,7.363636363636363,NA,3,NA,5,Danish,194787,jak,Danish,jacket,2,"jakke, jakken",16,5.5,16,6.181818181818182,0,5,0
+billede,29,29,NA,3,9,NA,7,Danish,194787,billed,Danish,picture,4,"billeder, billede, billedet, billederne",61,8.25,61,6.972368421052631,3,25,0
+trækkes,6,6,6,NA,NA,NA,7,Danish,194787,træk,Danish,pull,4,"træk, trække, trækkes, trækker",211,6,211,6,10,31,14
+knap,11,11,5.818181818181818,NA,6,NA,4,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+mund,22,22,5.318181818181818,NA,15,NA,4,Danish,194787,mund,Danish,mouth,2,"munden, mund",68,5,68,6.289525691699605,1,49,0
+brandbil,2,2,5.5,NA,2,NA,8,Danish,194787,brandbil,Danish,firetruck,2,"brandbil, brandbilen",4,9,4,4.25,0,4,0
+pigen,88,88,5.7272727272727275,2,23,11,5,Danish,194787,pig,Danish,girl,6,"pigen, pige, pigens, pigerne, piger, pigge",145,5.333333333333333,145,6.602958152958153,3,53,11
+børster,5,5,5.2,NA,NA,1,7,Danish,194787,børst,Danish,brush (object),3,"børster, børste, børst",17,6,17,8.157575757575758,0,4,2
+vasker,15,15,6.666666666666667,NA,NA,2,6,Danish,194787,vask,Danish,sink,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vasker,15,15,6.666666666666667,NA,NA,2,6,Danish,194787,vask,Danish,wash,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+ansigtet,2,2,9.5,NA,1,NA,8,Danish,194787,ans,Danish,face,1,ansigtet,2,8,2,9.5,0,1,0
+sæbe,5,5,5.4,NA,2,NA,4,Danish,194787,sæb,Danish,soap,1,sæbe,5,4,5,5.4,0,2,0
+morgenmad,9,9,5.888888888888889,1,6,NA,9,Danish,194787,morgenmad,Danish,breakfast,1,morgenmad,9,9,9,5.888888888888889,1,6,0
+sparker,36,36,3.361111111111111,NA,9,22,7,Danish,194787,spark,Danish,kick,4,"sparke, sparker, sparket, spark",57,6.25,57,5.606944444444444,1,12,23
+barnevognen,3,3,7,NA,2,NA,11,Danish,194787,barnevogn,Danish,stroller,3,"klapvogn, barnevognen, barnevogn",15,9.333333333333334,15,5.666666666666667,0,11,0
+bamer,1,1,2,NA,1,NA,5,Danish,194787,bam,Danish,teddybear,6,"bamsen, bamse, bamme, bamer, bam, bamsens",194,5.166666666666667,194,3.8909090909090907,8,105,18
+hjemme,28,28,6.25,NA,9,3,6,Danish,194787,hjem,Danish,home,2,"hjem, hjemme",61,5,61,7.367424242424242,0,24,3
+kigger,69,69,6.217391304347826,NA,6,7,6,Danish,194787,kig,Danish,look,4,"kig, kigge, kigger, kigget",295,5,295,6.155797101449275,7,53,20
+nøgle,5,5,5.4,NA,2,NA,5,Danish,194787,nøgl,Danish,keys,3,"nøglen, nøgle, nøgler",12,5.666666666666667,12,4.938888888888889,0,9,0
+dukkens,5,5,5.6,NA,NA,NA,7,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+blusen,5,5,6.6,NA,1,NA,6,Danish,194787,blus,Danish,shirt,2,"bluse, blusen",15,5.5,15,6.6,0,6,1
+æsel,4,4,8,NA,3,NA,4,Danish,194787,æsel,Danish,donkey,2,"æsel, æselet",5,5,5,9,0,3,0
+hjort,8,8,5.625,NA,7,NA,5,Danish,194787,hjort,Danish,deer,3,"hjort, hjorten, hjorte",13,6,13,5.125,0,12,0
+mand,41,41,NA,1,21,NA,4,Danish,194787,mand,Danish,man,3,"mand, manden, mandens",79,5.666666666666667,79,7.283783783783784,1,29,4
+ske,5,5,5.6,1,2,NA,3,Danish,194787,ske,Danish,spoon,1,ske,5,3,5,5.6,1,2,0
+gaffel,1,1,4,NA,1,NA,6,Danish,194787,gaffel,Danish,fork,1,gaffel,1,6,1,4,0,1,0
+sofa,5,5,4.2,NA,4,1,4,Danish,194787,sofa,Danish,couch,2,"sofa, sofaen",16,5,16,5.554545454545455,0,13,1
+potte,5,5,5.4,NA,3,NA,5,Danish,194787,pot,Danish,potty,5,"potte, poten, poter, pote, potten",20,5,20,7.42,0,9,0
+fugl,64,64,NA,5,38,1,4,Danish,194787,fugl,Danish,bird,5,"fugl, fugle, fuglen, fuglene, fuglerede",159,6.2,159,4.681818181818182,7,79,16
+morfar,12,12,6.416666666666667,NA,6,1,6,Danish,194787,morfar,Danish,grandpa,4,"morfar, farfar, farfars, morfars",24,6.5,24,5.229166666666667,1,11,2
+seng,33,33,7.03030303030303,1,18,NA,4,Danish,194787,seng,Danish,bed,4,"seng, sengen, senge, sengene",59,5.5,59,6.764928698752228,1,34,0
+trækker,26,26,NA,2,4,1,7,Danish,194787,træk,Danish,pull,4,"træk, trække, trækkes, trækker",211,6,211,6,10,31,14
+sover,67,67,4.432835820895522,NA,23,18,5,Danish,194787,sov,Danish,sleep,5,"sove, sover, sov, sovet, sovs",165,4.2,165,5.274875621890548,2,74,20
+lys,51,51,NA,1,21,NA,3,Danish,194787,lys,Danish,light (object),4,"lys, lyset, lyser, lyse",78,4.25,78,5.777777777777778,1,34,1
+tegner,27,27,6.555555555555555,1,3,4,6,Danish,194787,tegn,Danish,draw,5,"tegne, tegn, tegnet, tegner, tegnes",315,5.4,315,6.337359098228664,3,83,22
+fugle,11,11,5.545454545454546,NA,9,NA,5,Danish,194787,fugl,Danish,bird,5,"fugl, fugle, fuglen, fuglene, fuglerede",159,6.2,159,4.681818181818182,7,79,16
+tegnes,6,6,4.5,NA,1,NA,6,Danish,194787,tegn,Danish,draw,5,"tegne, tegn, tegnet, tegner, tegnes",315,5.4,315,6.337359098228664,3,83,22
+dyne,13,13,5.384615384615385,2,4,NA,4,Danish,194787,dyn,Danish,blanket,3,"dyne, dyner, dynen",20,4.666666666666667,20,4.017094017094017,4,7,0
+fjernsynet,27,27,7.148148148148148,2,19,NA,10,Danish,194787,fjernsyn,Danish,tv,3,"fjernsynet, fjernsyn, tv",59,6.666666666666667,59,6.457984866587017,6,38,1
+ødelægge,17,17,6.764705882352941,NA,3,NA,8,Danish,194787,ødelæg,Danish,break,3,"ødelægger, ødelægge, ødelægges",31,8.666666666666666,31,6.819004524886878,0,4,1
+lukket,14,14,5.214285714285714,NA,9,NA,6,Danish,194787,luk,Danish,close,5,"lukke, lukkes, lukker, lukket, luk",65,5.2,65,4.476648351648352,2,15,4
+støvle,2,2,6.5,1,NA,NA,6,Danish,194787,støvl,Danish,boots,3,"støvle, støvlerne, støvler",7,7.333333333333333,7,5.722222222222222,2,1,1
+øje,33,33,6.181818181818182,1,18,1,3,Danish,194787,øje,Danish,eye,1,øje,33,3,33,6.181818181818182,1,18,1
+kys,7,7,4.571428571428571,1,6,NA,3,Danish,194787,kys,Danish,kiss,6,"kyse, kys, kysser, kysse, kysses, kysset",57,5,57,3.959126984126984,2,25,3
+bider,81,81,4.172839506172839,2,20,13,5,Danish,194787,bid,Danish,bite,5,"bid, bidder, bide, bider, bides",126,4.6,126,5.9248709315375985,7,34,13
+klokken,31,31,5.645161290322581,NA,9,2,7,Danish,194787,klok,Danish,clock,2,"klokken, klokke",33,6.5,33,5.57258064516129,0,11,2
+babyen,52,52,4.826923076923077,NA,20,1,6,Danish,194787,baby,Danish,baby,3,"babyen, baby, babyer",91,5.333333333333333,91,5.3497150997151,0,52,1
+rappen,1,1,3,NA,NA,1,6,Danish,194787,rap,Danish,quack quack,4,"rap, rappen, rapper, rapperen",20,5.75,20,3.6323529411764706,5,12,1
+hjorten,4,4,3.75,NA,4,NA,7,Danish,194787,hjort,Danish,deer,3,"hjort, hjorten, hjorte",13,6,13,5.125,0,12,0
+hesten,90,90,NA,4,38,13,6,Danish,194787,hest,Danish,horse,4,"hest, hesten, heste, hestene",156,5.5,156,6.333333333333334,6,86,13
+søde,4,4,5.75,NA,1,NA,4,Danish,194787,sød,Danish,cute,2,"sød, søde",85,3.5,85,5.75,2,60,0
+hånd,36,36,5.916666666666667,NA,28,NA,4,Danish,194787,hånd,Danish,hand,2,"hånden, hånd",84,5,84,5.916666666666667,2,65,1
+rapper,1,1,6,NA,NA,NA,6,Danish,194787,rap,Danish,quack quack,4,"rap, rappen, rapper, rapperen",20,5.75,20,3.6323529411764706,5,12,1
+øre,16,16,5.875,2,9,NA,3,Danish,194787,øre,Danish,ear,1,øre,16,3,16,5.875,2,9,0
+kasserne,3,3,10.666666666666666,NA,NA,NA,8,Danish,194787,kas,Danish,box,6,"kasse, kassen, æsken, kasserne, kasser, æsk",120,5.5,120,7.256245210727969,2,83,1
+leget,15,15,NA,1,NA,1,5,Danish,194787,leg,Danish,play,5,"lege, leger, leget, leg, legen",369,4.4,369,5.96236559139785,7,45,8
+tørret,4,4,7.25,NA,NA,NA,6,Danish,194787,tør,Danish,dry (description),5,"tørre, tør, tørret, tørrer, tørres",54,5.2,54,6.336607142857143,3,6,6
+farfar,10,10,6.5,1,5,1,6,Danish,194787,farfar,Danish,grandpa,4,"morfar, farfar, farfars, morfars",24,6.5,24,5.229166666666667,1,11,2
+arbejder,2,2,2.5,NA,1,1,8,Danish,194787,arbejd,Danish,work (place),4,"arbejdet, arbejde, arbejder, arbejdes",12,7.75,12,4.058333333333334,0,11,1
+klokke,2,2,5.5,NA,2,NA,6,Danish,194787,klok,Danish,clock,2,"klokken, klokke",33,6.5,33,5.57258064516129,0,11,2
+ur,16,16,3.8125,2,11,NA,2,Danish,194787,ur,Danish,watch (object),1,ur,16,2,16,3.8125,2,11,0
+søvn,1,1,6,NA,NA,NA,4,Danish,194787,søvn,Danish,sleepy,2,"søvnig, søvn",6,5,6,5,0,3,0
+knapper,3,3,7,NA,1,NA,7,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+tiger,15,15,5.266666666666667,2,8,NA,5,Danish,194787,tig,Danish,tiger,3,"tiger, tigeren, tiggeren",22,6.666666666666667,22,4.144444444444445,2,13,1
+lyset,12,12,5.916666666666667,NA,3,1,5,Danish,194787,lys,Danish,light (object),4,"lys, lyset, lyser, lyse",78,4.25,78,5.777777777777778,1,34,1
+tændt,5,5,5.4,NA,4,NA,5,Danish,194787,tænd,Danish,tooth,6,"tænde, tændt, tænderne, tænder, tændes, tændte",40,6,40,6.386111111111111,0,20,0
+mørkt,7,7,6,NA,5,NA,5,Danish,194787,mørk,Danish,dark,3,"mørkt, mørke, mørk",9,4.666666666666667,9,6.333333333333333,0,5,0
+kinder,3,3,3.6666666666666665,NA,2,NA,6,Danish,194787,kind,Danish,cheek,2,"kinder, kinden",4,6,4,4.333333333333333,0,3,0
+blød,10,10,NA,1,8,NA,4,Danish,194787,blød,Danish,soft,3,"blød, bløde, bløder",13,5,13,8.25,1,8,0
+togene,3,3,7,NA,NA,NA,6,Danish,194787,tog,Danish,train,4,"tog, toget, togene, toge",263,4.5,263,6.268199233716475,8,94,22
+billedet,8,8,7.875,NA,4,NA,8,Danish,194787,billed,Danish,picture,4,"billeder, billede, billedet, billederne",61,8.25,61,6.972368421052631,3,25,0
+jakken,5,5,5,NA,2,NA,6,Danish,194787,jak,Danish,jacket,2,"jakke, jakken",16,5.5,16,6.181818181818182,0,5,0
+arm,6,6,6,NA,3,NA,3,Danish,194787,arm,Danish,arm,4,"armene, arme, arm, armen",36,4.5,36,5.7875,0,18,3
+armen,20,20,6.9,NA,9,1,5,Danish,194787,arm,Danish,arm,4,"armene, arme, arm, armen",36,4.5,36,5.7875,0,18,3
+shh,1,1,7,NA,NA,1,3,Danish,194787,shh,Danish,shh,1,shh,1,3,1,7,0,0,1
+dyrene,12,12,6.333333333333333,NA,5,1,6,Danish,194787,dyr,Danish,animal,2,"dyr, dyrene",62,4.5,62,6.976666666666667,2,38,1
+kyllinger,7,7,3.857142857142857,NA,5,NA,9,Danish,194787,kylling,Danish,chicken (animal),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+kyllinger,7,7,3.857142857142857,NA,5,NA,9,Danish,194787,kylling,Danish,chicken (food),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+fårene,1,1,4,NA,1,NA,6,Danish,194787,får,Danish,sheep,3,"får, fårene, fåret",177,4.666666666666667,177,3.5,3,16,11
+lam,10,10,4.8,NA,9,NA,3,Danish,194787,lam,Danish,lamb,3,"lam, lammet, lammets",15,5.333333333333333,15,4.6,0,12,0
+mæh,5,5,3.4,2,2,1,3,Danish,194787,mæh,Danish,baa baa,1,mæh,5,3,5,3.4,2,2,1
+dens,11,11,6.090909090909091,NA,NA,1,4,Danish,194787,den,Danish,it,3,"den, denne, dens",7297,4,7297,6.574866310160427,115,1373,1362
+dens,11,11,6.090909090909091,NA,NA,1,4,Danish,194787,den,Danish,this,5,"det, den, denne, dens, dette",18040,4,18040,6.549910873440285,225,3243,5130
+fåret,2,2,3,NA,2,NA,5,Danish,194787,får,Danish,sheep,3,"får, fårene, fåret",177,4.666666666666667,177,3.5,3,16,11
+gås,6,6,4.833333333333333,1,3,NA,3,Danish,194787,gås,Danish,goose,2,"gås, gåsen",7,4,7,4.416666666666666,1,3,1
+moren,103,103,5.533980582524272,NA,39,21,5,Danish,194787,mor,Danish,mommy,5,"mor, moren, more, mors, morens",392,4.4,392,6.669209431345354,5,139,49
+hunde,7,7,NA,1,4,NA,5,Danish,194787,hund,Danish,dog,4,"hund, hunden, hunde, hundene",338,5.5,338,8.661740558292284,9,188,24
+huset,37,37,7.378378378378378,NA,27,NA,5,Danish,194787,hus,Danish,house,5,"huset, hus, huse, husene, husets",138,4.8,138,6.381519831519832,2,80,2
+farmor,10,10,NA,1,1,2,6,Danish,194787,farmor,Danish,grandma,3,"farmor, mormoren, mormor",20,6.666666666666667,20,5.055555555555555,3,4,2
+hus,84,84,7.392857142857143,NA,45,1,3,Danish,194787,hus,Danish,house,5,"huset, hus, huse, husene, husets",138,4.8,138,6.381519831519832,2,80,2
+sov,2,2,6,NA,NA,NA,3,Danish,194787,sov,Danish,sleep,5,"sove, sover, sov, sovet, sovs",165,4.2,165,5.274875621890548,2,74,20
+hans,66,66,7.333333333333333,1,16,5,4,Danish,194787,han,Danish,his,3,"hane, han, hans",1102,3.6666666666666665,1102,5.738095238095238,8,88,184
+poten,3,3,9,NA,NA,NA,5,Danish,194787,pot,Danish,potty,5,"potte, poten, poter, pote, potten",20,5,20,7.42,0,9,0
+sommerfugl,10,10,4.3,1,7,NA,10,Danish,194787,sommerfugl,Danish,butterfly,3,"sommerfugl, sommerfuglen, sommerfugle",18,11,18,6.155555555555556,1,13,0
+kanin,38,38,4.7105263157894735,5,25,NA,5,Danish,194787,kanin,Danish,bunny,6,"kaniner, kanin, kaninen, kanins, kaninens, kaninerne",78,7,78,5.394936204146731,8,42,4
+hurtigt,20,20,6.3,NA,9,NA,7,Danish,194787,hurt,Danish,fast,3,"hurtig, hurtigt, hurtigere",29,7.333333333333333,29,7.05,0,11,0
+kaninen,22,22,5.409090909090909,2,11,2,7,Danish,194787,kanin,Danish,bunny,6,"kaniner, kanin, kaninen, kanins, kaninens, kaninerne",78,7,78,5.394936204146731,8,42,4
+skildpadde,9,9,4.222222222222222,2,6,NA,10,Danish,194787,skildpad,Danish,turtle,3,"skildpadde, skildpadder, skildpadden",12,10.666666666666666,12,4.7407407407407405,3,7,1
+billederne,5,5,6.2,NA,4,NA,10,Danish,194787,billed,Danish,picture,4,"billeder, billede, billedet, billederne",61,8.25,61,6.972368421052631,3,25,0
+syg,9,9,5.444444444444445,NA,6,NA,3,Danish,194787,syg,Danish,sick,2,"syg, syge",15,3.5,15,6.222222222222222,0,8,0
+syge,6,6,7,NA,2,NA,4,Danish,194787,syg,Danish,sick,2,"syg, syge",15,3.5,15,6.222222222222222,0,8,0
+dukker,12,12,5.25,2,6,NA,6,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+gode,18,18,7.166666666666667,NA,3,NA,4,Danish,194787,god,Danish,good,2,"god, gode",114,3.5,114,7.166666666666667,1,21,1
+tallerken,3,3,3,1,1,NA,9,Danish,194787,tallerk,Danish,plate,3,"tallerken, tallerkener, tallerkenen",5,10.333333333333334,5,7.666666666666667,1,2,0
+barn,13,13,7.538461538461538,NA,7,NA,4,Danish,194787,barn,Danish,child,2,"barn, barnet",14,5,14,4.269230769230769,1,7,0
+lærer,5,5,9.2,NA,2,NA,5,Danish,194787,lær,Danish,teacher,2,"lære, lærer",18,4.5,18,8.1,0,3,0
+mine,27,27,6.814814814814815,NA,6,1,4,Danish,194787,min,Danish,mine,3,"min, mine, mit",157,3.3333333333333335,157,6.814814814814815,3,32,9
+skubbet,4,4,5.5,NA,1,NA,7,Danish,194787,skub,Danish,push,5,"skubbe, skubbet, skubber, skub, skubbes",94,6.2,94,4.290343137254902,1,13,20
+huse,11,11,6.636363636363637,1,5,NA,4,Danish,194787,hus,Danish,house,5,"huset, hus, huse, husene, husets",138,4.8,138,6.381519831519832,2,80,2
+vinduer,6,6,4.833333333333333,NA,4,NA,7,Danish,194787,vindu,Danish,window,4,"vinduer, vindue, vinduet, vinduerne",20,7.25,20,6.883928571428571,0,14,0
+dør,19,19,4.894736842105263,2,12,NA,3,Danish,194787,dør,Danish,door,5,"døren, dør, døre, dørens, dørene",58,4.8,58,6.598684210526316,5,29,1
+blomster,22,22,3.8636363636363638,5,10,1,8,Danish,194787,blomst,Danish,flower,4,"blomsten, blomst, blomster, blomsterne",53,8,53,4.26010101010101,8,34,1
+stjerne,3,3,4.666666666666667,NA,2,NA,7,Danish,194787,stjern,Danish,star,2,"stjerne, stjerner",4,7.5,4,4.333333333333334,0,3,0
+pude,5,5,5.6,NA,4,NA,4,Danish,194787,pud,Danish,pillow,4,"pude, puder, puden, puderne",14,5.25,14,7.792857142857143,0,8,1
+dyner,6,6,3.6666666666666665,2,2,NA,5,Danish,194787,dyn,Danish,blanket,3,"dyne, dyner, dynen",20,4.666666666666667,20,4.017094017094017,4,7,0
+mit,9,9,NA,1,NA,NA,3,Danish,194787,mit,Danish,mine,3,"min, mine, mit",157,3.3333333333333335,157,6.814814814814815,3,32,9
+menneske,2,2,9.5,NA,1,NA,8,Danish,194787,mennesk,Danish,people,3,"menneske, mennesker, menneskene",27,9,27,8.432539682539682,0,11,1
+vaskes,5,5,4.6,NA,2,NA,6,Danish,194787,vask,Danish,sink,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vaskes,5,5,4.6,NA,2,NA,6,Danish,194787,vask,Danish,wash,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vask,3,3,3.6666666666666665,NA,1,1,4,Danish,194787,vask,Danish,sink,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vask,3,3,3.6666666666666665,NA,1,1,4,Danish,194787,vask,Danish,wash,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+fisk,39,39,NA,5,28,NA,4,Danish,194787,fisk,Danish,fish (animal),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+fisk,39,39,NA,5,28,NA,4,Danish,194787,fisk,Danish,fish (food),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+baby,36,36,6.555555555555555,NA,29,NA,4,Danish,194787,baby,Danish,baby,3,"babyen, baby, babyer",91,5.333333333333333,91,5.3497150997151,0,52,1
+tungen,10,10,NA,1,5,1,6,Danish,194787,tung,Danish,tongue,4,"tung, tunge, tungen, tungt",51,5,51,4.895833333333333,3,31,1
+pige,42,42,6.190476190476191,1,26,NA,4,Danish,194787,pig,Danish,girl,6,"pigen, pige, pigens, pigerne, piger, pigge",145,5.333333333333333,145,6.602958152958153,3,53,11
+vindue,4,4,4.75,NA,2,NA,6,Danish,194787,vindu,Danish,window,4,"vinduer, vindue, vinduet, vinduerne",20,7.25,20,6.883928571428571,0,14,0
+gyngen,5,5,4.4,NA,5,NA,6,Danish,194787,gyng,Danish,swing (action),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+gyngen,5,5,4.4,NA,5,NA,6,Danish,194787,gyng,Danish,swing (object),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+planter,5,5,6,1,3,NA,7,Danish,194787,plant,Danish,plant,1,planter,5,7,5,6,1,3,0
+vandet,53,53,7.509433962264151,NA,37,1,6,Danish,194787,vand,Danish,water (beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+vandet,53,53,7.509433962264151,NA,37,1,6,Danish,194787,vand,Danish,water (not beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+fisken,4,4,3.75,NA,3,NA,6,Danish,194787,fisk,Danish,fish (animal),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+fisken,4,4,3.75,NA,3,NA,6,Danish,194787,fisk,Danish,fish (food),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+skubber,51,51,4.03921568627451,NA,2,19,7,Danish,194787,skub,Danish,push,5,"skubbe, skubbet, skubber, skub, skubbes",94,6.2,94,4.290343137254902,1,13,20
+kysser,36,36,4.25,NA,18,3,6,Danish,194787,kys,Danish,kiss,6,"kyse, kys, kysser, kysse, kysses, kysset",57,5,57,3.959126984126984,2,25,3
+løb,3,3,6.333333333333333,NA,NA,NA,3,Danish,194787,løb,Danish,run,5,"løbe, løb, løbende, løbet, løber",100,4.8,100,11.333333333333334,3,13,3
+fuglen,81,81,NA,1,31,15,6,Danish,194787,fugl,Danish,bird,5,"fugl, fugle, fuglen, fuglene, fuglerede",159,6.2,159,4.681818181818182,7,79,16
+dynen,1,1,3,NA,1,NA,5,Danish,194787,dyn,Danish,blanket,3,"dyne, dyner, dynen",20,4.666666666666667,20,4.017094017094017,4,7,0
+koldt,5,5,4.8,NA,4,NA,5,Danish,194787,kold,Danish,cold,4,"kolde, koldt, kold, koldere",16,5.25,16,5.223809523809524,0,11,0
+boller,8,8,3.5,NA,3,3,6,Danish,194787,bol,Danish,bun,1,boller,8,6,8,3.5,0,3,3
+smør,6,6,5.333333333333333,NA,3,NA,4,Danish,194787,smør,Danish,butter,3,"smør, smøre, smørret",10,5.333333333333333,10,7.444444444444445,0,4,0
+udenfor,11,11,4.636363636363637,1,9,NA,7,Danish,194787,udenfor,Danish,outside,1,udenfor,11,7,11,4.636363636363637,1,9,0
+æg,4,4,4,1,3,NA,2,Danish,194787,æg,Danish,egg,1,æg,4,2,4,4,1,3,0
+komfur,8,8,3,3,4,NA,6,Danish,194787,komfur,Danish,stove,2,"komfur, komfuret",13,7,13,4.3,3,7,0
+køleskabet,9,9,4.666666666666667,2,5,NA,10,Danish,194787,køleskab,Danish,refrigerator,3,"køleskabet, køleskab, køleskabene",15,9.666666666666666,15,2.8222222222222224,5,8,0
+dreng,29,29,8.03448275862069,NA,14,1,5,Danish,194787,dreng,Danish,boy,5,"dreng, drengen, drenge, drengene, drengens",61,6.8,61,8.710600255427842,1,22,4
+biler,11,11,NA,2,8,NA,5,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+tænderne,9,9,6,NA,7,NA,8,Danish,194787,tænd,Danish,tooth,6,"tænde, tændt, tænderne, tænder, tændes, tændte",40,6,40,6.386111111111111,0,20,0
+stand,2,2,7.5,NA,2,NA,5,Danish,194787,stand,Danish,stop,2,"stand, standse",3,6,3,8.25,0,2,0
+løbende,3,3,12.333333333333334,NA,1,NA,7,Danish,194787,løb,Danish,run,5,"løbe, løb, løbende, løbet, løber",100,4.8,100,11.333333333333334,3,13,3
+drengen,27,27,5.185185185185185,1,8,3,7,Danish,194787,dreng,Danish,boy,5,"dreng, drengen, drenge, drengene, drengens",61,6.8,61,8.710600255427842,1,22,4
+lastbilen,3,3,6.333333333333333,NA,2,NA,9,Danish,194787,lastbil,Danish,truck,2,"lastbilen, lastbil",10,8,10,5.809523809523809,0,8,0
+slem,21,21,NA,1,16,NA,4,Danish,194787,slem,Danish,naughty,2,"slem, slemme",25,5,25,7.5,1,18,0
+vaske,23,23,7.3478260869565215,NA,1,1,5,Danish,194787,vask,Danish,sink,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vaske,23,23,7.3478260869565215,NA,1,1,5,Danish,194787,vask,Danish,wash,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+dette,2,2,6.5,NA,NA,NA,5,Danish,194787,det,Danish,that,2,"det, dette",10743,4,10743,6.5,110,1870,3768
+dette,2,2,6.5,NA,NA,NA,5,Danish,194787,det,Danish,this,5,"det, den, denne, dens, dette",18040,4,18040,6.549910873440285,225,3243,5130
+bjørn,44,44,4.4772727272727275,4,35,NA,5,Danish,194787,bjørn,Danish,bear,2,"bjørnen, bjørn",54,6,54,3.9386363636363635,5,40,1
+frø,28,28,NA,1,18,NA,3,Danish,194787,frø,Danish,frog,1,frø,28,3,28,NA,1,18,0
+sovet,6,6,6,NA,2,NA,5,Danish,194787,sov,Danish,sleep,5,"sove, sover, sov, sovet, sovs",165,4.2,165,5.274875621890548,2,74,20
+kopper,3,3,9.333333333333334,NA,1,NA,6,Danish,194787,kop,Danish,cup,6,"kop, koppen, kruset, kopper, krus, kopperne",85,5.5,85,5.919607843137255,3,54,3
+sut,34,34,5.5588235294117645,3,26,1,3,Danish,194787,sut,Danish,pacifier,5,"sutte, sut, sutten, sutter, suttet",50,5.2,50,9.915574229691877,4,30,1
+kigget,8,8,7.75,NA,1,NA,6,Danish,194787,kig,Danish,look,4,"kig, kigge, kigger, kigget",295,5,295,6.155797101449275,7,53,20
+poter,5,5,8,NA,2,NA,5,Danish,194787,pot,Danish,potty,5,"potte, poten, poter, pote, potten",20,5,20,7.42,0,9,0
+støvlerne,2,2,8,NA,1,NA,9,Danish,194787,støvl,Danish,boots,3,"støvle, støvlerne, støvler",7,7.333333333333333,7,5.722222222222222,2,1,1
+støvler,3,3,2.6666666666666665,1,NA,1,7,Danish,194787,støvl,Danish,boots,3,"støvle, støvlerne, støvler",7,7.333333333333333,7,5.722222222222222,2,1,1
+trappe,12,12,4,NA,12,NA,6,Danish,194787,trap,Danish,stairs,4,"trappe, trappen, trapperne, trapper",25,7.25,25,5.9875,0,21,0
+badekaret,5,5,7.2,NA,3,NA,9,Danish,194787,badekar,Danish,bathtub,3,"badekaret, badekarret, badekar",33,8.666666666666666,33,7.226510721247563,0,22,0
+badeværelset,5,5,6,NA,2,NA,12,Danish,194787,badevær,Danish,bathroom,2,"badeværelset, badeværelse",6,11.5,6,6,0,3,0
+badeværelse,1,1,6,NA,1,NA,11,Danish,194787,badevær,Danish,bathroom,2,"badeværelset, badeværelse",6,11.5,6,6,0,3,0
+sengen,17,17,6.529411764705882,NA,12,NA,6,Danish,194787,seng,Danish,bed,4,"seng, sengen, senge, sengene",59,5.5,59,6.764928698752228,1,34,0
+hoved,25,25,5.84,2,16,NA,5,Danish,194787,hoved,Danish,head,5,"hovedet, hoved, hovede, hovederne, hoveder",96,6.8,96,5.26,3,53,1
+senge,3,3,7,NA,NA,NA,5,Danish,194787,seng,Danish,bed,4,"seng, sengen, senge, sengene",59,5.5,59,6.764928698752228,1,34,0
+natten,2,2,6,NA,2,NA,6,Danish,194787,nat,Danish,night,2,"natten, nat",3,4.5,3,4,0,3,0
+trappen,5,5,7.2,NA,2,NA,7,Danish,194787,trap,Danish,stairs,4,"trappe, trappen, trapperne, trapper",25,7.25,25,5.9875,0,21,0
+killing,1,1,1,1,NA,NA,7,Danish,194787,killing,Danish,kitty,1,killing,1,7,1,1,1,0,0
+kør,12,12,4.25,1,NA,7,3,Danish,194787,kør,Danish,drive,3,"køre, kører, kør",433,4,433,5.121598639455782,8,79,33
+løbet,3,3,15.333333333333334,NA,NA,NA,5,Danish,194787,løb,Danish,run,5,"løbe, løb, løbende, løbet, løber",100,4.8,100,11.333333333333334,3,13,3
+døre,4,4,6.5,NA,2,NA,4,Danish,194787,dør,Danish,door,5,"døren, dør, døre, dørens, dørene",58,4.8,58,6.598684210526316,5,29,1
+faren,29,29,7.241379310344827,1,8,3,5,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+svømme,3,3,7.333333333333333,NA,2,NA,6,Danish,194787,svøm,Danish,swim,3,"svømme, svømmer, svømmet",5,6.666666666666667,5,8.11111111111111,0,2,0
+badekarret,19,19,7.368421052631579,NA,14,NA,10,Danish,194787,badekar,Danish,bathtub,3,"badekaret, badekarret, badekar",33,8.666666666666666,33,7.226510721247563,0,22,0
+muser,2,2,2,NA,2,NA,5,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+løber,56,56,NA,1,9,3,5,Danish,194787,løb,Danish,run,5,"løbe, løb, løbende, løbet, løber",100,4.8,100,11.333333333333334,3,13,3
+stole,11,11,6.909090909090909,1,4,NA,5,Danish,194787,stol,Danish,chair,4,"stolen, stol, stole, stolene",134,5.5,134,5.973692054278767,2,89,3
+stolene,5,5,5.6,NA,3,1,7,Danish,194787,stol,Danish,chair,4,"stolen, stol, stole, stolene",134,5.5,134,5.973692054278767,2,89,3
+farens,2,2,NA,1,NA,NA,6,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+badekar,9,9,7.111111111111111,NA,5,NA,7,Danish,194787,badekar,Danish,bathtub,3,"badekaret, badekarret, badekar",33,8.666666666666666,33,7.226510721247563,0,22,0
+morgenen,5,5,8.4,NA,4,NA,8,Danish,194787,morgen,Danish,morning,3,"morgen, morgenen, morges",23,6.666666666666667,23,8.28888888888889,0,16,0
+håndklæde,2,2,6,NA,2,NA,9,Danish,194787,håndklæd,Danish,towel,1,håndklæde,2,9,2,6,0,2,0
+tørrer,2,2,NA,1,NA,1,6,Danish,194787,tør,Danish,dry (description),5,"tørre, tør, tørret, tørrer, tørres",54,5.2,54,6.336607142857143,3,6,6
+flyvemaskine,12,12,3.75,2,8,NA,12,Danish,194787,flyvemaskin,Danish,airplane,3,"flyvemaskine, flyvemaskinen, flyvemaskiner",18,12.666666666666666,18,4.5,3,11,1
+muses,1,1,4,NA,NA,NA,5,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+knapperne,7,7,6,NA,6,NA,9,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+skålen,1,1,7,NA,NA,NA,6,Danish,194787,skål,Danish,bowl,2,"skål, skålen",12,5,12,4.7272727272727275,5,0,4
+køleskab,5,5,2.8,2,3,NA,8,Danish,194787,køleskab,Danish,refrigerator,3,"køleskabet, køleskab, køleskabene",15,9.666666666666666,15,2.8222222222222224,5,8,0
+komfuret,5,5,5.6,NA,3,NA,8,Danish,194787,komfur,Danish,stove,2,"komfur, komfuret",13,7,13,4.3,3,7,0
+skuffer,6,6,NA,1,3,NA,7,Danish,194787,skuf,Danish,drawer,4,"skuffer, skuffe, skuffen, skufferne",15,7.25,15,5.333333333333333,1,7,0
+maden,3,3,7.666666666666667,NA,1,1,5,Danish,194787,mad,Danish,feed,2,"mad, maden",65,4,65,7.666666666666667,1,34,2
+maden,3,3,7.666666666666667,NA,1,1,5,Danish,194787,mad,Danish,food,2,"mad, maden",65,4,65,7.666666666666667,1,34,2
+rører,3,3,7.333333333333333,NA,1,NA,5,Danish,194787,rør,Danish,touch,3,"røre, rører, rør",37,4,37,6.579861111111111,0,5,0
+smiler,2,2,2,NA,2,NA,6,Danish,194787,smil,Danish,smile,1,smiler,2,6,2,2,0,2,0
+glade,5,5,10.2,NA,2,NA,5,Danish,194787,glad,Danish,happy,2,"glade, glad",36,4.5,36,9.42258064516129,0,12,0
+krus,1,1,4,NA,1,NA,4,Danish,194787,krus,Danish,cup,6,"kop, koppen, kruset, kopper, krus, kopperne",85,5.5,85,5.919607843137255,3,54,3
+venter,12,12,8.833333333333334,1,3,NA,6,Danish,194787,vent,Danish,wait,3,"vent, vente, venter",112,5,112,6.4288451012588945,6,13,25
+drik,2,2,7,NA,NA,2,4,Danish,194787,drik,Danish,drink (action),3,"drikke, drikker, drik",79,5.666666666666667,79,7.013810420590081,0,22,6
+ble,1,1,7,NA,NA,NA,3,Danish,194787,ble,Danish,diaper,1,ble,1,3,1,7,0,0,0
+bløde,2,2,13.5,NA,NA,NA,5,Danish,194787,blød,Danish,soft,3,"blød, bløde, bløder",13,5,13,8.25,1,8,0
+kirke,5,5,5,NA,5,NA,5,Danish,194787,kirk,Danish,church,2,"kirke, kirken",8,5.5,8,4.833333333333334,0,8,0
+penge,37,37,NA,3,13,NA,5,Danish,194787,peng,Danish,money,2,"penge, pengene",46,6,46,6.222222222222222,3,18,1
+kysse,3,3,4.333333333333333,NA,1,NA,5,Danish,194787,kys,Danish,kiss,6,"kyse, kys, kysser, kysse, kysses, kysset",57,5,57,3.959126984126984,2,25,3
+gulerødder,12,12,3.9166666666666665,NA,10,1,10,Danish,194787,gulerød,Danish,carrots,1,gulerødder,12,10,12,3.9166666666666665,0,10,1
+papiret,13,13,7.538461538461538,NA,4,1,7,Danish,194787,papir,Danish,paper,2,"papir, papiret",59,6,59,7.538461538461538,3,30,2
+træ,18,18,7.444444444444445,NA,12,NA,3,Danish,194787,træ,Danish,tree,1,træ,18,3,18,7.444444444444445,0,12,0
+ugle,10,10,3.9,NA,10,NA,4,Danish,194787,ugl,Danish,owl,2,"ugle, uglen",23,4.5,23,4.9884615384615385,0,17,2
+kanins,1,1,4,NA,NA,NA,6,Danish,194787,kanin,Danish,bunny,6,"kaniner, kanin, kaninen, kanins, kaninens, kaninerne",78,7,78,5.394936204146731,8,42,4
+abe,22,22,4.5,NA,19,NA,3,Danish,194787,abe,Danish,monkey,1,abe,22,3,22,4.5,0,19,0
+bille,8,8,4.375,NA,8,NA,5,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+rar,2,2,4.5,NA,2,NA,3,Danish,194787,rar,Danish,gentle,1,rar,2,3,2,4.5,0,2,0
+farfars,1,1,4,NA,NA,NA,7,Danish,194787,farfar,Danish,grandpa,4,"morfar, farfar, farfars, morfars",24,6.5,24,5.229166666666667,1,11,2
+tandbørste,3,3,2.3333333333333335,NA,3,NA,10,Danish,194787,tandbørst,Danish,toothbrush,1,tandbørste,3,10,3,2.3333333333333335,0,3,0
+legetøjs,1,1,4,NA,1,NA,8,Danish,194787,legetøj,Danish,toy (object),3,"legetøj, legetøjs, legetøjet",15,8,15,5.722222222222222,1,8,0
+bus,7,7,4.714285714285714,NA,7,NA,3,Danish,194787,bus,Danish,bus,2,"bus, bussen",8,4.5,8,4.857142857142858,0,7,0
+barnet,1,1,1,1,NA,NA,6,Danish,194787,barn,Danish,child,2,"barn, barnet",14,5,14,4.269230769230769,1,7,0
+dukkes,1,1,4,NA,NA,NA,6,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+mormoren,1,1,5,NA,NA,NA,8,Danish,194787,mormor,Danish,grandma,3,"farmor, mormoren, mormor",20,6.666666666666667,20,5.055555555555555,3,4,2
+læser,18,18,5.833333333333333,NA,1,2,5,Danish,194787,læs,Danish,read,4,"læse, læser, læsse, læs",225,4.25,225,5.611111111111111,3,47,3
+vises,1,1,9,NA,NA,NA,5,Danish,194787,vis,Danish,show,4,"vise, vises, viser, vis",208,4.25,208,8.664102564102564,2,6,1
+viser,13,13,9.692307692307692,NA,NA,NA,5,Danish,194787,vis,Danish,show,4,"vise, vises, viser, vis",208,4.25,208,8.664102564102564,2,6,1
+kylling,9,9,5.333333333333333,NA,7,NA,7,Danish,194787,kylling,Danish,chicken (animal),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+kylling,9,9,5.333333333333333,NA,7,NA,7,Danish,194787,kylling,Danish,chicken (food),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+kyllingerne,1,1,2,NA,1,NA,11,Danish,194787,kylling,Danish,chicken (animal),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+kyllingerne,1,1,2,NA,1,NA,11,Danish,194787,kylling,Danish,chicken (food),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+heste,3,3,4.666666666666667,NA,3,NA,5,Danish,194787,hest,Danish,horse,4,"hest, hesten, heste, hestene",156,5.5,156,6.333333333333334,6,86,13
+brød,1,1,4,NA,1,NA,4,Danish,194787,brød,Danish,bread,1,brød,1,4,1,4,0,1,0
+kold,7,7,4.428571428571429,NA,6,NA,4,Danish,194787,kold,Danish,cold,4,"kolde, koldt, kold, koldere",16,5.25,16,5.223809523809524,0,11,0
+fjernsyn,31,31,6.225806451612903,4,18,1,8,Danish,194787,fjernsyn,Danish,tv,3,"fjernsynet, fjernsyn, tv",59,6.666666666666667,59,6.457984866587017,6,38,1
+hovede,5,5,6.2,NA,4,NA,6,Danish,194787,hoved,Danish,head,5,"hovedet, hoved, hovede, hovederne, hoveder",96,6.8,96,5.26,3,53,1
+vinduet,7,7,8.285714285714286,NA,6,NA,7,Danish,194787,vindu,Danish,window,4,"vinduer, vindue, vinduet, vinduerne",20,7.25,20,6.883928571428571,0,14,0
+trapperne,4,4,8,NA,4,NA,9,Danish,194787,trap,Danish,stairs,4,"trappe, trappen, trapperne, trapper",25,7.25,25,5.9875,0,21,0
+skuffe,4,4,4.75,NA,2,NA,6,Danish,194787,skuf,Danish,drawer,4,"skuffer, skuffe, skuffen, skufferne",15,7.25,15,5.333333333333333,1,7,0
+skuffen,4,4,6.25,NA,1,NA,7,Danish,194787,skuf,Danish,drawer,4,"skuffer, skuffe, skuffen, skufferne",15,7.25,15,5.333333333333333,1,7,0
+flyvemaskinen,2,2,4,NA,1,1,13,Danish,194787,flyvemaskin,Danish,airplane,3,"flyvemaskine, flyvemaskinen, flyvemaskiner",18,12.666666666666666,18,4.5,3,11,1
+sol,6,6,5.5,NA,3,1,3,Danish,194787,sol,Danish,sun,2,"sol, solen",11,4,11,6.85,0,5,1
+juicen,6,6,5.666666666666667,1,3,NA,6,Danish,194787,juic,Danish,juice,2,"juice, juicen",31,5.5,31,5.453333333333333,3,21,0
+appelsinerne,1,1,10,NA,NA,NA,12,Danish,194787,appelsin,Danish,orange (food),3,"appelsin, appelsinerne, appelsiner",8,10,8,6.666666666666667,0,4,0
+tørres,1,1,4,NA,1,NA,6,Danish,194787,tør,Danish,dry (description),5,"tørre, tør, tørret, tørrer, tørres",54,5.2,54,6.336607142857143,3,6,6
+læsse,2,2,6.5,NA,NA,NA,5,Danish,194787,læs,Danish,read,4,"læse, læser, læsse, læs",225,4.25,225,5.611111111111111,3,47,3
+kalkun,2,2,3.5,NA,2,NA,6,Danish,194787,kalkun,Danish,turkey,1,kalkun,2,6,2,3.5,0,2,0
+gammel,20,20,5.9,NA,4,NA,6,Danish,194787,gammel,Danish,old,1,gammel,20,6,20,5.9,0,4,0
+lastbil,7,7,5.285714285714286,NA,6,NA,7,Danish,194787,lastbil,Danish,truck,2,"lastbilen, lastbil",10,8,10,5.809523809523809,0,8,0
+frække,3,3,3.3333333333333335,NA,1,1,6,Danish,194787,fræk,Danish,bad,2,"fræk, frække",10,5,10,3.8095238095238093,0,5,1
+bananer,1,1,2,NA,1,NA,7,Danish,194787,banan,Danish,banana,2,"banan, bananer",12,6,12,3.727272727272727,1,6,0
+uglen,13,13,6.076923076923077,NA,7,2,5,Danish,194787,ugl,Danish,owl,2,"ugle, uglen",23,4.5,23,4.9884615384615385,0,17,2
+glad,31,31,8.64516129032258,NA,10,NA,4,Danish,194787,glad,Danish,happy,2,"glade, glad",36,4.5,36,9.42258064516129,0,12,0
+hjorte,1,1,6,NA,1,NA,6,Danish,194787,hjort,Danish,deer,3,"hjort, hjorten, hjorte",13,6,13,5.125,0,12,0
+ovnen,3,3,8,NA,3,NA,5,Danish,194787,ovn,Danish,oven,2,"ovnen, ovn",7,4,7,5.75,0,6,1
+kinden,1,1,5,NA,1,NA,6,Danish,194787,kind,Danish,cheek,2,"kinder, kinden",4,6,4,4.333333333333333,0,3,0
+mormor,9,9,5.111111111111111,2,3,NA,6,Danish,194787,mormor,Danish,grandma,3,"farmor, mormoren, mormor",20,6.666666666666667,20,5.055555555555555,3,4,2
+babyer,3,3,4.666666666666667,NA,3,NA,6,Danish,194787,baby,Danish,baby,3,"babyen, baby, babyer",91,5.333333333333333,91,5.3497150997151,0,52,1
+sokker,4,4,9,NA,3,NA,6,Danish,194787,sok,Danish,sock,5,"strømpe, sok, strømper, sokker, strømpen",21,6.4,21,7.550000000000001,2,9,0
+regner,5,5,7.8,NA,2,NA,6,Danish,194787,regn,Danish,rain,4,"regnen, regner, regnet, regne",15,5.75,15,6.628571428571428,0,5,1
+frokost,1,1,4,NA,1,NA,7,Danish,194787,frokost,Danish,lunch,1,frokost,1,7,1,4,0,1,0
+vasket,7,7,NA,1,1,NA,6,Danish,194787,vask,Danish,sink,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vasket,7,7,NA,1,1,NA,6,Danish,194787,vask,Danish,wash,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+tænder,12,12,6.75,NA,8,NA,6,Danish,194787,tænd,Danish,tooth,6,"tænde, tændt, tænderne, tænder, tændes, tændte",40,6,40,6.386111111111111,0,20,0
+kaninens,2,2,3,NA,NA,1,8,Danish,194787,kanin,Danish,bunny,6,"kaniner, kanin, kaninen, kanins, kaninens, kaninerne",78,7,78,5.394936204146731,8,42,4
+skriver,7,7,7.142857142857143,NA,1,2,7,Danish,194787,skriv,Danish,write,3,"skriver, skrive, skriv",38,6,38,6.036507936507936,0,6,2
+givet,4,4,8.5,NA,NA,NA,5,Danish,194787,giv,Danish,give,4,"giver, give, giv, givet",137,4.25,137,6.943589743589744,1,5,18
+dagen,4,4,4.75,NA,4,NA,5,Danish,194787,dag,Danish,day,2,"dag, dagen",89,4,89,4.75,2,66,0
+køkkenet,8,8,NA,1,4,NA,8,Danish,194787,køkken,Danish,kitchen,2,"køkkenet, køkken",11,7,11,5,1,7,0
+smides,2,2,7,NA,NA,NA,6,Danish,194787,smid,Danish,throw,4,"smider, smid, smide, smides",26,5.25,26,5.758333333333333,0,0,5
+knappet,1,1,7,NA,NA,NA,7,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+tungt,1,1,4,NA,1,NA,5,Danish,194787,tung,Danish,tongue,4,"tung, tunge, tungen, tungt",51,5,51,4.895833333333333,3,31,1
+vinduerne,3,3,9.666666666666666,NA,2,NA,9,Danish,194787,vindu,Danish,window,4,"vinduer, vindue, vinduet, vinduerne",20,7.25,20,6.883928571428571,0,14,0
+kasser,5,5,8.4,NA,2,NA,6,Danish,194787,kas,Danish,box,6,"kasse, kassen, æsken, kasserne, kasser, æsk",120,5.5,120,7.256245210727969,2,83,1
+haver,1,1,3,NA,1,NA,5,Danish,194787,hav,Danish,garden,4,"have, haver, hav, haven",963,4.25,963,7.666666666666667,10,126,6
+griser,3,3,2.3333333333333335,1,1,NA,6,Danish,194787,gris,Danish,pig,4,"grise, gris, grisen, griser",168,5.25,168,3.7666666666666666,8,83,25
+kirken,3,3,4.666666666666667,NA,3,NA,6,Danish,194787,kirk,Danish,church,2,"kirke, kirken",8,5.5,8,4.833333333333334,0,8,0
+mennesker,21,21,9.047619047619047,NA,9,1,9,Danish,194787,mennesk,Danish,people,3,"menneske, mennesker, menneskene",27,9,27,8.432539682539682,0,11,1
+forretning,1,1,10,NA,NA,NA,10,Danish,194787,forretning,Danish,business,2,"forretning, forretninger",4,11,4,6.833333333333333,0,3,0
+forretninger,3,3,3.6666666666666665,NA,3,NA,12,Danish,194787,forretning,Danish,business,2,"forretning, forretninger",4,11,4,6.833333333333333,0,3,0
+hårdere,2,2,5,NA,2,NA,7,Danish,194787,hård,Danish,hard,4,"hårdt, hårdere, hårde, hård",27,5.25,27,6.266666666666667,1,18,0
+slikker,2,2,7,NA,NA,1,7,Danish,194787,slik,Danish,candy,3,"slikker, slikke, slik",11,5.666666666666667,11,6.291666666666667,0,2,2
+slikke,1,1,4,NA,NA,NA,6,Danish,194787,slik,Danish,candy,3,"slikker, slikke, slik",11,5.666666666666667,11,6.291666666666667,0,2,2
+skildpadder,1,1,6,NA,1,NA,11,Danish,194787,skildpad,Danish,turtle,3,"skildpadde, skildpadder, skildpadden",12,10.666666666666666,12,4.7407407407407405,3,7,1
+måne,5,5,5.2,NA,5,NA,4,Danish,194787,mån,Danish,moon,2,"måne, månen",11,4.5,11,5.266666666666667,0,10,0
+æsk,1,1,4,NA,NA,NA,3,Danish,194787,æsk,Danish,box,6,"kasse, kassen, æsken, kasserne, kasser, æsk",120,5.5,120,7.256245210727969,2,83,1
+lampe,4,4,1.75,2,1,NA,5,Danish,194787,lamp,Danish,lamp,2,"lampen, lampe",6,5.5,6,2.625,2,3,0
+kattens,1,1,4,NA,NA,NA,7,Danish,194787,kat,Danish,cat,4,"kat, katten, kattens, katte",178,5.25,178,5.57516339869281,7,94,23
+puttet,3,3,8,NA,NA,NA,6,Danish,194787,put,Danish,put,9,"putter, putte, sætte, sætter, put, sættes, sæt, puttes, puttet",683,5.111111111111111,683,6.025862682598751,16,9,75
+hårde,3,3,6,NA,2,NA,5,Danish,194787,hård,Danish,hard,4,"hårdt, hårdere, hårde, hård",27,5.25,27,6.266666666666667,1,18,0
+knappen,12,12,5.75,NA,5,NA,7,Danish,194787,knap,Danish,button,7,"knappes, knappe, knap, knapper, knapperne, knappet, knappen",48,6.714285714285714,48,5.890692640692641,0,21,0
+sne,5,5,6.4,NA,3,NA,3,Danish,194787,sne,Danish,snow,1,sne,5,3,5,6.4,0,3,0
+køkken,3,3,5,NA,3,NA,6,Danish,194787,køk,Danish,kitchen,2,"køkkenet, køkken",11,7,11,5,1,7,0
+hops,2,2,1,2,NA,NA,4,Danish,194787,hop,Danish,jump,4,"hoppe, hopper, hop, hops",129,4.5,129,2.5509171410499683,53,38,7
+briller,7,7,3.4285714285714284,1,6,NA,7,Danish,194787,bril,Danish,glasses,2,"briller, brillerne",10,8,10,3.5476190476190474,1,9,0
+lyser,12,12,5.75,NA,8,NA,5,Danish,194787,lys,Danish,light (object),4,"lys, lyset, lyser, lyse",78,4.25,78,5.777777777777778,1,34,1
+motorcykel,9,9,6.888888888888889,1,3,NA,10,Danish,194787,motorcykel,Danish,motorcycle,1,motorcykel,9,10,9,6.888888888888889,1,3,0
+børste,11,11,7.2727272727272725,NA,4,NA,6,Danish,194787,børst,Danish,brush (object),3,"børster, børste, børst",17,6,17,8.157575757575758,0,4,2
+strømpen,3,3,6.666666666666667,NA,3,NA,8,Danish,194787,strømp,Danish,sock,5,"strømpe, sok, strømper, sokker, strømpen",21,6.4,21,7.550000000000001,2,9,0
+flyvemaskiner,4,4,5.75,1,2,NA,13,Danish,194787,flyvemaskin,Danish,airplane,3,"flyvemaskine, flyvemaskinen, flyvemaskiner",18,12.666666666666666,18,4.5,3,11,1
+himmelen,7,7,9.857142857142858,NA,7,NA,8,Danish,194787,himmel,Danish,sky,2,"himmelen, himmel",8,7,8,7.928571428571429,0,7,0
+hav,1,1,11,NA,1,NA,3,Danish,194787,hav,Danish,garden,4,"have, haver, hav, haven",963,4.25,963,7.666666666666667,10,126,6
+åbn,1,1,3,NA,1,NA,3,Danish,194787,åbn,Danish,open (action),5,"åbne, åbnet, åbnes, åbn, åbner",62,4.4,62,5.129166666666666,2,18,1
+hård,5,5,7.8,NA,4,NA,4,Danish,194787,hård,Danish,hard,4,"hårdt, hårdere, hårde, hård",27,5.25,27,6.266666666666667,1,18,0
+forsigtigt,12,12,3.5833333333333335,3,5,1,10,Danish,194787,forsig,Danish,careful,3,"forsigtig, forsigtige, forsigtigt",38,9.666666666666666,38,3.9221014492753623,10,16,2
+næser,2,2,9,NA,2,NA,5,Danish,194787,næs,Danish,nose,3,"næse, næsen, næser",88,4.666666666666667,88,7.392857142857142,3,60,0
+elefanter,5,5,4.2,1,3,NA,9,Danish,194787,elefant,Danish,elephant,4,"elefant, elefanter, elefanten, elefanterne",43,9,43,4.925,2,28,3
+hestene,1,1,8,NA,1,NA,7,Danish,194787,hest,Danish,horse,4,"hest, hesten, heste, hestene",156,5.5,156,6.333333333333334,6,86,13
+bides,3,3,4.333333333333333,NA,NA,NA,5,Danish,194787,bid,Danish,bite,5,"bid, bidder, bide, bider, bides",126,4.6,126,5.9248709315375985,7,34,13
+varmere,1,1,6,NA,NA,NA,7,Danish,194787,varm,Danish,hot,4,"varmen, varm, varmere, varme",32,5.5,32,4.901785714285714,0,26,0
+plask,4,4,3,3,NA,NA,5,Danish,194787,plask,Danish,splash,1,plask,4,5,4,3,3,0,0
+blomsterne,8,8,NA,1,4,NA,10,Danish,194787,blomst,Danish,flower,4,"blomsten, blomst, blomster, blomsterne",53,8,53,4.26010101010101,8,34,1
+ballonen,2,2,7.5,NA,1,NA,8,Danish,194787,ballon,Danish,balloon,3,"ballon, balloner, ballonen",13,7.333333333333333,13,4.466666666666667,5,5,0
+koldere,1,1,5,NA,1,NA,7,Danish,194787,kold,Danish,cold,4,"kolde, koldt, kold, koldere",16,5.25,16,5.223809523809524,0,11,0
+solen,5,5,8.2,NA,2,NA,5,Danish,194787,sol,Danish,sun,2,"sol, solen",11,4,11,6.85,0,5,1
+køleskabene,1,1,1,1,NA,NA,11,Danish,194787,køleskab,Danish,refrigerator,3,"køleskabet, køleskab, køleskabene",15,9.666666666666666,15,2.8222222222222224,5,8,0
+spis,5,5,4.2,NA,NA,4,4,Danish,194787,spis,Danish,eat,4,"spise, spises, spiser, spis",196,5.25,196,4.966265060240964,4,33,25
+arbejdes,2,2,4,NA,2,NA,8,Danish,194787,arbejd,Danish,work (place),4,"arbejdet, arbejde, arbejder, arbejdes",12,7.75,12,4.058333333333334,0,11,1
+more,1,1,10,NA,NA,NA,4,Danish,194787,mor,Danish,mommy,5,"mor, moren, more, mors, morens",392,4.4,392,6.669209431345354,5,139,49
+sten,6,6,6.333333333333333,NA,4,NA,4,Danish,194787,sten,Danish,rock (object),2,"sten, stenene",7,5.5,7,6.166666666666666,0,4,0
+kilder,3,3,2.6666666666666665,NA,1,2,6,Danish,194787,kild,Danish,tickle,3,"kilde, kilder, kilden",10,5.666666666666667,10,3,2,1,4
+kilden,1,1,4,NA,NA,NA,6,Danish,194787,kild,Danish,tickle,3,"kilde, kilder, kilden",10,5.666666666666667,10,3,2,1,4
+danser,4,4,3.75,NA,1,NA,6,Danish,194787,dans,Danish,dance,2,"danse, danser",30,5.5,30,3.7980769230769234,7,8,3
+dukkerne,1,1,14,NA,1,NA,8,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+bam,5,5,3,1,NA,1,3,Danish,194787,bam,Danish,teddybear,6,"bamsen, bamse, bamme, bamer, bam, bamsens",194,5.166666666666667,194,3.8909090909090907,8,105,18
+regnet,1,1,8,NA,NA,NA,6,Danish,194787,regn,Danish,rain,4,"regnen, regner, regnet, regne",15,5.75,15,6.628571428571428,0,5,1
+elefanten,14,14,7.5,1,5,3,9,Danish,194787,elefant,Danish,elephant,4,"elefant, elefanter, elefanten, elefanterne",43,9,43,4.925,2,28,3
+mælken,2,2,8,NA,NA,NA,6,Danish,194787,mælk,Danish,milk,2,"mælk, mælken",52,5,52,6.48,1,39,1
+pæn,5,5,5.6,NA,3,NA,3,Danish,194787,pæn,Danish,nice,1,pæn,5,3,5,5.6,0,3,0
+toge,2,2,4,NA,2,NA,4,Danish,194787,tog,Danish,train,4,"tog, toget, togene, toge",263,4.5,263,6.268199233716475,8,94,22
+hurtigere,4,4,9.25,NA,NA,NA,9,Danish,194787,hurt,Danish,fast,3,"hurtig, hurtigt, hurtigere",29,7.333333333333333,29,7.05,0,11,0
+standse,1,1,9,NA,NA,NA,7,Danish,194787,stands,Danish,stop,2,"stand, standse",3,6,3,8.25,0,2,0
+bilerne,11,11,9,NA,6,NA,7,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+hendes,22,22,NA,1,1,2,6,Danish,194787,hend,Danish,her,2,"hende, hendes",138,5.5,138,NA,2,43,9
+slik,8,8,7.875,NA,2,1,4,Danish,194787,slik,Danish,candy,3,"slikker, slikke, slik",11,5.666666666666667,11,6.291666666666667,0,2,2
+husene,4,4,9,NA,3,NA,6,Danish,194787,hus,Danish,house,5,"huset, hus, huse, husene, husets",138,4.8,138,6.381519831519832,2,80,2
+fest,3,3,6.666666666666667,NA,3,NA,4,Danish,194787,fest,Danish,party,1,fest,3,4,3,6.666666666666667,0,3,0
+borde,1,1,5,NA,NA,NA,5,Danish,194787,bord,Danish,table,3,"bordet, bord, borde",136,5,136,5,5,105,1
+take,1,1,3,NA,NA,1,4,Danish,194787,tak,Danish,thank you,2,"tak, take",293,3.5,293,2.2893835616438354,225,22,42
+fiskene,5,5,9,NA,2,NA,7,Danish,194787,fisk,Danish,fish (animal),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+fiskene,5,5,9,NA,2,NA,7,Danish,194787,fisk,Danish,fish (food),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+kjolen,3,3,6,NA,2,NA,6,Danish,194787,kjol,Danish,dress (object),3,"kjolen, kjole, kjoler",9,5.666666666666667,9,8.8,0,6,0
+pote,2,2,7.5,NA,NA,NA,4,Danish,194787,pot,Danish,potty,5,"potte, poten, poter, pote, potten",20,5,20,7.42,0,9,0
+egernets,2,2,4,NA,NA,NA,8,Danish,194787,egern,Danish,squirrel,3,"egern, egernet, egernets",71,6.666666666666667,71,4.839808558558558,3,41,2
+synger,19,19,NA,1,7,5,6,Danish,194787,syng,Danish,sing,4,"synge, synges, synger, syng",80,5.25,80,6.5,2,18,5
+deres,13,13,7.769230769230769,NA,NA,NA,5,Danish,194787,der,Danish,there,2,"der, deres",4664,4,4664,7.769230769230769,193,1395,913
+puder,7,7,6.571428571428571,NA,4,1,5,Danish,194787,pud,Danish,pillow,4,"pude, puder, puden, puderne",14,5.25,14,7.792857142857143,0,8,1
+nat,1,1,2,NA,1,NA,3,Danish,194787,nat,Danish,night,2,"natten, nat",3,4.5,3,4,0,3,0
+ridder,1,1,4,NA,NA,NA,6,Danish,194787,rid,Danish,ride,3,"ride, ridder, rider",18,5,18,5.7063492063492065,0,3,4
+fiske,5,5,9,NA,2,NA,5,Danish,194787,fisk,Danish,fish (animal),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+fiske,5,5,9,NA,2,NA,5,Danish,194787,fisk,Danish,fish (food),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+dam,4,4,5.5,1,3,NA,3,Danish,194787,dam,Danish,lady,4,"dam, damen, dame, damer",33,4.25,33,5.958333333333333,2,17,1
+smøre,3,3,12,NA,NA,NA,5,Danish,194787,smør,Danish,butter,3,"smør, smøre, smørret",10,5.333333333333333,10,7.444444444444445,0,4,0
+leg,10,10,NA,1,5,1,3,Danish,194787,leg,Danish,play,5,"lege, leger, leget, leg, legen",369,4.4,369,5.96236559139785,7,45,8
+mørke,1,1,6,NA,NA,NA,5,Danish,194787,mørk,Danish,dark,3,"mørkt, mørke, mørk",9,4.666666666666667,9,6.333333333333333,0,5,0
+månen,6,6,5.333333333333333,NA,5,NA,5,Danish,194787,mån,Danish,moon,2,"måne, månen",11,4.5,11,5.266666666666667,0,10,0
+garage,1,1,7,NA,NA,NA,6,Danish,194787,garag,Danish,garage,2,"garage, garagen",2,6.5,2,7,1,0,0
+husets,2,2,1.5,1,NA,1,6,Danish,194787,hus,Danish,house,5,"huset, hus, huse, husene, husets",138,4.8,138,6.381519831519832,2,80,2
+legetøjet,2,2,7.5,NA,NA,NA,9,Danish,194787,legetøj,Danish,toy (object),3,"legetøj, legetøjs, legetøjet",15,8,15,5.722222222222222,1,8,0
+aftensmad,1,1,7,NA,1,NA,9,Danish,194787,aftensmad,Danish,dinner,1,aftensmad,1,9,1,7,0,1,0
+gyngestol,1,1,3,NA,NA,NA,9,Danish,194787,gyngestol,Danish,rocking chair,1,gyngestol,1,9,1,3,0,0,0
+kælk,3,3,12,NA,2,NA,4,Danish,194787,kælk,Danish,sled,2,"kælk, kælke",5,4.5,5,11,0,2,0
+kælke,2,2,10,NA,NA,NA,5,Danish,194787,kælk,Danish,sled,2,"kælk, kælke",5,4.5,5,11,0,2,0
+sengene,6,6,6.5,NA,4,NA,7,Danish,194787,seng,Danish,bed,4,"seng, sengen, senge, sengene",59,5.5,59,6.764928698752228,1,34,0
+dukkernes,1,1,5,NA,1,NA,9,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+pengene,9,9,6.222222222222222,NA,5,1,7,Danish,194787,peng,Danish,money,2,"penge, pengene",46,6,46,6.222222222222222,3,18,1
+underligt,5,5,10.2,NA,1,NA,9,Danish,194787,under,Danish,under,3,"under, underligt, underlig",63,7.333333333333333,63,8.89090909090909,1,10,0
+luk,3,3,2,NA,NA,3,3,Danish,194787,luk,Danish,close,5,"lukke, lukkes, lukker, lukket, luk",65,5.2,65,4.476648351648352,2,15,4
+anders,3,3,7,NA,NA,NA,6,Danish,194787,and,Danish,duck,4,"anden, andet, and, anders",369,4.75,369,6.217391304347826,5,94,2
+damen,9,9,NA,1,2,1,5,Danish,194787,dam,Danish,lady,4,"dam, damen, dame, damer",33,4.25,33,5.958333333333333,2,17,1
+brillerne,3,3,3.6666666666666665,NA,3,NA,9,Danish,194787,bril,Danish,glasses,2,"briller, brillerne",10,8,10,3.5476190476190474,1,9,0
+is,10,10,NA,1,4,1,2,Danish,194787,is,Danish,ice cream,1,is,10,2,10,NA,1,4,1
+rapperen,1,1,3,NA,1,NA,8,Danish,194787,rap,Danish,quack quack,4,"rap, rappen, rapper, rapperen",20,5.75,20,3.6323529411764706,5,12,1
+manden,37,37,7.5675675675675675,NA,8,4,6,Danish,194787,mand,Danish,man,3,"mand, manden, mandens",79,5.666666666666667,79,7.283783783783784,1,29,4
+puster,1,1,5,NA,NA,NA,6,Danish,194787,pust,Danish,blow,3,"puste, pust, puster",18,5,18,4.791666666666667,2,7,1
+kaffen,7,7,5.571428571428571,NA,3,NA,6,Danish,194787,kaf,Danish,coffee,2,"kaffe, kaffen",66,5.5,66,5.571428571428571,1,41,1
+osten,1,1,6,NA,NA,NA,5,Danish,194787,ost,Danish,cheese,2,"ost, osten",5,4,5,5.5,0,4,0
+drenge,3,3,10.333333333333334,NA,NA,NA,6,Danish,194787,dreng,Danish,boy,5,"dreng, drengen, drenge, drengene, drengens",61,6.8,61,8.710600255427842,1,22,4
+skrive,30,30,6.966666666666667,NA,5,NA,6,Danish,194787,skriv,Danish,write,3,"skriver, skrive, skriv",38,6,38,6.036507936507936,0,6,2
+varme,1,1,4,NA,1,NA,5,Danish,194787,varm,Danish,hot,4,"varmen, varm, varmere, varme",32,5.5,32,4.901785714285714,0,26,0
+kopperne,2,2,5,NA,NA,1,8,Danish,194787,kop,Danish,cup,6,"kop, koppen, kruset, kopper, krus, kopperne",85,5.5,85,5.919607843137255,3,54,3
+skub,2,2,1.5,1,NA,1,4,Danish,194787,skub,Danish,push,5,"skubbe, skubbet, skubber, skub, skubbes",94,6.2,94,4.290343137254902,1,13,20
+pigens,5,5,5.2,NA,NA,NA,6,Danish,194787,pig,Danish,girl,6,"pigen, pige, pigens, pigerne, piger, pigge",145,5.333333333333333,145,6.602958152958153,3,53,11
+sutten,7,7,8.285714285714286,NA,3,NA,6,Danish,194787,sut,Danish,pacifier,5,"sutte, sut, sutten, sutter, suttet",50,5.2,50,9.915574229691877,4,30,1
+potten,5,5,7.2,NA,4,NA,6,Danish,194787,pot,Danish,potty,5,"potte, poten, poter, pote, potten",20,5,20,7.42,0,9,0
+pigerne,2,2,9.5,NA,NA,NA,7,Danish,194787,pig,Danish,girl,6,"pigen, pige, pigens, pigerne, piger, pigge",145,5.333333333333333,145,6.602958152958153,3,53,11
+sofaen,11,11,6.909090909090909,NA,9,NA,6,Danish,194787,sofa,Danish,couch,2,"sofa, sofaen",16,5,16,5.554545454545455,0,13,1
+mors,14,14,5.642857142857143,NA,2,3,4,Danish,194787,mor,Danish,mommy,5,"mor, moren, more, mors, morens",392,4.4,392,6.669209431345354,5,139,49
+radioen,7,7,4.571428571428571,2,5,NA,7,Danish,194787,radio,Danish,radio,2,"radioen, radio",12,6,12,3.2857142857142856,6,6,0
+åbner,5,5,5.6,NA,NA,1,5,Danish,194787,åbn,Danish,open (action),5,"åbne, åbnet, åbnes, åbn, åbner",62,4.4,62,5.129166666666666,2,18,1
+piger,6,6,6.5,NA,4,NA,5,Danish,194787,pig,Danish,girl,6,"pigen, pige, pigens, pigerne, piger, pigge",145,5.333333333333333,145,6.602958152958153,3,53,11
+hammer,9,9,7.222222222222222,NA,5,NA,6,Danish,194787,ham,Danish,hammer,3,"ham, hammer, hammeren",167,5.666666666666667,167,6.669312169312169,0,57,19
+kost,1,1,8,NA,NA,NA,4,Danish,194787,kost,Danish,broom,3,"kosten, kost, koste",5,5,5,7.222222222222222,0,2,0
+sutter,3,3,9.333333333333334,1,NA,NA,6,Danish,194787,sut,Danish,pacifier,5,"sutte, sut, sutten, sutter, suttet",50,5.2,50,9.915574229691877,4,30,1
+tigeren,6,6,4.166666666666667,NA,4,1,7,Danish,194787,tig,Danish,tiger,3,"tiger, tigeren, tiggeren",22,6.666666666666667,22,4.144444444444445,2,13,1
+mandens,1,1,7,NA,NA,NA,7,Danish,194787,mand,Danish,man,3,"mand, manden, mandens",79,5.666666666666667,79,7.283783783783784,1,29,4
+intet,1,1,1,1,NA,NA,5,Danish,194787,int,Danish,nothing,1,intet,1,5,1,1,1,0,0
+våde,2,2,12.5,NA,NA,NA,4,Danish,194787,våd,Danish,wet (description),2,"våd, våde",14,3.5,14,9.041666666666666,0,8,0
+lammet,4,4,4,NA,3,NA,6,Danish,194787,lam,Danish,lamb,3,"lam, lammet, lammets",15,5.333333333333333,15,4.6,0,12,0
+lammets,1,1,5,NA,NA,NA,7,Danish,194787,lam,Danish,lamb,3,"lam, lammet, lammets",15,5.333333333333333,15,4.6,0,12,0
+mjaver,1,1,2,NA,NA,1,6,Danish,194787,mjav,Danish,meow,2,"mjav, mjaver",2,5,2,2.5,0,1,1
+hovederne,1,1,4,NA,NA,NA,9,Danish,194787,hoved,Danish,head,5,"hovedet, hoved, hovede, hovederne, hoveder",96,6.8,96,5.26,3,53,1
+kaninerne,3,3,9.333333333333334,NA,NA,1,9,Danish,194787,kanin,Danish,bunny,6,"kaniner, kanin, kaninen, kanins, kaninens, kaninerne",78,7,78,5.394936204146731,8,42,4
+morfars,1,1,4,NA,NA,NA,7,Danish,194787,morfar,Danish,grandpa,4,"morfar, farfar, farfars, morfars",24,6.5,24,5.229166666666667,1,11,2
+ærter,6,6,4.666666666666667,NA,4,NA,5,Danish,194787,ært,Danish,peas,1,ærter,6,5,6,4.666666666666667,0,4,0
+dame,16,16,6.625,NA,9,NA,4,Danish,194787,dam,Danish,lady,4,"dam, damen, dame, damer",33,4.25,33,5.958333333333333,2,17,1
+kød,1,1,4,NA,1,NA,3,Danish,194787,kød,Danish,meat,1,kød,1,3,1,4,0,1,0
+damer,4,4,5.75,NA,3,NA,5,Danish,194787,dam,Danish,lady,4,"dam, damen, dame, damer",33,4.25,33,5.958333333333333,2,17,1
+appelsiner,5,5,5,NA,3,NA,10,Danish,194787,appelsin,Danish,orange (food),3,"appelsin, appelsinerne, appelsiner",8,10,8,6.666666666666667,0,4,0
+kammen,1,1,5,NA,1,NA,6,Danish,194787,kam,Danish,comb (object),1,kammen,1,6,1,5,0,1,0
+menneskene,4,4,6.75,NA,1,NA,10,Danish,194787,mennesk,Danish,people,3,"menneske, mennesker, menneskene",27,9,27,8.432539682539682,0,11,1
+sommerfuglen,6,6,4.666666666666667,NA,5,NA,12,Danish,194787,sommerfugl,Danish,butterfly,3,"sommerfugl, sommerfuglen, sommerfugle",18,11,18,6.155555555555556,1,13,0
+græd,3,3,5.666666666666667,NA,NA,NA,4,Danish,194787,græd,Danish,cry,2,"græder, græd",95,5,95,5.666666666666667,3,25,20
+blyant,4,4,4.25,NA,4,NA,6,Danish,194787,blyant,Danish,pen/pencil,1,blyant,4,6,4,4.25,0,4,0
+drengene,1,1,11,NA,NA,NA,8,Danish,194787,dreng,Danish,boy,5,"dreng, drengen, drenge, drengene, drengens",61,6.8,61,8.710600255427842,1,22,4
+nøgler,3,3,5.666666666666667,NA,3,NA,6,Danish,194787,nøgl,Danish,keys,3,"nøglen, nøgle, nøgler",12,5.666666666666667,12,4.938888888888889,0,9,0
+saks,1,1,4,NA,1,NA,4,Danish,194787,sak,Danish,scissors,2,"saks, sak",2,3.5,2,3,0,2,0
+rene,2,2,4.5,NA,1,NA,4,Danish,194787,ren,Danish,clean (description),2,"rene, rens",3,4,3,3.75,0,1,1
+kjole,5,5,10.4,NA,4,NA,5,Danish,194787,kjol,Danish,dress (object),3,"kjolen, kjole, kjoler",9,5.666666666666667,9,8.8,0,6,0
+bang,10,10,2,6,2,2,4,Danish,194787,bang,Danish,scared,2,"bange, bang",48,4.5,48,2,8,12,3
+skubbes,5,5,4.6,NA,1,NA,7,Danish,194787,skub,Danish,push,5,"skubbe, skubbet, skubber, skub, skubbes",94,6.2,94,4.290343137254902,1,13,20
+kysses,5,5,4,NA,NA,NA,6,Danish,194787,kys,Danish,kiss,6,"kyse, kys, kysser, kysse, kysses, kysset",57,5,57,3.959126984126984,2,25,3
+kysset,5,5,5.6,NA,NA,NA,6,Danish,194787,kys,Danish,kiss,6,"kyse, kys, kysser, kysse, kysses, kysset",57,5,57,3.959126984126984,2,25,3
+støvsugeren,5,5,10.4,NA,4,NA,11,Danish,194787,støvsug,Danish,vacuum,3,"støvsugeren, støvsuger, støvsuget",15,9.666666666666666,15,9.503703703703703,0,6,1
+hvornår,11,11,5.7272727272727275,NA,1,9,7,Danish,194787,hvornår,Danish,when (question),1,hvornår,11,7,11,5.7272727272727275,0,1,9
+ulækker,3,3,5,NA,1,NA,7,Danish,194787,ulæk,Danish,yucky,1,ulækker,3,7,3,5,0,1,0
+flue,4,4,7,NA,2,NA,4,Danish,194787,flue,Danish,fly (animal),1,flue,4,4,4,7,0,2,0
+sparket,3,3,5,NA,NA,NA,7,Danish,194787,spark,Danish,kick,4,"sparke, sparker, sparket, spark",57,6.25,57,5.606944444444444,1,12,23
+suttet,1,1,19,NA,NA,NA,6,Danish,194787,sut,Danish,pacifier,5,"sutte, sut, sutten, sutter, suttet",50,5.2,50,9.915574229691877,4,30,1
+elefanterne,1,1,3,NA,1,NA,11,Danish,194787,elefant,Danish,elephant,4,"elefant, elefanter, elefanten, elefanterne",43,9,43,4.925,2,28,3
+støvsuger,9,9,5.111111111111111,NA,2,1,9,Danish,194787,støvsug,Danish,vacuum,3,"støvsugeren, støvsuger, støvsuget",15,9.666666666666666,15,9.503703703703703,0,6,1
+støvsuget,1,1,13,NA,NA,NA,9,Danish,194787,støvsug,Danish,vacuum,3,"støvsugeren, støvsuger, støvsuget",15,9.666666666666666,15,9.503703703703703,0,6,1
+farlige,5,5,6.4,NA,3,NA,7,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+fuglene,2,2,7.5,NA,1,NA,7,Danish,194787,fugl,Danish,bird,5,"fugl, fugle, fuglen, fuglene, fuglerede",159,6.2,159,4.681818181818182,7,79,16
+kjoler,1,1,10,NA,NA,NA,6,Danish,194787,kjol,Danish,dress (object),3,"kjolen, kjole, kjoler",9,5.666666666666667,9,8.8,0,6,0
+flasken,4,4,10.25,NA,4,NA,7,Danish,194787,flask,Danish,bottle,3,"flaske, flasken, flasker",11,6.666666666666667,11,6.916666666666667,1,8,0
+gåsen,1,1,4,NA,NA,1,5,Danish,194787,gås,Danish,goose,2,"gås, gåsen",7,4,7,4.416666666666666,1,3,1
+hjælp,5,5,4.4,1,1,2,5,Danish,194787,hjælp,Danish,help,3,"hjælpe, hjælper, hjælp",140,6,140,5.088888888888889,2,12,2
+syng,1,1,5,NA,NA,NA,4,Danish,194787,syng,Danish,sing,4,"synge, synges, synger, syng",80,5.25,80,6.5,2,18,5
+slemme,4,4,7.5,NA,2,NA,6,Danish,194787,slem,Danish,naughty,2,"slem, slemme",25,5,25,7.5,1,18,0
+underlig,3,3,9,NA,1,NA,8,Danish,194787,under,Danish,under,3,"under, underligt, underlig",63,7.333333333333333,63,8.89090909090909,1,10,0
+ovn,4,4,3.5,NA,3,1,3,Danish,194787,ovn,Danish,oven,2,"ovnen, ovn",7,4,7,5.75,0,6,1
+flasker,2,2,3.5,1,NA,NA,7,Danish,194787,flask,Danish,bottle,3,"flaske, flasken, flasker",11,6.666666666666667,11,6.916666666666667,1,8,0
+fars,4,4,5.5,NA,NA,1,4,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+musens,1,1,4,NA,NA,NA,6,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+æbler,2,2,6.5,1,1,NA,5,Danish,194787,æbl,Danish,apple,3,"æble, æblet, æbler",20,4.666666666666667,20,5.5476190476190474,1,13,0
+moster,8,8,6,NA,2,NA,6,Danish,194787,most,Danish,aunt,3,"fast, moster, mosters",118,5.666666666666667,118,4.333333333333333,3,68,2
+duk,1,1,3,NA,1,NA,3,Danish,194787,duk,Danish,doll,8,"dukken, dukke, dukkens, dukker, dukkes, dukkerne, dukkernes, duk",245,6.25,245,5.783318965517241,6,149,7
+brandbilen,2,2,3,NA,2,NA,10,Danish,194787,brandbil,Danish,firetruck,2,"brandbil, brandbilen",4,9,4,4.25,0,4,0
+barnevogn,3,3,5.666666666666667,NA,3,NA,9,Danish,194787,barnevogn,Danish,stroller,3,"klapvogn, barnevognen, barnevogn",15,9.333333333333334,15,5.666666666666667,0,11,0
+hammeren,4,4,5.5,NA,3,NA,8,Danish,194787,ham,Danish,hammer,3,"ham, hammer, hammeren",167,5.666666666666667,167,6.669312169312169,0,57,19
+æselet,1,1,10,NA,NA,NA,6,Danish,194787,æsel,Danish,donkey,2,"æsel, æselet",5,5,5,9,0,3,0
+rider,3,3,6.333333333333333,NA,NA,NA,5,Danish,194787,rid,Danish,ride,3,"ride, ridder, rider",18,5,18,5.7063492063492065,0,3,4
+oldefar,6,6,5.666666666666667,NA,2,1,7,Danish,194787,oldefar,Danish,great grandpa,1,oldefar,6,7,6,5.666666666666667,0,2,1
+trætte,1,1,6,NA,NA,NA,6,Danish,194787,træt,Danish,tired,2,"træt, trætte",42,5,42,5.609756097560975,0,25,0
+gynger,2,2,4,NA,NA,NA,6,Danish,194787,gyng,Danish,swing (action),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+gynger,2,2,4,NA,NA,NA,6,Danish,194787,gyng,Danish,swing (object),4,"gynge, gyng, gyngen, gynger",23,5.25,23,3.716666666666667,1,14,0
+tv,1,1,6,NA,1,NA,2,Danish,194787,tv,Danish,tv,3,"fjernsynet, fjernsyn, tv",59,6.666666666666667,59,6.457984866587017,6,38,1
+mosters,3,3,2.6666666666666665,NA,NA,2,7,Danish,194787,most,Danish,aunt,3,"fast, moster, mosters",118,5.666666666666667,118,4.333333333333333,3,68,2
+biller,1,1,4,NA,NA,1,6,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+billen,1,1,9,NA,1,NA,6,Danish,194787,bil,Danish,car,7,"bilen, bil, biler, bille, bilerne, biller, billen",262,5.285714285714286,262,6.59375,9,151,22
+musse,2,2,3.5,NA,1,NA,5,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+bussen,1,1,5,NA,NA,NA,6,Danish,194787,bus,Danish,bus,2,"bus, bussen",8,4.5,8,4.857142857142858,0,7,0
+sovs,3,3,4.666666666666667,NA,1,NA,4,Danish,194787,sov,Danish,sleep,5,"sove, sover, sov, sovet, sovs",165,4.2,165,5.274875621890548,2,74,20
+spaghetti,1,1,4,NA,1,NA,9,Danish,194787,spaghetti,Danish,pasta,1,spaghetti,1,9,1,4,0,1,0
+skovlen,4,4,5,NA,2,NA,7,Danish,194787,skovl,Danish,shovel,2,"skovl, skovlen",15,6,15,5.363636363636363,0,9,0
+børst,1,1,12,NA,NA,1,5,Danish,194787,børst,Danish,brush (object),3,"børster, børste, børst",17,6,17,8.157575757575758,0,4,2
+halskæde,1,1,5,NA,NA,NA,8,Danish,194787,halskæd,Danish,necklace,1,halskæde,1,8,1,5,0,0,0
+trapper,4,4,4.75,NA,3,NA,7,Danish,194787,trap,Danish,stairs,4,"trappe, trappen, trapperne, trapper",25,7.25,25,5.9875,0,21,0
+tomme,1,1,4,NA,1,NA,5,Danish,194787,tom,Danish,empty,2,"tom, tomme",40,4,40,4,3,30,0
+dørens,1,1,4,NA,NA,NA,6,Danish,194787,dør,Danish,door,5,"døren, dør, døre, dørens, dørene",58,4.8,58,6.598684210526316,5,29,1
+skole,5,5,7.6,NA,5,NA,5,Danish,194787,skol,Danish,school,2,"skole, skolen",10,5.5,10,6.3,0,10,0
+fuglerede,1,1,1,1,NA,NA,9,Danish,194787,fugl,Danish,bird,5,"fugl, fugle, fuglen, fuglene, fuglerede",159,6.2,159,4.681818181818182,7,79,16
+pigge,2,2,6.5,NA,NA,NA,5,Danish,194787,pig,Danish,girl,6,"pigen, pige, pigens, pigerne, piger, pigge",145,5.333333333333333,145,6.602958152958153,3,53,11
+puden,1,1,11,NA,NA,NA,5,Danish,194787,pud,Danish,pillow,4,"pude, puder, puden, puderne",14,5.25,14,7.792857142857143,0,8,1
+søster,2,2,6,NA,1,NA,6,Danish,194787,søst,Danish,sister,1,søster,2,6,2,6,0,1,0
+stenene,1,1,6,NA,NA,NA,7,Danish,194787,sten,Danish,rock (object),2,"sten, stenene",7,5.5,7,6.166666666666666,0,4,0
+skildpadden,2,2,4,1,NA,1,11,Danish,194787,skildpad,Danish,turtle,3,"skildpadde, skildpadder, skildpadden",12,10.666666666666666,12,4.7407407407407405,3,7,1
+svømmer,1,1,6,NA,NA,NA,7,Danish,194787,svøm,Danish,swim,3,"svømme, svømmer, svømmet",5,6.666666666666667,5,8.11111111111111,0,2,0
+neden,9,9,7.333333333333333,NA,NA,1,5,Danish,194787,ned,Danish,down,3,"ned, nede, neden",531,4,531,7.333333333333333,11,167,25
+regne,7,7,7.714285714285714,NA,2,NA,5,Danish,194787,regn,Danish,rain,4,"regnen, regner, regnet, regne",15,5.75,15,6.628571428571428,0,5,1
+kyllingen,1,1,8,NA,NA,NA,9,Danish,194787,kylling,Danish,chicken (animal),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+kyllingen,1,1,8,NA,NA,NA,9,Danish,194787,kylling,Danish,chicken (food),4,"kyllinger, kylling, kyllingerne, kyllingen",18,9,18,4.7976190476190474,0,13,0
+bi,1,1,4,NA,1,NA,2,Danish,194787,bi,Danish,bee,1,bi,1,2,1,4,0,1,0
+vis,10,10,7.3,1,NA,1,3,Danish,194787,vis,Danish,show,4,"vise, vises, viser, vis",208,4.25,208,8.664102564102564,2,6,1
+bamsens,1,1,8,NA,NA,NA,7,Danish,194787,bams,Danish,teddybear,6,"bamsen, bamse, bamme, bamer, bam, bamsens",194,5.166666666666667,194,3.8909090909090907,8,105,18
+spark,3,3,6.666666666666667,1,NA,1,5,Danish,194787,spark,Danish,kick,4,"sparke, sparker, sparket, spark",57,6.25,57,5.606944444444444,1,12,23
+navlen,1,1,1,1,NA,NA,6,Danish,194787,navl,Danish,belly button,1,navlen,1,6,1,1,1,0,0
+morens,2,2,5.5,NA,1,1,6,Danish,194787,mor,Danish,mommy,5,"mor, moren, more, mors, morens",392,4.4,392,6.669209431345354,5,139,49
+tallerkener,1,1,18,NA,NA,NA,11,Danish,194787,tallerken,Danish,plate,3,"tallerken, tallerkener, tallerkenen",5,10.333333333333334,5,7.666666666666667,1,2,0
+tændes,1,1,6,NA,NA,NA,6,Danish,194787,tænd,Danish,tooth,6,"tænde, tændt, tænderne, tænder, tændes, tændte",40,6,40,6.386111111111111,0,20,0
+løver,2,2,8.5,NA,2,NA,5,Danish,194787,løv,Danish,lion,4,"løve, løven, løver, løvens",45,5,45,6.633333333333334,3,33,0
+giraffer,1,1,4,NA,1,NA,8,Danish,194787,giraf,Danish,giraffe,3,"giraf, giraffen, giraffer",19,7,19,4.333333333333333,0,17,0
+ødelægges,1,1,7,NA,1,NA,9,Danish,194787,ødelæg,Danish,break,3,"ødelægger, ødelægge, ødelægges",31,8.666666666666666,31,6.819004524886878,0,4,1
+drengens,1,1,9,NA,NA,NA,8,Danish,194787,dreng,Danish,boy,5,"dreng, drengen, drenge, drengene, drengens",61,6.8,61,8.710600255427842,1,22,4
+smørret,1,1,5,NA,1,NA,7,Danish,194787,smør,Danish,butter,3,"smør, smøre, smørret",10,5.333333333333333,10,7.444444444444445,0,4,0
+glas,3,3,9.333333333333334,NA,2,NA,4,Danish,194787,glas,Danish,glass,2,"glasset, glas",6,5.5,6,9.666666666666668,0,3,0
+tiggeren,1,1,3,NA,1,NA,8,Danish,194787,tig,Danish,tiger,3,"tiger, tigeren, tiggeren",22,6.666666666666667,22,4.144444444444445,2,13,1
+læs,2,2,4.5,NA,NA,NA,3,Danish,194787,læs,Danish,read,4,"læse, læser, læsse, læs",225,4.25,225,5.611111111111111,3,47,3
+rør,2,2,6,NA,NA,NA,3,Danish,194787,rør,Danish,touch,3,"røre, rører, rør",37,4,37,6.579861111111111,0,5,0
+haven,2,2,9,NA,1,NA,5,Danish,194787,hav,Danish,garden,4,"have, haver, hav, haven",963,4.25,963,7.666666666666667,10,126,6
+bløder,1,1,3,NA,NA,NA,6,Danish,194787,blød,Danish,soft,3,"blød, bløde, bløder",13,5,13,8.25,1,8,0
+elsker,1,1,5,NA,NA,NA,6,Danish,194787,elsk,Danish,love,1,elsker,1,6,1,5,0,0,0
+vasken,1,1,3,NA,1,NA,6,Danish,194787,vask,Danish,sink,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+vasken,1,1,3,NA,1,NA,6,Danish,194787,vask,Danish,wash,6,"vasker, vaskes, vask, vaske, vasket, vasken",54,5.5,54,5.056231884057971,1,6,4
+musene,1,1,15,NA,NA,NA,6,Danish,194787,mus,Danish,mouse,7,"musen, mus, muser, muses, musens, musse, musene",223,5,223,5.7,13,124,16
+futte,4,4,7.25,NA,1,NA,5,Danish,194787,fut,Danish,choo choo,2,"fut, futte",18,4,18,5.946428571428571,3,6,3
+morges,3,3,8,NA,2,NA,6,Danish,194787,morg,Danish,morning,3,"morgen, morgenen, morges",23,6.666666666666667,23,8.28888888888889,0,16,0
+puderne,1,1,8,NA,NA,NA,7,Danish,194787,pud,Danish,pillow,4,"pude, puder, puden, puderne",14,5.25,14,7.792857142857143,0,8,1
+mørk,1,1,7,NA,NA,NA,4,Danish,194787,mørk,Danish,dark,3,"mørkt, mørke, mørk",9,4.666666666666667,9,6.333333333333333,0,5,0
+himmel,1,1,6,NA,NA,NA,6,Danish,194787,himmel,Danish,sky,2,"himmelen, himmel",8,7,8,7.928571428571429,0,7,0
+katte,5,5,8,NA,4,NA,5,Danish,194787,kat,Danish,cat,4,"kat, katten, kattens, katte",178,5.25,178,5.57516339869281,7,94,23
+rens,1,1,3,NA,NA,1,4,Danish,194787,ren,Danish,clean (description),2,"rene, rens",3,4,3,3.75,0,1,1
+hundene,3,3,12.333333333333334,NA,1,1,7,Danish,194787,hund,Danish,dog,4,"hund, hunden, hunde, hundene",338,5.5,338,8.661740558292284,9,188,24
+pony,2,2,6,NA,1,NA,4,Danish,194787,pony,Danish,pony,1,pony,2,4,2,6,0,1,0
+stranden,2,2,12.5,NA,1,NA,8,Danish,194787,strand,Danish,beach,1,stranden,2,8,2,12.5,0,1,0
+skolen,5,5,5,NA,5,NA,6,Danish,194787,skol,Danish,school,2,"skole, skolen",10,5.5,10,6.3,0,10,0
+stjerner,1,1,4,NA,1,NA,8,Danish,194787,stjern,Danish,star,2,"stjerne, stjerner",4,7.5,4,4.333333333333334,0,3,0
+koste,1,1,6,NA,NA,NA,5,Danish,194787,kost,Danish,broom,3,"kosten, kost, koste",5,5,5,7.222222222222222,0,2,0
+hvalpen,2,2,6,1,NA,NA,7,Danish,194787,hvalp,Danish,puppy,1,hvalpen,2,7,2,6,1,0,0
+farende,1,1,16,NA,NA,NA,7,Danish,194787,far,Danish,daddy,8,"farligt, farlig, far, faren, farens, farlige, fars, farende",150,5.625,150,7.287049239758599,5,54,14
+rødder,3,3,10,NA,2,NA,6,Danish,194787,rød,Danish,red,3,"rød, røde, rødder",143,4.333333333333333,143,7.3086419753086425,6,47,7
+tallerkenen,1,1,2,NA,1,NA,11,Danish,194787,tallerken,Danish,plate,3,"tallerken, tallerkener, tallerkenen",5,10.333333333333334,5,7.666666666666667,1,2,0
+vandt,2,2,4.5,NA,2,NA,5,Danish,194787,vand,Danish,water (beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+vandt,2,2,4.5,NA,2,NA,5,Danish,194787,vand,Danish,water (not beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+skriv,1,1,4,NA,NA,NA,5,Danish,194787,skriv,Danish,write,3,"skriver, skrive, skriv",38,6,38,6.036507936507936,0,6,2
+radio,5,5,2,4,1,NA,5,Danish,194787,radio,Danish,radio,2,"radioen, radio",12,6,12,3.2857142857142856,6,6,0
+garagen,1,1,NA,1,NA,NA,7,Danish,194787,garag,Danish,garage,2,"garage, garagen",2,6.5,2,7,1,0,0
+skufferne,1,1,5,NA,1,NA,9,Danish,194787,skuf,Danish,drawer,4,"skuffer, skuffe, skuffen, skufferne",15,7.25,15,5.333333333333333,1,7,0
+legen,1,1,5,NA,NA,NA,5,Danish,194787,leg,Danish,play,5,"lege, leger, leget, leg, legen",369,4.4,369,5.96236559139785,7,45,8
+lyse,3,3,5.666666666666667,NA,2,NA,4,Danish,194787,lys,Danish,light (object),4,"lys, lyset, lyser, lyse",78,4.25,78,5.777777777777778,1,34,1
+dørene,1,1,11,NA,NA,NA,6,Danish,194787,dør,Danish,door,5,"døren, dør, døre, dørens, dørene",58,4.8,58,6.598684210526316,5,29,1
+krammet,1,1,7,NA,NA,NA,7,Danish,194787,kram,Danish,hug,1,krammet,1,7,1,7,0,0,0
+slutte,1,1,9,NA,NA,NA,6,Danish,194787,slut,Danish,finish,2,"slut, slutte",29,5,29,6.964285714285714,5,13,3
+hoveder,1,1,5,NA,1,NA,7,Danish,194787,hoved,Danish,head,5,"hovedet, hoved, hovede, hovederne, hoveder",96,6.8,96,5.26,3,53,1
+tændte,1,1,8,NA,NA,NA,6,Danish,194787,tænd,Danish,tooth,6,"tænde, tændt, tænderne, tænder, tændes, tændte",40,6,40,6.386111111111111,0,20,0
+svømmet,1,1,11,NA,NA,NA,7,Danish,194787,svøm,Danish,swim,3,"svømme, svømmer, svømmet",5,6.666666666666667,5,8.11111111111111,0,2,0
+løvens,2,2,7,NA,NA,NA,6,Danish,194787,løv,Danish,lion,4,"løve, løven, løver, løvens",45,5,45,6.633333333333334,3,33,0
+fisker,2,2,7,NA,1,NA,6,Danish,194787,fisk,Danish,fish (animal),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+fisker,2,2,7,NA,1,NA,6,Danish,194787,fisk,Danish,fish (food),5,"fisk, fisken, fiskene, fiske, fisker",55,5.6,55,7.1875,5,36,0
+sak,1,1,2,NA,1,NA,3,Danish,194787,sak,Danish,scissors,2,"saks, sak",2,3.5,2,3,0,2,0
+sommerfugle,2,2,9.5,NA,1,NA,11,Danish,194787,sommerfugl,Danish,butterfly,3,"sommerfugl, sommerfuglen, sommerfugle",18,11,18,6.155555555555556,1,13,0
+ikkke,1,1,8,NA,NA,NA,5,Danish,194787,ikk,Danish,not,2,"ikke, ikkke",4884,4.5,4884,8,136,817,265
+vander,1,1,6,NA,NA,NA,6,Danish,194787,vand,Danish,water (beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+vander,1,1,6,NA,NA,NA,6,Danish,194787,vand,Danish,water (not beverage),4,"vand, vandet, vandt, vander",124,5.25,124,6.388387902330743,0,71,1
+vække,1,1,16,NA,NA,NA,5,Danish,194787,væk,Danish,all gone,3,"væk, vække, vækker",197,4.666666666666667,197,13,13,134,11
+vække,1,1,16,NA,NA,NA,5,Danish,194787,væk,Danish,away,3,"væk, vække, vækker",197,4.666666666666667,197,13,13,134,11
+vækker,1,1,10,NA,NA,NA,6,Danish,194787,væk,Danish,all gone,3,"væk, vække, vækker",197,4.666666666666667,197,13,13,134,11
+vækker,1,1,10,NA,NA,NA,6,Danish,194787,væk,Danish,away,3,"væk, vække, vækker",197,4.666666666666667,197,13,13,134,11
+cornflakes,1,1,7,NA,1,NA,10,Danish,194787,cornflak,Danish,cheerios,1,cornflakes,1,10,1,7,0,1,0
+parkere,1,1,12,NA,NA,NA,7,Danish,194787,park,Danish,park,1,parkere,1,7,1,12,0,0,0

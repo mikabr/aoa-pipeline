@@ -39,15 +39,18 @@ eng_data
 
 Loading cached Wordbank data for multiple languages:
 ```{r}
-target_langs <- c("Croatian", "Danish", "English (American)",
-                  "French (Quebecois)", "Italian", "Norwegian", "Russian",
-                  "Spanish (Mexican)", "Swedish", "Turkish")
+#target_langs <- c("Croatian", "Danish", "English (American)",
+          #        "French (Quebecois)", "Italian", "Norwegian", "Russian",
+           #       "Spanish (Mexican)", "Swedish", "Turkish")
+target_langs <- c("Spanish (Mexican)")
+
 
 lang_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
   lang_str <- normalize_language(lang)
   readRDS(glue("data/wordbank/{lang_str}.rds"))
 })
+
 ```
 
 Creating saved Wordbank data for English:
@@ -106,29 +109,26 @@ valence_map <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
 valence <- uni_lemmas %>% map_predictor("valence", valence_map)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
-conctreteness <- uni_lemmas %>% map_predictor("concreteness", concreteness_map)
+concreteness <- uni_lemmas %>% map_predictor("concreteness", concreteness_map)
 ```
 
 ```{r}
 # TODO: requires espeak
 # http://espeak.sourceforge.net
+
 phonemes <- uni_lemmas %>% map_phonemes()
 
 uni_joined <- uni_lemmas %>% 
   # left_join(phonemes, by = c("language", "uni_lemma")) %>%
   left_join(babiness, by = c("language", "uni_lemma")) %>% 
   left_join(valence, by = c("language", "uni_lemma")) %>% 
-  left_join(conctreteness, by = c("language", "uni_lemma"))
+  left_join(concreteness, by = c("language", "uni_lemma"))
 ```
 
 Add CHILDES predictors
 
 ```{r}
-target_langs <- c("Italian") #Italian French (French) Russian - !!! stemming from wordbank cyrillic vs stemmer latin
-
-childes_predictors <- map_df(target_langs, get_childes_metrics)
-
-clean_childes_predictors <- childes_predictors %>%
+childes_predictors <- map_df(target_langs, get_childes_metrics) %>%
   # ungroup() %>%
   distinct(uni_lemma, MLU, frequency, solo_frequency, initial_frequency,
            final_frequency, nb_realisations_lemma, mean_character_count_lemma,

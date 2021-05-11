@@ -1,6 +1,6 @@
 # library(data.table)
 source("scripts/stemmer.R")
-childes_path <- "data/childes"
+childes_path <- "data/childes/"
 
 convert_lang <- function(lang){
    lang <- substr(lang, start = 1, stop = 3) %>% tolower() 
@@ -30,7 +30,7 @@ get_childes_metrics <- function(lang = NULL,
                    order = TRUE,
                    clean = TRUE){
   
- file_ <-paste0( childes_data, "childes_metrics_{norm_lang}.csv")
+ file_ <-paste0( childes_path, "childes_metrics_{norm_lang}.csv")
  if(!file.exists(file_))
   {  
   args_<-list(convert_lang(lang), corpus, speaker_role, 
@@ -69,7 +69,7 @@ find_order(data_$utterances, data_$tokens)) }
   childes_metrics <- read.csv(file_)  
 }  
    
-unilemma_metrics<-prepare_unilemmas(lang)  
+unilemma_metrics<-prepare_unilemmas(lang)
 return(unilemma_metrics)  
 }  
 
@@ -230,19 +230,20 @@ special_case_map <- map_df(special_case_files, function(case_file) {
       discard(is.na)
       trans_opts <- map(options, apply_transforms) %>% unlist() %>% 
 unique() #apply transforms to special cases
-      data_frame(language = lang,
+      data_frame(language = normalize_language(lang),
                uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
-               stem = c(trans_opts, stem(trans_opts, lang)))
+               stem = c(trans_opts, stem(trans_opts, convert_stemlang(lang))))
   })
-  
 }) 
+
+
 loadRData <- function(fileName){
     load(fileName)
     get(ls()[ls() != "fileName"])
 }
 load_unilemmas <- function(){
 print(glue("Mapping tokens to uni_lemmas..."))  
-uni_lemmas <- loadRData("data/_uni_lemmas.RData")
+uni_lemmas <- loadRData("data/wordbank/_uni_lemmas.RData")
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
@@ -250,35 +251,42 @@ pattern_map <- uni_lemmas %>%
     uni_lemma <- uni_data$uni_lemma
     options <- uni_data$words %>% strsplit(", ") %>% unlist() %>%
       strsplit("/") %>% unlist()
-    options <- c(options, stem(options, language)) %>% unique() 
+    options <- c(options, stem(options, convert_stemlang(language))) %>% unique() 
 #stemming with Snowball
     trans_opts <- map(options, apply_transforms) %>% unlist() %>% 
 unique()
-    trans_opts <- c(trans_opts, stem(trans_opts, language)) %>% unique()
-    data_frame(language = rep(uni_data$language, length(trans_opts)),
+    trans_opts <- c(trans_opts, stem(trans_opts, convert_stemlang(language))) %>% unique()
+    data_frame(language = rep(uni_data$language %>% normalize_language(), length(trans_opts)),
                uni_lemma = rep(uni_lemma, length(trans_opts)),
                stem = trans_opts)
   })
+
 case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
 return(case_map)
 }
 
-uni_lang <- function(x){
-x <- gsub("[()]","",as.character(x))
-x <- gsub(" ","_",as.character(x))
-pat <- c("French_French")
-replace <- c("French")
-for(i in seq_along(pat)) x_<- gsub(pat[i], replace[i], x)
-return(x_)
+stem_replace <- function(x){
+  pat <- c("spanish_mexican", "french_quebec", "english_american")
+  replace <- c("spanish", "french", "english")
+  for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
+  return(x)
 }
+
+convert_stemlang <- function(lang){
+  lang <- normalize_language(lang)
+  lang <- gsub("[()]","",as.character(lang))
+  lang <- stem_replace(lang)   
+  return(lang)
+}
+
 
 load_childes_data <- function(lang) {
   # name <- paste0("childes_metrics_", lang, ".csv")
   norm_lang <- normalize_language(lang)
   df <- read_csv(glue("data/childes/childes_metrics_{norm_lang}.csv")) %>%
     filter(!is.na(word)) %>%
-    mutate(stem = stem(word, normalize_language(lang))) %>%
-    full_join(load_unilemmas() %>% filter(language == uni_lang(lang)), 
+    mutate(stem = stem(word, convert_stemlang(lang))) %>%
+    full_join(load_unilemmas() %>% filter(language == norm_lang), 
 by = "stem") %>%
     rename(language = language.x) %>%
     group_by(uni_lemma, language) %>%
@@ -307,6 +315,8 @@ childes_data <- map_df(lang, load_childes_data)
 childes_data$words_lemma <- vapply(childes_data$words_lemma, paste, 
 collapse = ", ", character(1L))
 norm_lang <- normalize_language(lang)
+childes_data<- childes_data %>%
+  select(-c(language.y))
 write_csv(childes_data,
           file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv")))
 return(childes_data)
