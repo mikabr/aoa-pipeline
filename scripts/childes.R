@@ -75,7 +75,7 @@ find_order(data_$utterances, data_$tokens)) }
  write_csv(childes_metrics,
            file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
 } else { 
-  childes_metrics <- read.csv(file_)  
+  childes_metrics <- read_csv(file_)  
   print(glue("{file_} exists. Retrieving data from file"))
   
 }  
@@ -84,7 +84,7 @@ find_order(data_$utterances, data_$tokens)) }
     print(glue("{file_u} doesn't exist. Retrieving unilemmas..."))
     unilemma_metrics<-prepare_unilemmas(lang)
  } else {
-    unilemma_metrics <- read.csv(file_u)  
+    unilemma_metrics <- read_csv(file_u)  
     print(glue("{file_u} exists. Retrieving data from file"))
     
 }
@@ -104,16 +104,21 @@ get_data <- function(lang = NULL,
                    word,
                    clean = FALSE)
                    {
+norm_lang <- normalize_language(lang)  
 print(glue("Getting utterances for {lang}..."))
 utterances <- childesr::get_utterances(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex) %>%
   mutate(gloss = tolower(gloss)) 
 
+write_csv(utterances,
+          file.path(childes_path, glue("childes_utterances_{norm_lang}.csv")))
+
 print(glue("Getting tokens for {lang}..."))
 tokens_ <- childesr::get_tokens(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex, token="*") 
+
 if (word != ""){
   tokens <- childesr::get_tokens(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
@@ -121,6 +126,10 @@ speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex
 } else {tokens <- tokens_ }
 tokens <- tokens %>%
   mutate(gloss = tolower(gloss))
+
+write_csv(tokens,
+          file.path(childes_path, glue("childes_tokens_{norm_lang}.csv")))
+
   
 if (target_child != ""){
   tokens <- tokens %>%
@@ -219,6 +228,19 @@ NA)) %>%
 return(tokens_final)
 }
 
+stem_replace <- function(x){
+  pat <- c("spanish_mexican", "french_quebecois", "english_american")
+  replace <- c("spanish", "french", "english")
+  for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
+  return(x)
+}
+
+convert_stemlang <- function(lang){
+  lang <- normalize_language(lang)
+  lang <- gsub("[()]","",as.character(lang))
+  lang <- stem_replace(lang)   
+  return(lang)
+}
 
 
 
@@ -259,8 +281,16 @@ loadRData <- function(fileName){
     load(fileName)
     get(ls()[ls() != "fileName"])
 }
+
 load_unilemmas <- function(){
 print(glue("Mapping tokens to uni_lemmas..."))  
+
+norm_lang <- normalize_language(lang)  
+file_ <- file.path(childes_path, glue("load_unilemmas.csv"))
+print(glue("Checking whether {file_} exists..."))
+if(!file.exists(file_)){  
+    print(glue("{file_} doesn't exist. Retrieving data from uni_lemmas..."))
+    
 uni_lemmas <- loadRData("data/wordbank/_uni_lemmas.RData")
 uni_lemmas <- uni_lemmas %>%
   mutate(language = ifelse(language== "French (Quebec)", "French (Quebecois)", language))
@@ -282,22 +312,16 @@ unique()
   })
 
 case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
+write_csv(case_map, file.path(childes_path, glue("load_unilemmas.csv")))
+
+} else{
+case_map <- read_csv(glue(childes_path, glue("load_unilemmas.csv")))  
+}
 return(case_map)
 }
 
-stem_replace <- function(x){
-  pat <- c("spanish_mexican", "french_quebecois", "english_american")
-  replace <- c("spanish", "french", "english")
-  for(i in seq_along(pat)) x<- gsub(pat[i], replace[i], x)
-  return(x)
-}
 
-convert_stemlang <- function(lang){
-  lang <- normalize_language(lang)
-  lang <- gsub("[()]","",as.character(lang))
-  lang <- stem_replace(lang)   
-  return(lang)
-}
+
 
 
 load_childes_data <- function(lang) {
