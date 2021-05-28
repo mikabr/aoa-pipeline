@@ -16,8 +16,8 @@ convert_lang_childes <- function(x){
 
 
 
-get_childes_metrics <- function(lang,
-                   uni_lemmas,
+get_childes_metrics <- function( lang = NULL,
+                   uni_lemmas =NULL,
                    corpus = NULL,
                    speaker_role = NULL, 
                    speaker_role_exclude = "Target_Child", 
@@ -31,12 +31,12 @@ get_childes_metrics <- function(lang,
                    charlen = TRUE, 
                    order = TRUE,
                    clean = FALSE){
+  
 
 norm_lang <- normalize_language(lang)  
 file_ <- file.path(childes_path, glue("childes_metrics_{norm_lang}.csv"))
 file_u <- file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv"))
-print(glue("Checking whether {file_} exists..."))
-  
+
 if(!file.exists(file_))
   {  
 print(glue("{file_} doesn't exist. Retrieving data from CHILDES..."))
@@ -46,8 +46,7 @@ speaker_role_exclude, target_child, child_age, child_sex, pos, word,
 clean)
   data_<- do.call(get_data, args_)
   
-  metrics <- data.frame(matrix(ncol=1,nrow=0, dimnames=list(NULL, 
-c("gloss")))) %>%
+  metrics <- data.frame(matrix(ncol=1,nrow=0, dimnames=list(NULL, c("gloss")))) %>%
     mutate(gloss = as.character(gloss))
   
  total <- nrow(data_$tokens)
@@ -70,25 +69,26 @@ find_order(data_$utterances, data_$tokens)) }
          mutate(totalcount =  total) %>%
             rename(word = gloss)
  
- write_csv(childes_metrics,
-           file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
+ write_csv(childes_metrics, file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
 } else { 
-  childes_metrics <- read.csv(file_)  
+  childes_metrics <- read_csv(file_)  
   print(glue("{file_} exists. Retrieving data from file"))
 }  
+
+##################### UNILEMMAS:
 
   if(!file.exists(file_u))
   {  
     print(glue("{file_u} doesn't exist. Retrieving unilemmas..."))
     unilemma_metrics<-prepare_unilemmas(lang, uni_lemmas)
- } else {
-    unilemma_metrics <- read.csv(file_u)  
-    print(glue("{file_u} exists. Retrieving data from file"))
+    write_csv(unilemma_metrics, file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv")))
     
-}
-return(unilemma_metrics)  
+ } else {
+   print(glue("{file_u} exists. Retrieving data from file"))
+   unilemma_metrics <- read_csv(file_u)  
+ }
+ return(unilemma_metrics)  
 }  
-
 
 
 get_data <- function(lang = NULL,
@@ -102,43 +102,31 @@ get_data <- function(lang = NULL,
                    word,
                    clean = FALSE)
                    {
+  
 norm_lang <- normalize_language(lang)  
-print(glue("Getting utterances for {lang}..."))
-utterances <- childesr::get_utterances(language = lang, corpus = corpus, role = 
+  utterances <- childesr::get_utterances(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex) %>%
   mutate(gloss = tolower(gloss)) 
-write_csv(utterances,
-          file.path(childes_path, glue("childes_utterances_{norm_lang}.csv")))
-
-print(glue("Getting tokens for {lang}..."))
-tokens_ <- childesr::get_tokens(language = lang, corpus = corpus, role = 
+  write_csv(utterances, file.path(childes_path, glue("childes_utterances_{norm_lang}.csv")))
+ 
+  tokens_ <- childesr::get_tokens(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex, token="*") 
 
-if (word != ""){
+ if (word != ""){
   tokens <- childesr::get_tokens(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex, part_of_speech = pos, token = word)
 } else {tokens <- tokens_ }
-tokens <- tokens %>%
+ tokens <- tokens %>%
   mutate(gloss = tolower(gloss))
-
-write_csv(tokens,
-          file.path(childes_path, glue("childes_tokens_{norm_lang}.csv")))
-
+ write_csv(tokens, file.path(childes_path, glue("childes_tokens_{norm_lang}.csv")))
   
 if (target_child != ""){
   tokens <- tokens %>%
     filter(target_child_name == target_child)
 } else {}
-if (clean == TRUE ){
-  annot <- c("xxx", "yyy", "www") 
-  annotUtt <- filter(tokens, gloss %in% annot) 
-  annotUttID<- unique(annotUtt$utterance_id) 
-  utterances <- filter(utterances, !(id  %in% annotUttID)) #remove utterances with annotations - incomplete
-  tokens <-  filter(tokens, !(gloss  %in% annot)) #remove tokens with annotations
-}
 
 return(list(utterances = tibble(utterances), 
             tokens = tibble(tokens))) 
@@ -236,7 +224,6 @@ convert_lang_stemmer <- function(x){
 }
 
 
-
 #adapted from mikabr/aoa_prediction
 transforms <- c(
   function(x) gsub("(.*) \\(.*\\)", "\\1", x),
@@ -247,48 +234,32 @@ transforms <- c(
 apply_transforms <- function(str) {
   transforms %>% map_chr(~.x(str))
 }
-special_case_files <- list.files(file.path(childes_path, "special_cases"),
-                                 full.names = TRUE)
+special_case_files <- list.files(file.path(childes_path, "special_cases"), full.names = TRUE)
 special_case_map <- map_df(special_case_files, function(case_file) {
   
   lang <- basename(case_file) %>% str_remove(".csv")
   special_cases <- read_csv(case_file, col_names = FALSE)
-  
   map_df(1:nrow(special_cases), function(i) {
-    uni_lemma <- special_cases$X1[i]
+   uni_lemma <- special_cases$X1[i]
     options <- special_cases[i, 3:ncol(special_cases)] %>%
-      as.character() %>%
+     as.character() %>%
       discard(is.na)
       trans_opts <- map(options, apply_transforms) %>% unlist() %>% 
-unique() #apply transforms to special cases
-      data_frame(language = normalize_language(lang),
+       unique() #apply transforms to special cases
+        data_frame(language = normalize_language(lang),
                uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
                stem = c(trans_opts, stem(trans_opts, convert_lang_stemmer(lang))))
   })
 }) 
 
 
-#loadRData <- function(fileName){
-#    load(fileName)
-#    get(ls()[ls() != "fileName"])
-#}
 
 load_unilemmas <- function(uni_lemmas){
-#print(glue("Mapping tokens to uni_lemmas..."))  
-
-#norm_lang <- normalize_language(lang)  
-
-file_ <- file.path(childes_path, glue("/load_unilemmas.csv"))
-
-if(!file.exists(file_)){  
-print(glue("{file_} doesn't exist. Retrieving data from uni_lemmas..."))
-    
-uni_lemmas <- uni_lemmas %>% 
-        unnest(items) %>%
-          select(language, uni_lemma, definition) %>%
-            distinct() %>%
-             rename(words = definition)
-
+  uni_lemmas <- uni_lemmas %>% 
+    unnest(items) %>%
+    select(language, uni_lemma, definition) %>%
+    distinct() %>%
+    rename(words = definition)
 pattern_map <- uni_lemmas %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
@@ -296,60 +267,51 @@ pattern_map <- uni_lemmas %>%
     uni_lemma <- uni_data$uni_lemma
     options <- uni_data$words %>% strsplit(", ") %>% unlist() %>% strsplit("/") %>% unlist()
     options <- c(options, stem(options, convert_lang_stemmer(language))) %>% unique() 
-#stemming with Snowball
+    #stemming with Snowball
     trans_opts <- map(options, apply_transforms) %>% unlist() %>% unique()
-    trans_opts <- c(trans_opts, stem(trans_opts, convert_stemlang(language))) %>% unique()
+    trans_opts <- c(trans_opts, stem(trans_opts, convert_lang_stemmer(language))) %>% unique()
     data_frame(language = rep(uni_data$language %>% normalize_language(), length(trans_opts)),
                uni_lemma = rep(uni_lemma, length(trans_opts)),
                stem = trans_opts)
   })
 
 case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
-write_csv(case_map, file.path(childes_path, glue("/load_unilemmas.csv")))
-} else{
-case_map <- read_csv(glue(childes_path, glue("/load_unilemmas.csv")))  
-}
-
 return(case_map)
 }
 
 load_childes_data <- function(lang, uni_lemmas) {
-  # name <- paste0("childes_metrics_", lang, ".csv")
   norm_lang <- normalize_language(lang)
-  df <- read_csv(glue("data/childes/childes_metrics_{norm_lang}.csv")) %>%
+  df_by_word <- read_csv(glue("data/childes/childes_metrics_{norm_lang}.csv")) %>%
     filter(!is.na(word)) %>%
-    mutate(stem = stem(word, convert_stemlang(lang))) %>%
+    mutate(stem = stem(word, convert_lang_stemmer(lang))) %>%
     full_join(load_unilemmas(uni_lemmas) %>% filter(language == norm_lang), by = "stem") %>%
     rename(language = language.x) %>%
     group_by(uni_lemma, language) %>%
-    filter(!is.na(uni_lemma)) %>%
-    filter(!is.na(word)) %>%
+    filter(!is.na(uni_lemma), !is.na(word)) %>%
     group_by(word) 
-  df_by_lemma <- df %>% 
+  df_by_unilemma <- df_by_word %>% 
     group_by(uni_lemma) %>%
     summarise(nb_realisations_lemma=n(),
               words_lemma = list(unique(word)),
               sum_wordcount_lemma = sum(wordcount, na.rm = TRUE),
-              mean_character_count_lemma = mean(charactercount, na.rm = 
-TRUE), 
+              mean_character_count_lemma = mean(charactercount, na.rm = TRUE), 
               frequency=sum(frequency_word, na.rm =TRUE),
               MLU=mean(mlu_word, na.rm = TRUE),
               solo_frequency=sum(solo_word, na.rm = TRUE),
               final_frequency=sum(final_word, na.rm = TRUE),     
               initial_frequency=sum(initial_word, na.rm = TRUE))
   print(glue("Grouping predictors across uni_lemmas..."))  
-  df_total <- left_join(df, df_by_lemma) 
+  df_total <- left_join(df_by_word, df_by_unilemma) 
   return(df_total)
   }  
     
 prepare_unilemmas <- function(lang, uni_lemmas){
-childes_data <- map2_df(lang, uni_lemmas, load_childes_data)
-childes_data$words_lemma <- vapply(childes_data$words_lemma, paste, 
-collapse = ", ", character(1L))
-norm_lang <- normalize_language(lang)
-childes_data<- childes_data %>%
-  select(-c(language.y))
-write_csv(childes_data,
+  norm_lang <- normalize_language(lang)
+  childes_data <- load_childes_data(lang, uni_lemmas)
+  childes_data$words_lemma <- vapply(childes_data$words_lemma, paste, collapse = ", ", character(1L))
+  childes_data<- childes_data %>%
+   select(-c(language.y))
+  write_csv(childes_data,
           file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv")))
-return(childes_data)
+  return(childes_data)
 }
