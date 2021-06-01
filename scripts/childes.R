@@ -69,9 +69,9 @@ find_order(data_$utterances, data_$tokens)) }
          mutate(totalcount =  total) %>%
             rename(word = gloss)
  
- write_csv(childes_metrics, file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
+ write_feather(childes_metrics, file.path(childes_path, glue("childes_metrics_{norm_lang}.csv")))
 } else { 
-  childes_metrics <- read_csv(file_)  
+  childes_metrics <- read_feather(file_)  
   print(glue("{file_} exists. Retrieving data from file"))
 }  
 
@@ -81,11 +81,11 @@ find_order(data_$utterances, data_$tokens)) }
   {  
     print(glue("{file_u} doesn't exist. Retrieving unilemmas..."))
     unilemma_metrics<-prepare_unilemmas(lang, uni_lemmas)
-    write_csv(unilemma_metrics, file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv")))
+    write_feather(unilemma_metrics, file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv")))
     
  } else {
    print(glue("{file_u} exists. Retrieving data from file"))
-   unilemma_metrics <- read_csv(file_u)  
+   unilemma_metrics <- read_feather(file_u)  
  }
  return(unilemma_metrics)  
 }  
@@ -108,7 +108,7 @@ norm_lang <- normalize_language(lang)
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
 = child_sex) %>%
   mutate(gloss = tolower(gloss)) 
-  write_csv(utterances, file.path(childes_path, glue("childes_utterances_{norm_lang}.csv")))
+ # write_csv(utterances, file.path(childes_path, glue("childes_utterances_{norm_lang}.csv")))
  
   tokens_ <- childesr::get_tokens(language = lang, corpus = corpus, role = 
 speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex 
@@ -121,7 +121,7 @@ speaker_role, role_exclude = speaker_role_exclude, age = child_age, sex
 } else {tokens <- tokens_ }
  tokens <- tokens %>%
   mutate(gloss = tolower(gloss))
- write_csv(tokens, file.path(childes_path, glue("childes_tokens_{norm_lang}.csv")))
+# write_csv(tokens, file.path(childes_path, glue("childes_tokens_{norm_lang}.csv")))
   
 if (target_child != ""){
   tokens <- tokens %>%
@@ -225,15 +225,32 @@ convert_lang_stemmer <- function(x){
 
 
 #adapted from mikabr/aoa_prediction
-transforms <- c(
+transforms_fr <- c(
   function(x) gsub("(.*) \\(.*\\)", "\\1", x),
   function(x) gsub(" ", "_", x),
   function(x) gsub(" ", "+", x),
-  function(x) gsub("(.+) \\1", "\\1", x)
+  function(x) gsub("(.+) \\1", "\\1", x),
+  function(x) paste0(x, "e+moi"),
+  function(x) paste0(x, "e-moi"),
+  function(x) paste0(x, "+moi"),
+  function(x) paste0(x, "-moi"),
+  function(x) paste0(x, "ent"),
+  function(x) paste0(x, "e-l"),
+  function(x) paste0(x, "e-toi"),
+  function(x) paste0(x, "-l"),
+  function(x) paste0(x, "-toi"),
+  function(x) paste0(x, "es-tu"),
+  function(x) paste0(x, "s+tu"),
+  function(x) paste0(x, "s-moi")
 )
-apply_transforms <- function(str) {
-  transforms %>% map_chr(~.x(str))
+
+
+apply_transforms <- function(str, lang_, class_) {
+  if (lang_ == "french_(quebecois)" && class_=="verb" ){
+  transforms_fr %>% map_chr(~.x(str))
 }
+}
+
 special_case_files <- list.files(file.path(childes_path, "special_cases"), full.names = TRUE)
 special_case_map <- map_df(special_case_files, function(case_file) {
   
@@ -241,10 +258,11 @@ special_case_map <- map_df(special_case_files, function(case_file) {
   special_cases <- read_csv(case_file, col_names = FALSE)
   map_df(1:nrow(special_cases), function(i) {
    uni_lemma <- special_cases$X1[i]
+   lexical_class <- special_cases$X2[i]
     options <- special_cases[i, 3:ncol(special_cases)] %>%
      as.character() %>%
       discard(is.na)
-      trans_opts <- map(options, apply_transforms) %>% unlist() %>% 
+      trans_opts <- map(options, apply_transforms, lang_=lang, class_=lexical_class) %>% unlist() %>% 
        unique() #apply transforms to special cases
         data_frame(language = normalize_language(lang),
                uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
@@ -257,7 +275,7 @@ special_case_map <- map_df(special_case_files, function(case_file) {
 load_unilemmas <- function(uni_lemmas){
   uni_lemmas <- uni_lemmas %>% 
     unnest(items) %>%
-    select(language, uni_lemma, definition) %>%
+    select(language, uni_lemma, definition, lexical_class) %>%
     distinct() %>%
     rename(words = definition)
 pattern_map <- uni_lemmas %>%
@@ -268,7 +286,7 @@ pattern_map <- uni_lemmas %>%
     options <- uni_data$words %>% strsplit(", ") %>% unlist() %>% strsplit("/") %>% unlist()
     options <- c(options, stem(options, convert_lang_stemmer(language))) %>% unique() 
     #stemming with Snowball
-    trans_opts <- map(options, apply_transforms) %>% unlist() %>% unique()
+    trans_opts <- map(options, apply_transforms, lang_=language, class_=lexical_class) %>% unlist() %>% unique()
     trans_opts <- c(trans_opts, stem(trans_opts, convert_lang_stemmer(language))) %>% unique()
     data_frame(language = rep(uni_data$language %>% normalize_language(), length(trans_opts)),
                uni_lemma = rep(uni_lemma, length(trans_opts)),
@@ -281,7 +299,7 @@ return(case_map)
 
 load_childes_data <- function(lang, uni_lemmas) {
   norm_lang <- normalize_language(lang)
-  df_by_word <- read_csv(glue("data/childes/childes_metrics_{norm_lang}.csv")) %>%
+  df_by_word <- read_feather(glue("data/childes/childes_metrics_{norm_lang}.csv")) %>%
     filter(!is.na(word)) %>%
     mutate(stem = stem(word, convert_lang_stemmer(lang))) %>%
     full_join(load_unilemmas(uni_lemmas) %>% filter(language == norm_lang), by = "stem") %>%
@@ -311,7 +329,7 @@ prepare_unilemmas <- function(lang, uni_lemmas){
   childes_data$words_lemma <- vapply(childes_data$words_lemma, paste, collapse = ", ", character(1L))
   childes_data<- childes_data %>%
    select(-c(language.y))
-  write_csv(childes_data,
+  write_feather(childes_data,
           file.path(childes_path, glue("unilemma_metrics_{norm_lang}.csv")))
   return(childes_data)
 }
