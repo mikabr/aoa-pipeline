@@ -245,10 +245,8 @@ transforms_fr <- c(
 )
 
 
-apply_transforms <- function(str, lang_, class_) {
-  if (lang_ == "french_(quebecois)" && class_=="verb" ){
-  transforms_fr %>% map_chr(~.x(str))
-}
+apply_transforms <- function(str, class_) {
+  if (class_=="verbs") {transforms_fr %>% map_chr(~.x(str), )} else{}
 }
 
 special_case_files <- list.files(file.path(childes_path, "special_cases"), full.names = TRUE)
@@ -262,7 +260,7 @@ special_case_map <- map_df(special_case_files, function(case_file) {
     options <- special_cases[i, 3:ncol(special_cases)] %>%
      as.character() %>%
       discard(is.na)
-      trans_opts <- map(options, apply_transforms, lang_=lang, class_=lexical_class) %>% unlist() %>% 
+      trans_opts <- map(options, apply_transforms, class_=lexical_class) %>% unlist() %>% 
        unique() #apply transforms to special cases
         data_frame(language = normalize_language(lang),
                uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
@@ -270,15 +268,27 @@ special_case_map <- map_df(special_case_files, function(case_file) {
   })
 }) 
 
+apply_transforms <- function(str ){ 
+ transforms_fr %>% map_chr(~.x(str), )
+}
+
+lexical_classes<-c("function_words", "adjectives", "other", "nouns",  "verbs") 
 
 
-load_unilemmas <- function(uni_lemmas){
-  uni_lemmas <- uni_lemmas %>% 
+load_unilemmas_main <- function(uni_lemmas) {
+  map_df(lexical_classes, load_unilemmas, unilemmas=uni_lemmas) %>% 
+  rbind() %>% 
+  distinct()
+}
+
+load_unilemmas <- function(class_, unilemmas){
+  unilemma <- unilemmas %>% 
     unnest(items) %>%
-    select(language, uni_lemma, definition, lexical_class) %>%
+    filter(lexical_class==class_) %>%
+    select(language, uni_lemma, definition) %>%
     distinct() %>%
     rename(words = definition)
-pattern_map <- uni_lemmas %>%
+pattern_map <- unilemma %>%
   split(paste(.$language, .$uni_lemma, .$words)) %>%
   map_df(function(uni_data) {
     language <- uni_data$language %>% normalize_language()
@@ -286,7 +296,7 @@ pattern_map <- uni_lemmas %>%
     options <- uni_data$words %>% strsplit(", ") %>% unlist() %>% strsplit("/") %>% unlist()
     options <- c(options, stem(options, convert_lang_stemmer(language))) %>% unique() 
     #stemming with Snowball
-    trans_opts <- map(options, apply_transforms, lang_=language, class_=lexical_class) %>% unlist() %>% unique()
+    trans_opts <- map(options, apply_transforms, class_) %>% unlist() %>% unique()
     trans_opts <- c(trans_opts, stem(trans_opts, convert_lang_stemmer(language))) %>% unique()
     data_frame(language = rep(uni_data$language %>% normalize_language(), length(trans_opts)),
                uni_lemma = rep(uni_lemma, length(trans_opts)),
@@ -302,7 +312,7 @@ load_childes_data <- function(lang, uni_lemmas) {
   df_by_word <- read_feather(glue("data/childes/childes_metrics_{norm_lang}.csv")) %>%
     filter(!is.na(word)) %>%
     mutate(stem = stem(word, convert_lang_stemmer(lang))) %>%
-    full_join(load_unilemmas(uni_lemmas) %>% filter(language == norm_lang), by = "stem") %>%
+    full_join(load_unilemmas_main(uni_lemmas) %>% filter(language == norm_lang), by = "stem") %>%
     rename(language = language.x) %>%
     group_by(uni_lemma, language) %>%
     filter(!is.na(uni_lemma), !is.na(word)) %>%
