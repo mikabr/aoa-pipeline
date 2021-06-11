@@ -249,24 +249,27 @@ apply_transforms <- function(str, class_) {
   if (class_=="verbs") {transforms_fr %>% map_chr(~.x(str), )} else{}
 }
 
-special_case_files <- list.files(file.path(childes_path, "special_cases"), full.names = TRUE)
-special_case_map <- map_df(special_case_files, function(case_file) {
-  
-  lang <- basename(case_file) %>% str_remove(".csv")
-  special_cases <- read_csv(case_file, col_names = FALSE)
-  map_df(1:nrow(special_cases), function(i) {
-   uni_lemma <- special_cases$X1[i]
-   lexical_class <- special_cases$X2[i]
-    options <- special_cases[i, 3:ncol(special_cases)] %>%
-     as.character() %>%
-      discard(is.na)
+build_special_case_map <- function() {
+  special_case_files <- list.files(file.path(childes_path, "special_cases"), full.names = TRUE)
+  special_case_map <- map_df(special_case_files, function(case_file) {
+    
+    lang <- basename(case_file) %>% str_remove(".csv")
+    special_cases <- read_csv(case_file, col_names = FALSE)
+    map_df(1:nrow(special_cases), function(i) {
+      uni_lemma <- special_cases$X1[i]
+      lexical_class <- special_cases$X2[i]
+      options <- special_cases[i, 3:ncol(special_cases)] %>%
+        as.character() %>%
+        discard(is.na)
       trans_opts <- map(options, apply_transforms, class_=lexical_class) %>% unlist() %>% 
-       unique() #apply transforms to special cases
-        data_frame(language = normalize_language(lang),
-               uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
-               stem = c(trans_opts, stem(trans_opts, convert_lang_stemmer(lang))))
+        unique() #apply transforms to special cases
+      data_frame(language = normalize_language(lang),
+                 uni_lemma = rep(uni_lemma, 2 * length(trans_opts)),
+                 stem = c(trans_opts, stem(trans_opts, convert_lang_stemmer(lang))))
+    })
   })
-}) 
+  return(special_case_map)
+}
 
 apply_transforms <- function(str ){ 
  transforms_fr %>% map_chr(~.x(str), )
@@ -303,6 +306,7 @@ pattern_map <- unilemma %>%
                stem = trans_opts)
   })
 
+special_case_map <- build_special_case_map()
 case_map <- bind_rows(special_case_map, pattern_map) %>% distinct()
 return(case_map)
 }

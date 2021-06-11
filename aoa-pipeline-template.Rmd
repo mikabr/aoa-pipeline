@@ -1,6 +1,8 @@
 ---
 title: "AoA prediction template"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -12,12 +14,12 @@ library(tidyverse)
 library(glue)
 
 # load functions
-walk(list.files("scripts", pattern = "*.R", full.names = TRUE), source)
+walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
 
 # set up julia
-library(jglmm)
-options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
-jglmm_setup()
+# library(jglmm)
+# options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
+# jglmm_setup()
 ```
 
 This template provides the structure for how to fit age of acquisition (AoA) prediction models, using data and scripts in this repository.
@@ -44,7 +46,6 @@ Loading cached Wordbank data for multiple languages:
            #       "Spanish (Mexican)", "Swedish", "Turkish")
 target_langs <- c("Croatian", "Danish")
 
-
 lang_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
   lang_str <- normalize_language(lang)
@@ -61,7 +62,6 @@ create_lang_data("English (American)")
 Creating saved Wordbank data for many languages:
 ```{r, eval=FALSE}
 walk(target_langs, create_lang_data)
-
 ```
 
 Creating saved Wordbank data one step at a time (potentially making changes between steps):
@@ -110,7 +110,6 @@ valence <- uni_lemmas %>% map_predictor("valence", valence_map)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas %>% map_predictor("concreteness", concreteness_map)
-
 ```
 
 ```{r}
