@@ -86,7 +86,7 @@ normalize_language <- function(language) {
   language |> str_replace(" ", "_") |> str_to_lower()
 }
 
-create_lang_data <- function(language, write = TRUE) {
+create_wb_data <- function(language, write = TRUE) {
   lang <- language # for filter name scope issues
   insts <- get_instruments()
   forms <- insts |> filter(language == lang) |> pull(form)
@@ -99,4 +99,13 @@ create_lang_data <- function(language, write = TRUE) {
     lang_label <- normalize_language(language)
     saveRDS(lang_summary, file = glue("data/wordbank/{lang_label}.rds"))
   }
+}
+
+get_uni_lemmas <- function(wb_data) {
+  wb_data |>
+    distinct(language, uni_lemma, items) |>
+    unnest(items) |>
+    select(-form, -item_id) |>
+    distinct() |>
+    nest(items = -c(language, uni_lemma))
 }

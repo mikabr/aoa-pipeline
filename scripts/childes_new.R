@@ -125,20 +125,6 @@ transforms <- list(
   #   function(x) paste0(x, "s-moi")
 )
 
-load_special_case_map <- function() {
-  special_case_files <- list.files("resources/special_cases", full.names = TRUE)
-  map_df(special_case_files, function(case_file) {
-    lang <- basename(case_file) |> str_remove(".csv")
-    special_cases <- read_csv(case_file, col_names = FALSE)
-    special_cases |>
-      rename(uni_lemma = X1, item = X2) |>
-      pivot_longer(-c(uni_lemma, item), names_to = "x", values_to = "option") |>
-      filter(!is.na(option)) |>
-      select(-x) |>
-      mutate(norm_lang = lang)
-  })
-}
-
 build_special_case_map <- function(language) {
   norm_lang <- normalize_language(language)
   special_case_file <- glue("resources/special_cases/{norm_lang}.csv")
@@ -146,7 +132,7 @@ build_special_case_map <- function(language) {
     read_csv(special_case_file, col_names = FALSE) |>
       rename(uni_lemma = X1, definition = X2) |>
       pivot_longer(-c(uni_lemma, definition),
-                   ames_to = "x", values_to = "option") |>
+                   names_to = "x", values_to = "option") |>
       filter(!is.na(option)) |>
       select(-x) |>
       mutate(language = language)
@@ -192,6 +178,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
     inner_join(uni_lemma_map |> rename(token = option)) |>
     inner_join(uni_lemma_map |> rename(token_stem = option)) |>
     select(-language) |>
+    rename(tokens = token, token_stems = token_stem) |>
     group_by(uni_lemma)
 
   metrics_summaries <- list(
@@ -200,7 +187,8 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
     metrics_mapped |> summarise(across(where(is_double), mean))
   )
   uni_metrics <- metrics_summaries |>
-    reduce(partial(left_join, by = "uni_lemma"))
+    reduce(partial(left_join, by = "uni_lemma")) |>
+    mutate(language = lang)
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
   saveRDS(uni_metrics, uni_metrics_file)

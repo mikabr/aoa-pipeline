@@ -12,14 +12,11 @@ options(dplyr.summarise.inform = FALSE)
 # load libraries
 library(tidyverse)
 library(glue)
+library(wordbankr)
+library(childesr)
 
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
-
-# set up julia
-# library(jglmm)
-# options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
-# jglmm_setup()
 ```
 
 This template provides the structure for how to fit age of acquisition (AoA) prediction models, using data and scripts in this repository.
@@ -35,59 +32,41 @@ The general steps are:
 
 Loading cached Wordbank data for English:
 ```{r}
-eng_data <- readRDS("data/wordbank/english_(american).rds")
-eng_data
+eng_wb_data <- readRDS("data/wordbank/english_(american).rds")
+eng_wb_data
 ```
 
 Loading cached Wordbank data for multiple languages:
 ```{r}
-#target_langs <- c("Croatian", "Danish", "English (American)",
-          #        "French (Quebecois)", "Italian", "Norwegian", "Russian",
-           #       "Spanish (Mexican)", "Swedish", "Turkish")
-target_langs <- c("Croatian", "Danish")
+# target_langs <- c("Croatian", "Danish", "English (American)",
+#                   "French (Quebecois)", "Italian", "Norwegian", "Russian",
+#                   "Spanish (Mexican)", "Swedish", "Turkish")
+target_langs <- c("English (American)")
 
-lang_data <- map_df(target_langs, function(lang) {
+wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
-  lang_str <- normalize_language(lang)
-  readRDS(glue("data/wordbank/{lang_str}.rds"))
+  norm_lang <- normalize_language(lang)
+  readRDS(glue("data/wordbank/{norm_lang}.rds"))
 })
-
 ```
 
 Creating saved Wordbank data for English:
 ```{r, eval=FALSE}
-create_lang_data("English (American)")
+create_wb_data("English (American)")
 ```
 
 Creating saved Wordbank data for many languages:
 ```{r, eval=FALSE}
-walk(target_langs, create_lang_data)
+walk(target_langs, create_wb_data)
 ```
 
 Creating saved Wordbank data one step at a time (potentially making changes between steps):
-```{r}
+```{r, eval=FALSE}
 eng_wg <- create_inst_data("English (American)", "WG")
 eng_ws <- create_inst_data("English (American)", "WS")
 eng_wg_summary <- collapse_inst_data(eng_wg)
 eng_ws_summary <- collapse_inst_data(eng_ws)
-eng_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
-eng_summary
-```
-
-```{r}
-# quick viz of item trajectories
-# lang_data %>%
-#   mutate(prop = num_true / total,
-#          measure = fct_relevel(measure, "understands")) %>%
-# ggplot(aes(x = age, y = prop)) +
-#   facet_grid(cols = vars(measure), rows = vars(language),
-#              scales = "free_x", space = "free_x",
-#              labeller = as_labeller(str_to_sentence)) +
-#   geom_smooth(aes(colour = uni_lemma, weight = total), alpha = 0.1, size = 0.1,
-#               se = FALSE, method = "glm", method.args = list(family = "binomial")) +
-#   scale_colour_discrete(guide = FALSE) +
-#   scale_x_continuous(breaks = seq(8, 30, 4)) +
-#   labs(x = "Age (months)", y = "Proportion of children")
+eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
 
 
@@ -96,80 +75,94 @@ eng_summary
 Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
 ```{r}
-uni_lemmas <- lang_data %>%
-  distinct(language, uni_lemma, items) %>%
-  unnest(items) %>%
-  select(-form) %>%
-  nest(items = -c(language, uni_lemma))
+uni_lemmas <- get_uni_lemmas(wb_data)
 
 babiness_map <- c(word = "word", babiness = "babyAVG")
-babiness <- uni_lemmas %>% map_predictor("babiness", babiness_map)
+babiness <- uni_lemmas |> map_predictor("babiness", babiness_map)
 
 valence_map <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
-valence <- uni_lemmas %>% map_predictor("valence", valence_map)
+valence <- uni_lemmas |> map_predictor("valence", valence_map)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
-concreteness <- uni_lemmas %>% map_predictor("concreteness", concreteness_map)
+concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 ```
 
-```{r}
+```{r, eval=FALSE}
 # TODO: requires espeak
 # http://espeak.sourceforge.net
 
-phonemes <- uni_lemmas %>% map_phonemes()
-
-uni_joined <- uni_lemmas %>% 
-  # left_join(phonemes, by = c("language", "uni_lemma")) %>%
-  left_join(babiness, by = c("language", "uni_lemma")) %>% 
-  left_join(valence, by = c("language", "uni_lemma")) %>% 
-  left_join(concreteness, by = c("language", "uni_lemma"))
+phonemes <- uni_lemmas |> map_phonemes()
+# left_join(phonemes, by = c("language", "uni_lemma")) |>
 ```
 
-Add CHILDES predictors
-
+Loading cached CHILDES data for English:
 ```{r}
-## A more fine-grained search can be done for each language with this command: childes_predictors<- get_childes_metrics(lang, corpus, word, speaker_role, speaker_role_exclude, target_child, child_age = NULL, child_sex, uttlength=TRUE, freq=TRUE, charlen=TRUE, order=TRUE, clean=FALSE)
+eng_childes <- readRDS("data/childes/uni_metrics_english_(american).rds")
+eng_childes
+```
 
-childes_predictors <- map_dfr(target_langs, get_childes_metrics) 
+Loading cached CHILDES data for multiple languages:
+```{r}
+target_langs <- c("English (American)")
 
-childes_predictors <- childes_predictors %>%
-  # ungroup() %>%
-  distinct(uni_lemma, MLU, frequency, solo_frequency, initial_frequency,
-           final_frequency, nb_realisations_lemma, mean_character_count_lemma,
-           totalcount)
+childes_metrics <- map_df(target_langs, function(lang) {
+  message(glue("Loading CHILDES data for {lang}..."))
+  norm_lang <- normalize_language(lang)
+  readRDS(glue("data/childes/uni_metrics_{norm_lang}.rds"))
+})
+```
 
-uni_joined_ <- uni_joined %>%
-  left_join(clean_childes_predictors)
+Creating saved CHILDES data for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr`:
+```{r, eval=FALSE}
+metric_funs <- list(compute_count, compute_mlu, compute_positions,
+                    compute_length_char, compute_length_phon)
+corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
+                    age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
+
+get_childes_metrics("English (American)", metric_funs, corpus_args)
+```
+
+Creating saved CHILDES data for many languages:
+```{r, eval=FALSE}
+walk(target_langs, get_childes_metrics)
+```
+
+Combine mapped predictors and CHILDES predictors:
+```{r}
+uni_joined <- uni_lemmas |>
+  left_join(babiness, by = c("language", "uni_lemma")) |>
+  left_join(valence, by = c("language", "uni_lemma")) |>
+  left_join(concreteness, by = c("language", "uni_lemma")) |>
+  left_join(childes_metrics, by = c("language", "uni_lemma"))
 ```
 
 
 Residualize solo freq and final freq
 
 ```{r}
-
-
 ```
 
-
 ```{r impute}
-prepped_data <- uni_joined %>%
-  #select out just the by lexical item data
-  unnest(cols = "items") %>%
-  select(-c(age, num_true, total, form, item_id)) %>%
-  distinct() %>%
-  #pull out categories from classes
-  mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other", lexical_class),
+prepped_data <- uni_joined |>
+  # select out just the by lexical item data
+  unnest(cols = "items") |>
+  select(-c(age, num_true, total, form, item_id)) |>
+  distinct() |>
+  # pull out categories from classes
+  mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
+                                    lexical_class),
          # collapse v, adj, adv into one category
-         lexical_category = lexical_category %>% as_factor() %>% 
-           #TODO: What to do if the languages selected don't have one of these - cant use fct collapse?
-           fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))) %>%
+         lexical_category = lexical_category |> as_factor() |>
+           suppressWarnings(
+             fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))
+             )) |>
   select(-lexical_class)
 
 pred_sources <- list(
-  #c("frequency", "MLU", "final_frequency", "solo_frequency"),
-  c("valence", "arousal"), 
+  # c("frequency", "MLU", "final_frequency", "solo_frequency"),
+  c("valence", "arousal"),
   "concreteness", "babiness", "num_phons"
 )
 
-imputed_data <- prepped_data %>% do_full_imputation(pred_sources, 20)
+imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 ```
