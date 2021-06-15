@@ -166,7 +166,7 @@ build_uni_lemma_map <- function(uni_lemmas) {
     unnest(option)
 }
 
-uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+# uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
 
 get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
   norm_lang <- normalize_language(lang)
