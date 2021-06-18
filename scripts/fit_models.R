@@ -4,8 +4,8 @@
 options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
 jglmm_setup()
 
-fit_aoa <- function(data) {
-  model <- arm::bayesglm(cbind(num_true, num_false) ~ unscaled_age,
+fit_bglm <- function(data, max_steps = 200) {
+  model <- arm::bayesglm(cbind(num_true, num_false) ~ age,
                          family = "binomial",
                          prior.mean = .3,
                          prior.scale = c(.01),
@@ -13,18 +13,18 @@ fit_aoa <- function(data) {
                          prior.scale.for.intercept = 2.5,
                          prior.df = 1,
                          data = data,
-                         maxit = 200)
-  aoa <- -model$coefficients[["(Intercept)"]] / model$coefficients[["unscaled_age"]]
+                         maxit = max_steps)
+  aoa <- -model$coefficients[["(Intercept)"]] / model$coefficients[["age"]]
 
   tibble(uni_lemma = data$uni_lemma[1],
-         slope = model$coefficients[["unscaled_age"]],
+         slope = model$coefficients[["age"]],
          aoa = aoa)
 }
 
-get_aoas <- function(data) {
+get_aoas <- function(data, max_steps = 200) {
   data |>
     split(~ uni_lemma) |>
-    map(fit_aoa) |>
+    map(fit_bglm, max_steps) |>
     bind_rows()
 }
 
@@ -34,10 +34,13 @@ get_aoas <- function(data) {
 #   prop, total, age
 #   !!predictors
 nest_data <- function(df, predictors, full = FALSE) {
-  df |> mutate(group = paste(language, measure),
-               lexical_category = lexical_category |> fct_relevel("other")) |>
+  keep_data <- df |>
+    mutate(group = paste(language, measure),
+           lexical_category = lexical_category |> fct_relevel("other")) |>
     select(language, measure, group, lexical_category, item = uni_lemma, prop,
-           total, age, !!predictors, ifelse(full, NULL, "aoa")) |>
+           total, age, !!predictors)
+  if (!full) { keep_data <- keep_data |> cbind(df$aoa) }
+  keep_data |>
     group_by(language, measure) |>
     nest()
 }
