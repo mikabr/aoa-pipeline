@@ -67,7 +67,7 @@ fit_group_model <- function(group_df, predictors, formula,
     return(jglmm(formula = formula, data = group_df, family = "binomial",
                  weights = group_df$total, contrasts = contrasts)),
     return(lm(formula = formula, data = group_df,
-              weights = total)) # not sure how to pass `contrsts` into `lm`
+              weights = total)) # not sure how to pass `contrasts` into `lm`
   )
 }
 
@@ -83,22 +83,22 @@ fit_models <- function(df, predictors, full = FALSE, lex_effects = TRUE, formula
 }
 
 ####### TEST CASE
-load("data/temp_saved_data/uni_model_data.RData")
-uni_model_data <- uni_model_data |> ungroup()
-
-eng_model_data <- uni_model_data |>
-  filter(language == "English (American)") |>
-  mutate(total = num_true + num_false)
-
-aoas <- get_aoas(eng_model_data)
-
-eng_model_data <- eng_model_data |>
-  left_join(aoas, by = "uni_lemma")
-
-predictors <- list(
-  c("frequency", "MLU", "final_frequency", "solo_frequency"),
-  c("valence", "arousal"),
-  "concreteness", "babiness", "num_phons"
-) |> unlist()
-
-eng_models <- fit_models(eng_model_data, predictors)
+# load("data/temp_saved_data/uni_model_data.RData")
+# uni_model_data <- uni_model_data |> ungroup()
+#
+# eng_model_data <- uni_model_data |>
+#   filter(language == "English (American)") |>
+#   mutate(total = num_true + num_false)
+#
+# aoas <- get_aoas(eng_model_data)
+#
+# eng_model_data <- eng_model_data |>
+#   left_join(aoas, by = "uni_lemma")
+#
+# predictors <- list(
+#   c("frequency", "MLU", "final_frequency", "solo_frequency"),
+#   c("valence", "arousal"),
+#   "concreteness", "babiness", "num_phons"
+# ) |> unlist()
+#
+# eng_models <- fit_models(eng_model_data, predictors)
