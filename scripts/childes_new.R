@@ -31,6 +31,8 @@ compute_positions <- function(metric_data) {
     select(token, starts_with("order")) |>
     group_by(token) |>
     summarise(across(everything(), sum)) |>
+    mutate(order_first = order_first - order_solo,
+           order_last = order_last - order_solo) |>
     rename_with(\(s) str_replace(s, "order", "count"), -token)
 }
 
@@ -88,13 +90,20 @@ get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
 
 get_childes_data <- function(childes_lang, corpus_args) {
 
+  file_t <- file.path(childes_path, glue("{childes_lang}_tokens.rds"))
+  file_u <- file.path(childes_path, glue("{childes_lang}_utterances.rds"))
+
+  if(!file.exists(file_u)) {
   utterances <- get_utterances(language = childes_lang,
                                corpus = corpus_args$corpus,
                                role = corpus_args$role,
                                role_exclude = corpus_args$role_exclude,
                                age = corpus_args$age,
                                sex = corpus_args$sex)
-
+  } else {
+  utterances<-readRDS(file_u)
+  }
+  if(!file.exists(file_t)) {
   tokens <- get_tokens(language = childes_lang,
                        corpus = corpus_args$corpus,
                        role = corpus_args$role,
@@ -102,7 +111,9 @@ get_childes_data <- function(childes_lang, corpus_args) {
                        age = corpus_args$age,
                        sex = corpus_args$sex,
                        token = corpus_args$token)
-
+  } else {
+    tokens<-readRDS(file_t)
+  }
   return(list("utterances" = utterances, "tokens" = tokens))
 }
 

@@ -2,7 +2,7 @@
 # library(jglmm)
 
 options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
-jglmm_setup()
+#jglmm_setup()
 
 fit_bglm <- function(data, max_steps = 200) {
   model <- arm::bayesglm(cbind(num_true, num_false) ~ age,

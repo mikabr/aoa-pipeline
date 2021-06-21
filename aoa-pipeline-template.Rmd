@@ -122,11 +122,14 @@ corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
 get_childes_metrics("English (American)", metric_funs, corpus_args)
+get_uni_lemma_metrics("English (American)", uni_lemmas)
 ```
 
 Creating saved CHILDES data for many languages:
 ```{r, eval=FALSE}
 walk(target_langs, get_childes_metrics)
+walk(target_langs, get_uni_lemma_metrics, uni_lemmas)
+
 ```
 
 Combine mapped predictors and CHILDES predictors:
