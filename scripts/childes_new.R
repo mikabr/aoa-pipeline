@@ -44,9 +44,12 @@ compute_length_phon <- function(metric_data) {
   print("Computing length in phonemes...")
   metric_data |>
     distinct(token, token_phonemes) |>
-    mutate(length_phon = as.double(str_length(token_phonemes))) |>
+    mutate(token_phonemes = if_else(token_phonemes == "", as.character(NA),
+                                    token_phonemes),
+           length_phon = as.double(str_length(token_phonemes))) |>
     group_by(token) |>
-    summarise(length_phon = mean(length_phon))
+    summarise(length_phon = mean(length_phon, na.rm = TRUE)) |>
+    mutate(length_phon = if_else(is.nan(length_phon), as.double(NA), length_phon))
 }
 
 default_metric_funs <- list(compute_count, compute_mlu, compute_positions,
@@ -177,18 +180,20 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
     mutate(token_stem = stem(token, convert_lang_stemmer(lang))) |>
     inner_join(uni_lemma_map |> rename(token = option)) |>
     inner_join(uni_lemma_map |> rename(token_stem = option)) |>
-    select(-language) |>
-    rename(tokens = token, token_stems = token_stem) |>
+    select(-language, -token_stem) |>
+    rename(tokens = token) |>
     group_by(uni_lemma)
 
   metrics_summaries <- list(
-    metrics_mapped |> summarise(across(where(is_character), list)),
+    metrics_mapped |>
+      summarise(across(where(is_character), \(col) list(unique(col)))),
     metrics_mapped |> summarise(across(where(is_integer), sum)),
     metrics_mapped |> summarise(across(where(is_double), mean))
   )
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
-    mutate(language = lang)
+    mutate(n_tokens = map_int(tokens, length), language = lang) |>
+    select(language, uni_lemma, tokens, n_tokens, everything())
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
   saveRDS(uni_metrics, uni_metrics_file)

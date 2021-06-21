@@ -103,6 +103,7 @@ eng_childes
 
 Loading cached CHILDES data for multiple languages:
 ```{r}
+uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
 target_langs <- c("English (American)")
 
 childes_metrics <- map_df(target_langs, function(lang) {
@@ -119,7 +120,10 @@ metric_funs <- list(compute_count, compute_mlu, compute_positions,
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
-get_childes_metrics("English (American)", metric_funs, corpus_args)
+eng_token_metrics <- get_childes_metrics("English (American)", metric_funs,
+                                         corpus_args)
+eng_uni_lemma_metrics <- get_uni_lemma_metrics("English (American)",
+                                               uni_lemma_map)
 ```
 
 Creating saved CHILDES data for many languages:
