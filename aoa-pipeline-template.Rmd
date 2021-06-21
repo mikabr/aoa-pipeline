@@ -14,6 +14,8 @@ library(tidyverse)
 library(glue)
 library(wordbankr)
 library(childesr)
+library(broom)
+library(jglmm)
 
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
@@ -129,6 +131,7 @@ eng_uni_lemma_metrics <- get_uni_lemma_metrics("English (American)",
 Creating saved CHILDES data for many languages:
 ```{r, eval=FALSE}
 walk(target_langs, get_childes_metrics)
+walk(target_langs, get_uni_lemma_metrics, uni_lemmas)
 ```
 
 Combine mapped predictors and CHILDES predictors:
@@ -150,7 +153,7 @@ Residualize solo freq and final freq
 prepped_data <- uni_joined |>
   # select out just the by lexical item data
   unnest(cols = "items") |>
-  select(-c(age, num_true, total, form, item_id)) |>
+  # select(-c(age, num_true, total, form, item_id)) |>
   distinct() |>
   # pull out categories from classes
   mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
@@ -165,8 +168,44 @@ prepped_data <- uni_joined |>
 pred_sources <- list(
   # c("frequency", "MLU", "final_frequency", "solo_frequency"),
   c("valence", "arousal"),
-  "concreteness", "babiness", "num_phons"
+  "concreteness", "babiness"#, "num_phons"
 )
 
 imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 ```
+
+
+# Model fitting
+
+aoa lm model:
+```{r aoa-lm}
+wb_data <- wb_data |>
+  mutate(num_false = total - num_true,
+         prop = num_true / total) |>
+  select(language, measure, uni_lemma, age, prop, num_true, num_false, total, items)
+
+aoas <- wb_data |>
+  group_by(language, measure) |>
+  nest() |>
+  mutate(aoa = map(data, get_aoas, max_steps = 400)) |>
+  select(-data) |>
+  unnest(cols = c(aoa))
+
+joined_data <- wb_data |>
+  left_join(aoas, by = c("language", "measure", "uni_lemma")) |>
+  left_join(imputed_data |>
+              select(-data) |>
+              unnest(cols = c(imputed)), 
+            by = c("language", "uni_lemma"))
+
+predictors <- pred_sources |> unlist()
+
+fitted_aoa_models <- fit_models(joined_data, predictors, full = FALSE)
+```
+
+age glmer model:
+```{r age-glmer}
+## TODO: fix fit_models; currently failing in Julia
+fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
+```
+
