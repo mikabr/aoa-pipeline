@@ -48,7 +48,7 @@ compute_length_phon <- function(metric_data) {
     distinct(token, token_phonemes) |>
     mutate(token_phonemes = if_else(token_phonemes == "", as.character(NA),
                                     token_phonemes),
-           length_phon = as.double(str_length(token_phonemes))) |>
+    length_phon = as.double(str_length(token_phonemes))) |>
     group_by(token) |>
     summarise(length_phon = mean(length_phon, na.rm = TRUE)) |>
     mutate(length_phon = if_else(is.nan(length_phon), as.double(NA), length_phon))
@@ -62,11 +62,15 @@ default_corpus_args <- list(corpus = NULL, role = NULL,
 
 get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
                                 corpus_args = default_corpus_args,
-                                write = TRUE) {
+                                write = TRUE, half=NULL) {
 
   childes_lang <- convert_lang_childes(lang)
-  childes_data <- get_childes_data(childes_lang, corpus_args)
 
+  if (!is.null(half)){
+   childes_data <- half
+  }else{
+   childes_data <- get_childes_data(childes_lang, corpus_args)
+  }
   utterances <- childes_data$utterances |>
     mutate(gloss = tolower(gloss)) |>
     select(utterance_id = id, utterance = gloss, utterance_length = num_tokens)
@@ -81,7 +85,15 @@ get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
 
   metrics <- map(metric_funs, \(fun) fun(metric_data)) |>
     reduce(partial(full_join, by = "token")) |>
-    mutate(language = lang)
+    mutate(language = lang) |>
+    mutate(count = count + 1,
+           frequency=log(count/sum(count)),
+           count_last=count_last +1,
+           freq_last=log(count_last/sum(count_last)),
+           count_first=count_first+1,
+           freq_first=log(count_first/sum(count_first)),
+           count_solo=count_solo+1,
+           freq_solo=log(count_solo/sum(count_solo)))
 
   if (write) {
     norm_lang <- normalize_language(lang)
@@ -180,9 +192,8 @@ build_uni_lemma_map <- function(uni_lemmas) {
     unnest(option)
 }
 
-# uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
-
-get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
+get_uni_lemma_metrics <- function(lang, uni_lemmas) {
+  uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
   norm_lang <- normalize_language(lang)
   token_metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
   token_metrics <- readRDS(token_metrics_file)
@@ -197,10 +208,12 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
 
   metrics_summaries <- list(
     metrics_mapped |>
-      summarise(across(where(is_character), \(col) list(unique(col)))),
+    summarise(across(where(is_character), \(col) list(unique(col)))),
+    metrics_mapped |> summarise(across(starts_with("freq"), sum)),
     metrics_mapped |> summarise(across(where(is_integer), sum)),
-    metrics_mapped |> summarise(across(where(is_double), mean))
+    metrics_mapped |> summarise(across(where(is.double) & !starts_with("freq"), ~weighted.mean(., frequency)))
   )
+
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
     mutate(n_tokens = map_int(tokens, length), language = lang) |>
