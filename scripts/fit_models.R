@@ -39,7 +39,7 @@ nest_data <- function(df, predictors, full = FALSE) {
            lexical_category = lexical_category |> fct_relevel("other")) |>
     select(language, measure, group, lexical_category, item = uni_lemma, prop,
            total, age, !!predictors)
-  if (!full) { keep_data <- keep_data |> cbind(df$aoa) }
+  if (!full) { keep_data <- keep_data |> cbind(aoa = df$aoa) }
   keep_data |>
     group_by(language, measure) |>
     nest()

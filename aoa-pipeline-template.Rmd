@@ -16,6 +16,7 @@ library(wordbankr)
 library(childesr)
 library(broom)
 library(jglmm)
+library(modelr)
 
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
@@ -191,12 +192,14 @@ aoas <- wb_data |>
   select(-data) |>
   unnest(cols = c(aoa))
 
-joined_data <- wb_data |>
-  left_join(aoas, by = c("language", "measure", "uni_lemma")) |>
+word_values <- aoas |>
   left_join(imputed_data |>
               select(-data) |>
               unnest(cols = c(imputed)), 
             by = c("language", "uni_lemma"))
+
+joined_data <- wb_data |>
+  left_join(word_values, by = c("language", "measure", "uni_lemma"))
 
 predictors <- pred_sources |> unlist()
 
@@ -207,5 +210,13 @@ age glmer model:
 ```{r age-glmer}
 ## TODO: fix fit_models; currently failing in Julia
 fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
+```
+
+Cross-validation:
+```{r}
+loo_df <- crossv_loo(ungroup(word_values))
+loo_models <- fit_cv_models(word_values, list(make_effs_formula(predictors, FALSE, TRUE)), loo_df)
+loo_preds <- get_cv_preds(loo_models, word_values)
+cv_results <- get_cv_results(loo_preds)
 ```
 
