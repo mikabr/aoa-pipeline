@@ -86,14 +86,13 @@ get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
   metrics <- map(metric_funs, \(fun) fun(metric_data)) |>
     reduce(partial(full_join, by = "token")) |>
     mutate(language = lang) |>
-    mutate(count = count + 1,
-           frequency=log(count/sum(count)),
-           count_last=count_last +1,
-           freq_last=log(count_last/sum(count_last)),
-           count_first=count_first+1,
-           freq_first=log(count_first/sum(count_first)),
-           count_solo=count_solo+1,
-           freq_solo=log(count_solo/sum(count_solo)))
+    mutate(sumcount = sum(count),
+           sumcount_last = sum(count_last),
+           sumcount_first = sum(count_first),
+           sumcount_solo = sum(count_solo),
+           freq_raw=count/sum(count))
+
+
 
   if (write) {
     norm_lang <- normalize_language(lang)
@@ -192,8 +191,7 @@ build_uni_lemma_map <- function(uni_lemmas) {
     unnest(option)
 }
 
-get_uni_lemma_metrics <- function(lang, uni_lemmas) {
-  uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
   norm_lang <- normalize_language(lang)
   token_metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
   token_metrics <- readRDS(token_metrics_file)
@@ -209,15 +207,15 @@ get_uni_lemma_metrics <- function(lang, uni_lemmas) {
   metrics_summaries <- list(
     metrics_mapped |>
     summarise(across(where(is_character), \(col) list(unique(col)))),
-    metrics_mapped |> summarise(across(starts_with("freq"), sum)),
-    metrics_mapped |> summarise(across(where(is_integer), sum)),
-    metrics_mapped |> summarise(across(where(is.double) & !starts_with("freq"), ~weighted.mean(., frequency)))
+    metrics_mapped |> summarise(across(where(is_integer) & !starts_with("sum"), sum)),
+    metrics_mapped |> summarise(across(where(is.double), ~weighted.mean(., freq_raw)))
   )
 
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
     mutate(n_tokens = map_int(tokens, length), language = lang) |>
-    select(language, uni_lemma, tokens, n_tokens, everything())
+    select(language, uni_lemma, tokens, n_tokens, everything()) |>
+    mutate(sumcount=metrics_mapped$sumcount[1], sumcount_first=metrics_mapped$sumcount_first[1], sumcount_last=metrics_mapped$sumcount_last[1], sumcount_solo=metrics_mapped$count_solo[1])
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
   saveRDS(uni_metrics, uni_metrics_file)
