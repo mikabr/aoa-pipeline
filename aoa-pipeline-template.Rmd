@@ -144,10 +144,8 @@ Normalize frequency:
 
 childes_metrics <- normalize_frequency(childes_metrics)  
 
-#4. log transformed smoothed frequencies (freq, freq_last, freq_first, freq_solo)
+#4. log transformed smoothed frequencies (frequency, final_frequency, first_frequency, solo_frequency)
 ```
-
-
 
 Combine mapped predictors and CHILDES predictors:
 ```{r}
@@ -157,7 +155,6 @@ uni_joined <- uni_lemmas |>
   left_join(concreteness, by = c("language", "uni_lemma")) |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
 ```
-
 
 Residualize solo freq and final freq
 
