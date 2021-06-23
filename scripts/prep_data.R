@@ -4,6 +4,22 @@
 
 # HELPER FUNCTIONS --------------
 
+
+#Normalize frequency: log transform and smoothing (+1)
+normalize_frequency<- function(uni_childes) {
+  uni_childes |>
+  mutate(count = count + 1,
+         freq=log(count/sum(count)),
+         count_last=count_last +1,
+         freq_last=log(count_last/sum(count_last)),
+         count_first=count_first+1,
+         freq_first=log(count_first/sum(count_first)),
+         count_solo=count_solo+1,
+         freq_solo=log(count_solo/sum(count_solo)))
+}
+
+
+
 # residualize - do each of these get their own functions? w/ an argument
 get_final_freq <- function(uni_childes) {
   return(lm(final_freq ~ requency, data = uni_childes)$residuals)
