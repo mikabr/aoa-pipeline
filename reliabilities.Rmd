@@ -78,25 +78,11 @@ uni_lemmas <- get_uni_lemmas(wb_data) %>%
 predictors <- map_dfr(target_langs, function(lang) {
   norm_lang <- normalize_language(lang)
   childes_lang <- convert_lang_childes(lang)
-  totalcount <- nrow(readRDS(file.path(childes_path, glue("{childes_lang}_tokens.rds")))) ####TOFIX
-
   file_ <- file.path(childes_path, glue("uni_metrics_{norm_lang}.rds"))
-  if(file.exists(file_)){  
-  childes_predictors <- readRDS(file_)
-  } else {
-  get_childes_metrics(lang, metric_funs, corpus_args)
-  childes_predictors <- get_uni_lemma_metrics(lang, uni_lemmas)
-  }
-  childes_predictors <- childes_predictors %>%
-              group_by(language, uni_lemma) %>%
-                summarise(tokens=tokens, 
-                        mlu=mlu,
-                        length_char=length_char,
-                        freq = count/totalcount, 
-                        solo_freq = count_solo/count,
-                        final_freq = count_last/count,
-                        init_freq = count_first/count)
-}) 
+  childes_predictors <- readRDS(file_)|>
+    group_by(language, uni_lemma)}) 
+
+predictors <- normalize_frequency(predictors)  
 
 ```
 
@@ -117,6 +103,14 @@ predictors <- map_dfr(target_langs, function(lang) {
 
 ```{r reliability}
 
+metric_funs <- list(compute_count, compute_mlu, compute_positions,
+                    compute_length_char, compute_length_phon)
+corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
+                    age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
+uni_lemma_map = build_uni_lemma_map(uni_lemmas)
+
+####################### 
+
 # add lemmas of the first half not existing at the second half, with 1 
 same_size_df <- function(df1, df2) { 
   firstlistlemma<-(df1$uni_lemma)
@@ -125,67 +119,41 @@ same_size_df <- function(df1, df2) {
   diff2<-setdiff(secondlistlemma,firstlistlemma) 
   df<-as.data.frame(c(diff1, diff2))
   colnames(df)<- c("uni_lemma")
-  if (nrow(df> 0)){
-    print("parts not equal")
-    df1<- df1 %>%
+  add_missing <- function(df1, df){
+      df1<- df1 %>%
       full_join(df) %>%
       arrange(uni_lemma)
-    df2<- df2 %>%
-      full_join(df)%>%
-      arrange(uni_lemma)
-  }else{}
+      return(df1)
+      }
+    df1<- add_missing(df1, df)
+    df2<- add_missing(df2, df)
   both=list(tibble(df1[!duplicated(df1$uni_lemma),]), tibble(df2[!duplicated(df2$uni_lemma),]))
   return(both)
 }
 
-######################
-unilemma_half_cor<- function(half, lang){  # count raw frequency of half #word_class
-  uni_lemma_map = build_uni_lemma_map(uni_lemmas)
-  half_ <- half %>%
-  mutate(stem = stem(token, convert_lang_stemmer(lang))) %>%
-  inner_join(uni_lemma_map |> rename(token = option)) |>
-  inner_join(uni_lemma_map |> rename(token_stem = option)) |>
-  rename(tokens = token, token_stems = token_stem) |>
-  group_by(uni_lemma) %>%
-  mutate(language=lang) #%>%  
- # summarise(nb_forms=n()
-  metrics_summaries <- list(
-  half_ |> summarise(across(where(is_character), list)),
-  half_ |> summarise(across(where(is_integer), sum)),
-  half_ |> summarise(across(where(is_double), mean))
-  )
-  half_ <- metrics_summaries |>
-    reduce(partial(left_join, by = "uni_lemma")) |>
-  unique()
-  half_ <- half_[!is.na(half_$count), ]
-  return(half_[order(half_$uni_lemma),])
-}
+#######################   
 
-#######################  
-default_metric_funs <- list(compute_count, compute_length_char)
-
-split_half_cor <-function(lang){ #word_class
-  childes_lang <- convert_lang_childes(lang)
-  tokens <-readRDS(glue(childes_path, "{childes_lang}_tokens.rds"))
-  utterances <- readRDS(glue(childes_path, "{childes_lang}_utterances.rds"))
-  unnest_predictors <- predictors %>% filter(language == lang) %>% unnest(tokens)
-  wblemmas<-unique(unnest_predictors$tokens) #used tokens
-  tokens_shrank <- tokens %>%
-    filter(gloss %in% wblemmas)
-  ind <- sample(c(TRUE, FALSE), nrow(tokens_shrank), replace=TRUE, prob=c(0.5, 0.5)) #split tokens
-  tokens1 <- tokens_shrank[ind, ] #split in two
-  tokens2 <- tokens_shrank[!ind, ] #split in two
-  split_df<- function(tokens){
-     utterances <- utterances %>%
+split_predictors<- function(tokens, childes_lang){
+     utterances <- readRDS(glue(childes_path, "{childes_lang}_utterances.rds")) %>%
      filter(id %in% tokens$utterance_id)
      half <- list("utterances" = utterances, "tokens" = tokens)
-     half<- get_childes_metrics(lang=lang, metric_funs = default_metric_funs, corpus_args, half=half)
-    return(half)
+     token_metrics<- get_childes_metrics(lang=lang, metric_funs, corpus_args, import_data=half)
+     uni_metrics<- get_uni_lemma_metrics(lang=lang, uni_lemma_map, token_metrics)
+     uni_metrics <- normalize_frequency(uni_metrics)  
+    return(uni_metrics[order(uni_metrics$uni_lemma),])
   }
-  both=list(tibble(split_df(tokens1)), tibble(split_df(tokens2)))
+
+#######################  
+
+split_half <-function(lang){ #word_class
+  childes_lang <- convert_lang_childes(lang)
+  tokens <-readRDS(glue(childes_path, "{childes_lang}_tokens.rds"))
+  ind <- sample(c(TRUE, FALSE), nrow(tokens), replace=TRUE, prob=c(0.5, 0.5)) #split tokens
+  tokens1 <- tokens[ind, ] #split in two
+  tokens2 <- tokens[!ind, ] #split in two
+  both=list(tibble(split_predictors(tokens1, childes_lang)), tibble(split_predictors(tokens2, childes_lang)))
   return(both)  
   }
-  
 
 #######################
 sbformula <- function(r){  #adjust with spearman-brown formula
@@ -193,43 +161,33 @@ sbformula <- function(r){  #adjust with spearman-brown formula
   return(r1)
 }
 
-#######################
-fix_nas <- function(df){
- df<-df %>%
-  mutate(char_number=ifelse(is.na(length_char), "0", length_char)) %>%
-   mutate(freq=ifelse(is.na(count), "0", count)) %>%
-return(df)
-}
-########################
-
-main_split_half <- function(lang){
-both<-split_half_cor(lang)
-df1<-unilemma_half_cor(both[[1]], lang)
-df2<-unilemma_half_cor(both[[2]], lang)                    
-df<- same_size_df(df1,df2)
-df[[1]]<-fix_nas(df[[1]])
-df[[2]]<-fix_nas(df[[2]])
-return(df)
-}
+#######################  
 
 corr_split<-function(lang){
-df <- main_split_half(lang)  
-length_char_r=cor(as.numeric(df[[1]]$length_char), as.numeric(df[[2]]$length_char), method="pearson", use="complete.obs")
-count_r=cor(as.numeric(df[[1]]$count), as.numeric(df[[2]]$count), method="pearson", use="complete.obs")
-r=c(length_char_r,count_r)
-names= c("length_char","count")
+both<-split_half(lang)
+df<- same_size_df(both[[1]],both[[2]])
+num_zero <- function(vector_with_nas) {
+  vector_with_nas[is.na(vector_with_nas)] <- 0
+  return(as.numeric(vector_with_nas))
+}
+length_char_r=cor(num_zero(df[[1]]$length_char), num_zero(df[[2]]$length_char), method="pearson")
+n_tokens_r=cor(num_zero(df[[1]]$n_tokens), num_zero(df[[2]]$n_tokens), method="pearson")
+mlu_r=cor(num_zero(df[[1]]$mlu), num_zero(df[[2]]$mlu), method="pearson")
+frequency_r=cor(num_zero(df[[1]]$frequency), num_zero(df[[2]]$frequency), method="pearson")
+raw_frequency_r=cor(num_zero(df[[1]]$freq_raw), num_zero(df[[2]]$freq_raw), method="pearson")
+count_r=cor(num_zero(df[[1]]$count), num_zero(df[[2]]$count), method="pearson")
+
+solo_frequency_r=cor(num_zero(df[[1]]$solo_frequency), num_zero(df[[2]]$solo_frequency), method="pearson")
+first_frequency_r=cor(num_zero(df[[1]]$first_frequency), num_zero(df[[2]]$first_frequency), method="pearson")
+final_frequency_r=cor(num_zero(df[[1]]$final_frequency), num_zero(df[[2]]$final_frequency), method="pearson")
+r=c(length_char_r,n_tokens_r, mlu_r, count_r, raw_frequency_r, frequency_r, solo_frequency_r, first_frequency_r, final_frequency_r)
+names= c("length_char","n_tokens", "mlu", "count", "raw_frequency","frequency", "solo_frequency", "first_frequency", "final_frequency")
 rdata <- data.frame(names, r)
 rdata <- rdata %>% mutate(language=lang)
 return(rdata)
 }
 
-#########################
 
-lang_pred_half <- function(lang, pred, split_half){
- s=split_half %>% filter(language==lang, names==pred)
- r=s[1,2]
-return(as.character(r) ) 
-}
 
 ``` 
 
@@ -240,14 +198,21 @@ return(as.character(r) )
 
 ```{r apply_reliability_frequency}
 
-split_half <- lapply(target_langs, corr_split) %>%
+lang_pred_half <- function(lang, pred, split_corpora){
+ s=split_corpora %>% filter(language==lang, names==pred)
+ r=s[1,2]
+return(as.character(r) ) 
+}
+
+
+split_corpora <- lapply(target_langs, corr_split) %>%
   bind_rows() #####could not find croatianpy
 
 reliabilities <- expand_grid(lang = c("Italian"),
                             word_class = c("all"),
-                            pred = c("length_char", "count")) %>%  #"nouns","adjectives","verbs","function_words","other
+                            pred = c("length_char","n_tokens", "mlu", "count", "raw_frequency","frequency", "solo_frequency", "first_frequency", "final_frequency")) %>%  #"nouns","adjectives","verbs","function_words","other
                 rowwise %>%            
- mutate(corrr =  lang_pred_half(lang, pred, split_half)) %>% #split_half
+ mutate(corrr =  lang_pred_half(lang, pred, split_corpora)) %>% #split_half
   mutate(sbr = sbformula(as.numeric(corrr)))
 
 reliabilities %>%
@@ -303,22 +268,9 @@ reliabilities_aoa %>%
 
 ```{r final_Data}
 build_final_data <- function(lang){
-predictor_data <- predictors %>% filter(language==lang)  %>%
-    group_by(uni_lemma)
-metrics_summaries <- list(
-  predictor_data |> summarise(across(where(is_character), list)),
-  predictor_data |> summarise(across(where(is_integer), sum)),
-  predictor_data |> summarise(across(where(is_double), mean))
-  )
-  predictor_data <- metrics_summaries |>
-    reduce(partial(left_join, by = "uni_lemma")) |>
-  unique() %>%
-  ungroup() %>%
-  mutate(count=freq) %>% 
-  select(uni_lemma, length_char, count)
-
+predictor_data <- predictors %>% filter(language==lang)
 aoas <- aoas %>% filter(language== lang)
- d <- aoas %>%
+d <- aoas %>%
   mutate(language=lang) %>%  
   left_join(predictor_data) %>%
   ungroup() %>% 
@@ -335,8 +287,6 @@ return(d)
 
 d <- lapply(target_langs, build_final_data) %>%
   bind_rows() #####could not find croatianpy
-
-
 
 
  regression_option1<-function(d,  pr){
