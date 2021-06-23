@@ -44,7 +44,7 @@ Loading cached Wordbank data for multiple languages:
 # target_langs <- c("Croatian", "Danish", "English (American)",
 #                   "French (Quebecois)", "Italian", "Norwegian", "Russian",
 #                   "Spanish (Mexican)", "Swedish", "Turkish")
-target_langs <- c("English (American)")
+target_langs <- c("Italian", "English (American)")
 
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
@@ -134,6 +134,20 @@ Creating saved CHILDES data for many languages:
 walk(target_langs, get_childes_metrics)
 walk(target_langs, get_uni_lemma_metrics, uni_lemmas)
 ```
+
+Normalize frequency:
+```{r}
+#the output has: 
+#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
+#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
+#3. freq_raw is the raw frequency (dividing count / sumcount)
+
+childes_metrics <- normalize_frequency(childes_metrics)  
+
+#4. log transformed smoothed frequencies (freq, freq_last, freq_first, freq_solo)
+```
+
+
 
 Combine mapped predictors and CHILDES predictors:
 ```{r}
