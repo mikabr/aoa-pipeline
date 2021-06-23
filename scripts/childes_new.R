@@ -62,12 +62,12 @@ default_corpus_args <- list(corpus = NULL, role = NULL,
 
 get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
                                 corpus_args = default_corpus_args,
-                                write = TRUE, half=NULL) {
+                                write = TRUE, import_data=NULL) {
 
   childes_lang <- convert_lang_childes(lang)
 
-  if (!is.null(half)){
-   childes_data <- half
+  if (!is.null(import_data)){
+   childes_data <- import_data
   }else{
    childes_data <- get_childes_data(childes_lang, corpus_args)
   }
@@ -91,7 +91,6 @@ get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
            sumcount_first = sum(count_first),
            sumcount_solo = sum(count_solo),
            freq_raw=count/sum(count))
-
 
 
   if (write) {
@@ -191,10 +190,14 @@ build_uni_lemma_map <- function(uni_lemmas) {
     unnest(option)
 }
 
-get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
+get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data=NULL) {
   norm_lang <- normalize_language(lang)
+  if (!is.null(import_data)){
+    token_metrics <- import_data
+  }else{
   token_metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
   token_metrics <- readRDS(token_metrics_file)
+  }
 
   metrics_mapped <- token_metrics |>
     mutate(token_stem = stem(token, convert_lang_stemmer(lang))) |>
@@ -208,8 +211,9 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
     metrics_mapped |>
     summarise(across(where(is_character), \(col) list(unique(col)))),
     metrics_mapped |> summarise(across(where(is_integer) & !starts_with("sum"), sum)),
-    metrics_mapped |> summarise(across(where(is.double), ~weighted.mean(., freq_raw)))
-  )
+    metrics_mapped |> summarise(across(where(is.double) & !starts_with("freq"), ~weighted.mean(., freq_raw))),
+    metrics_mapped |> summarise(across(starts_with("freq"), sum)))
+
 
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
@@ -219,4 +223,5 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map) {
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
   saveRDS(uni_metrics, uni_metrics_file)
+  return(uni_metrics)
 }
