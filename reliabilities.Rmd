@@ -46,23 +46,30 @@ load_cdi<- function(lang) {
 ```
 
 ```{r aoas}
-aoas <- map_df(target_langs, function(lang) {
-  items <- load_cdi(lang)
-  aoa <- fit_aoa(items, measure = "produces", method = "glmrob", proportion = 0.5)%>%
-                                 filter(!is.na(aoa), !is.na(uni_lemma)) %>%
-                                  mutate(language=lang)
-  return(aoa)
-})
-
-```
-
-```{r unilemmas}
-
+#aoas <- map_df(target_langs, function(lang) {
+#  items <- load_cdi(lang)
+#  aoa <- fit_aoa(items, measure = "produces", method = "glmrob", proportion = 0.5)%>%
+#                                 filter(!is.na(aoa), !is.na(uni_lemma)) %>%
+#                                  mutate(language=lang)
+#  return(aoa)
+#})
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
   norm_lang <- normalize_language(lang)
   readRDS(glue("data/wordbank/{norm_lang}.rds"))
 })
+
+wb_data <- wb_data |>
+  mutate(num_false = total - num_true,
+         prop = num_true / total) |>
+  select(language, measure, uni_lemma, age, prop, num_true, num_false, total, items)
+
+aoas <- wb_data |>
+  group_by(language, measure) |>
+  nest() |>
+  mutate(aoa = map(data, get_aoas, max_steps = 400)) |>
+  select(-data) |>
+  unnest(cols = c(aoa))
 
 uni_lemmas <- get_uni_lemmas(wb_data) %>%
   unnest(items) %>%
@@ -270,16 +277,34 @@ reliabilities_aoa %>%
 build_final_data <- function(lang){
 predictor_data <- predictors %>% filter(language==lang)
 aoas <- aoas %>% filter(language== lang)
-d <- aoas %>%
-  mutate(language=lang) %>%  
-  left_join(predictor_data) %>%
-  ungroup() %>% 
-  select(-c(item_id, num_item_id)) %>%
+word_values <- aoas |>
+  left_join(predictor_data) # |>
+              #select(-data) |>
+              #unnest(cols = c(imputed)), 
+          #  by = c("language", "uni_lemma"))
+joined_data <- wb_data |>
+  left_join(word_values, by = c("language", "measure", "uni_lemma"))%>%
   filter(!is.na(aoa), !is.na(uni_lemma), !is.na(count))  %>%
   unique()
-
-return(d)
+return(joined_data)
 }
+
+#d <- aoas %>%
+#  mutate(language=lang) %>%  
+#  left_join(predictor_data) %>%
+#  ungroup() %>% 
+#  select(-c(item_id, num_item_id)) %>%
+#  filter(!is.na(aoa), !is.na(uni_lemma), !is.na(count))  %>%
+#  unique()
+
+
+###aoas <- wb_data |>
+##  group_by(language, measure) |>
+##  nest() |>
+##  mutate(aoa = map(data, get_aoas, max_steps = 400)) |>
+##  select(-data) |>
+##  unnest(cols = c(aoa))
+
 ```
 
 
@@ -289,18 +314,40 @@ d <- lapply(target_langs, build_final_data) %>%
   bind_rows() #####could not find croatianpy
 
 
- regression_option1<-function(d,  pr){
- predictor <- d[[pr]]
- option1<-lm(aoa~predictor, d) 
- return(summary(option1)$adj.r.squared)
- }
+prepped_data <- d |>
+  # select out just the by lexical item data
+  unnest(cols = "items") |>
+  # select(-c(age, num_true, total, form, item_id)) |>
+  distinct() |>
+  # pull out categories from classes
+  mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
+                                    lexical_class),
+         # collapse v, adj, adv into one category
+         lexical_category = lexical_category |> as_factor() |>
+           suppressWarnings(
+             fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))
+             )) |>
+  select(-lexical_class)
+
+#predictors <- pred_sources |> unlist()
+
+#fitted_aoa_models <- fit_models(joined_data, predictors, full = FALSE)$rquared
+
+
+ #regression_option1<-function(d,  pr){
+ #predictor <- d[[pr]]
+ #option1<-lm(aoa~predictor, d) 
+ #return(summary(option1)$adj.r.squared)
+ #}
 # 
- r2 <- expand_grid(lang = c("Italian"), 
+ rsq <- expand_grid(lang = c("Italian"), 
               #     class = c("all"),
-                   pred = c("count",  "length_char")) %>% 
+                   predictor = c("length_char"),
+                    measures= c("produces"))#,"n_tokens", "mlu", "count", "frequency", #"solo_frequency", "first_frequency", "final_frequency")) %>% 
   rowwise %>%
-  mutate(r2=regression_option1(d %>% filter(language==lang), pr = pred)) %>%
-  rename( language = lang, predictor=pred)
+  mutate(r=fit_models(prepped_data %>% filter(language==lang, measure==measures), predictor, full=FALSE)) %>%
+#  mutate(r2=r$rsquared[1]) 
+  rename( language = lang)
 
 ```
 
