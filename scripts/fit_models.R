@@ -82,7 +82,8 @@ fit_models <- function(df, predictors, full = FALSE, lex_effects = TRUE, formula
   if (is.null(formula)) { formula <- make_effs_formula(predictors, full, lex_effects) }
   nest_data(df, predictors, full) |>
     mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
-           results = map(model, tidy))
+           results = map(model, tidy),
+           rsquared = map(model, glance))
 }
 
 ####### TEST CASE

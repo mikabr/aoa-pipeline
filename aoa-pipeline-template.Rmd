@@ -44,7 +44,7 @@ Loading cached Wordbank data for multiple languages:
 # target_langs <- c("Croatian", "Danish", "English (American)",
 #                   "French (Quebecois)", "Italian", "Norwegian", "Russian",
 #                   "Spanish (Mexican)", "Swedish", "Turkish")
-target_langs <- c("English (American)")
+target_langs <- c("French (Quebecois)", "Croatian")
 
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
@@ -107,7 +107,6 @@ eng_childes
 Loading cached CHILDES data for multiple languages:
 ```{r}
 uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
-target_langs <- c("English (American)")
 
 childes_metrics <- map_df(target_langs, function(lang) {
   message(glue("Loading CHILDES data for {lang}..."))
@@ -123,9 +122,9 @@ metric_funs <- list(compute_count, compute_mlu, compute_positions,
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
-eng_token_metrics <- get_childes_metrics("English (American)", metric_funs,
+tur_token_metrics <- get_childes_metrics("French (Quebecois)", metric_funs,
                                          corpus_args)
-eng_uni_lemma_metrics <- get_uni_lemma_metrics("English (American)",
+tur_uni_lemma_metrics <- get_uni_lemma_metrics("Croatian",
                                                uni_lemma_map)
 ```
 
@@ -133,6 +132,18 @@ Creating saved CHILDES data for many languages:
 ```{r, eval=FALSE}
 walk(target_langs, get_childes_metrics)
 walk(target_langs, get_uni_lemma_metrics, uni_lemmas)
+```
+
+Normalize frequency:
+```{r}
+#the output has: 
+#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
+#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
+#3. freq_raw is the raw frequency (dividing count / sumcount)
+
+childes_metrics <- normalize_frequency(childes_metrics)  
+
+#4. log transformed smoothed frequencies (frequency, final_frequency, first_frequency, solo_frequency)
 ```
 
 Combine mapped predictors and CHILDES predictors:
@@ -143,7 +154,6 @@ uni_joined <- uni_lemmas |>
   left_join(concreteness, by = c("language", "uni_lemma")) |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
 ```
-
 
 Residualize solo freq and final freq
 
@@ -167,10 +177,10 @@ prepped_data <- uni_joined |>
   select(-lexical_class)
 
 pred_sources <- list(
-  # c("frequency", "MLU", "final_frequency", "solo_frequency"),
+  c("frequency", "mlu", "final_frequency", "first_frequency", "solo_frequency"),
   c("valence", "arousal"),
-  "concreteness", "babiness"#, "num_phons"
-)
+  c("concreteness", "babiness"),
+  c("length_char"))
 
 imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 ```

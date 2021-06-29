@@ -62,12 +62,12 @@ default_corpus_args <- list(corpus = NULL, role = NULL,
 
 get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
                                 corpus_args = default_corpus_args,
-                                write = TRUE, half=NULL) {
+                                write = TRUE, import_data=NULL) {
 
   childes_lang <- convert_lang_childes(lang)
 
-  if (!is.null(half)){
-   childes_data <- half
+  if (!is.null(import_data)){
+   childes_data <- import_data
   }else{
    childes_data <- get_childes_data(childes_lang, corpus_args)
   }
@@ -86,14 +86,12 @@ get_childes_metrics <- function(lang, metric_funs = default_metric_funs,
   metrics <- map(metric_funs, \(fun) fun(metric_data)) |>
     reduce(partial(full_join, by = "token")) |>
     mutate(language = lang) |>
-    mutate(count = count + 1,
-           frequency=log(count/sum(count)),
-           count_last=count_last +1,
-           freq_last=log(count_last/sum(count_last)),
-           count_first=count_first+1,
-           freq_first=log(count_first/sum(count_first)),
-           count_solo=count_solo+1,
-           freq_solo=log(count_solo/sum(count_solo)))
+    mutate(sumcount = sum(count),
+           sumcount_last = sum(count_last),
+           sumcount_first = sum(count_first),
+           sumcount_solo = sum(count_solo),
+           freq_raw=count/sum(count))
+
 
   if (write) {
     norm_lang <- normalize_language(lang)
@@ -115,6 +113,8 @@ get_childes_data <- function(childes_lang, corpus_args) {
                                role_exclude = corpus_args$role_exclude,
                                age = corpus_args$age,
                                sex = corpus_args$sex)
+  uttpath <- glue("{childes_path}/{childes_lang}_utterances.rds")
+  saveRDS(utterances, uttpath)
   } else {
   utterances<-readRDS(file_u)
   }
@@ -126,8 +126,11 @@ get_childes_data <- function(childes_lang, corpus_args) {
                        age = corpus_args$age,
                        sex = corpus_args$sex,
                        token = corpus_args$token)
+  tokpath <- glue("{childes_path}/{childes_lang}_tokens.rds")
+  saveRDS(tokens, tokpath)
   } else {
     tokens<-readRDS(file_t)
+
   }
   return(list("utterances" = utterances, "tokens" = tokens))
 }
@@ -151,18 +154,23 @@ transforms <- list(
   #   function(x) paste0(x, "s-moi")
 )
 
-build_special_case_map <- function(language) {
-  norm_lang <- normalize_language(language)
+build_special_case_map <- function(lang) {
+  norm_lang <- normalize_language(lang)
   special_case_file <- glue("resources/special_cases/{norm_lang}.csv")
   if (file.exists(special_case_file)) {
-    read_csv(special_case_file, col_names = FALSE) |>
+    a<-read_csv(special_case_file, col_names = FALSE) |>
       rename(uni_lemma = X1, definition = X2) |>
       pivot_longer(-c(uni_lemma, definition),
                    names_to = "x", values_to = "option") |>
       filter(!is.na(option)) |>
       select(-x) |>
-      mutate(language = language)
+      mutate(language = lang)
   }
+  else{
+    a<-data.frame(matrix(ncol=4,nrow=0, dimnames=list(NULL, c("uni_lemma", "definition", "option", "language")))) %>%
+      mutate(language = lang, uni_lemma = as.character(uni_lemma), definition = as.character(definition), option = as.character(option) )
+  }
+  return(a)
 }
 
 build_options <- function(language, word, special_cases) {
@@ -192,16 +200,19 @@ build_uni_lemma_map <- function(uni_lemmas) {
     unnest(option)
 }
 
-get_uni_lemma_metrics <- function(lang, uni_lemmas) {
-  uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data=NULL) {
   norm_lang <- normalize_language(lang)
+  if (!is.null(import_data)){
+    token_metrics <- import_data
+  }else{
   token_metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
   token_metrics <- readRDS(token_metrics_file)
+  }
 
   metrics_mapped <- token_metrics |>
     mutate(token_stem = stem(token, convert_lang_stemmer(lang))) |>
-    inner_join(uni_lemma_map |> rename(token = option)) |>
-    inner_join(uni_lemma_map |> rename(token_stem = option)) |>
+    inner_join(uni_lemma_map |> mutate(option = tolower(option))  |> rename(token = option)) |>
+    inner_join(uni_lemma_map |> mutate(option = tolower(option)) |> rename(token_stem = option)) |>
     select(-language, -token_stem) |>
     rename(tokens = token) |>
     group_by(uni_lemma)
@@ -209,16 +220,18 @@ get_uni_lemma_metrics <- function(lang, uni_lemmas) {
   metrics_summaries <- list(
     metrics_mapped |>
     summarise(across(where(is_character), \(col) list(unique(col)))),
-    metrics_mapped |> summarise(across(starts_with("freq"), sum)),
-    metrics_mapped |> summarise(across(where(is_integer), sum)),
-    metrics_mapped |> summarise(across(where(is.double) & !starts_with("freq"), ~weighted.mean(., frequency)))
-  )
+    metrics_mapped |> summarise(across(where(is_integer) & !starts_with("sum"), sum)),
+    metrics_mapped |> summarise(across(where(is.double) & !starts_with("freq"), ~weighted.mean(., freq_raw))),
+    metrics_mapped |> summarise(across(starts_with("freq"), sum)))
+
 
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
     mutate(n_tokens = map_int(tokens, length), language = lang) |>
-    select(language, uni_lemma, tokens, n_tokens, everything())
+    select(language, uni_lemma, tokens, n_tokens, everything()) |>
+    mutate(sumcount=metrics_mapped$sumcount[1], sumcount_first=metrics_mapped$sumcount_first[1], sumcount_last=metrics_mapped$sumcount_last[1], sumcount_solo=metrics_mapped$count_solo[1])
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
   saveRDS(uni_metrics, uni_metrics_file)
+  return(uni_metrics)
 }
