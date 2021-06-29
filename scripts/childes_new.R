@@ -113,6 +113,8 @@ get_childes_data <- function(childes_lang, corpus_args) {
                                role_exclude = corpus_args$role_exclude,
                                age = corpus_args$age,
                                sex = corpus_args$sex)
+  uttpath <- glue("{childes_path}/{childes_lang}_utterances.rds")
+  saveRDS(utterances, uttpath)
   } else {
   utterances<-readRDS(file_u)
   }
@@ -124,8 +126,11 @@ get_childes_data <- function(childes_lang, corpus_args) {
                        age = corpus_args$age,
                        sex = corpus_args$sex,
                        token = corpus_args$token)
+  tokpath <- glue("{childes_path}/{childes_lang}_tokens.rds")
+  saveRDS(tokens, tokpath)
   } else {
     tokens<-readRDS(file_t)
+
   }
   return(list("utterances" = utterances, "tokens" = tokens))
 }
@@ -149,18 +154,23 @@ transforms <- list(
   #   function(x) paste0(x, "s-moi")
 )
 
-build_special_case_map <- function(language) {
-  norm_lang <- normalize_language(language)
+build_special_case_map <- function(lang) {
+  norm_lang <- normalize_language(lang)
   special_case_file <- glue("resources/special_cases/{norm_lang}.csv")
   if (file.exists(special_case_file)) {
-    read_csv(special_case_file, col_names = FALSE) |>
+    a<-read_csv(special_case_file, col_names = FALSE) |>
       rename(uni_lemma = X1, definition = X2) |>
       pivot_longer(-c(uni_lemma, definition),
                    names_to = "x", values_to = "option") |>
       filter(!is.na(option)) |>
       select(-x) |>
-      mutate(language = language)
+      mutate(language = lang)
   }
+  else{
+    a<-data.frame(matrix(ncol=4,nrow=0, dimnames=list(NULL, c("uni_lemma", "definition", "option", "language")))) %>%
+      mutate(language = lang, uni_lemma = as.character(uni_lemma), definition = as.character(definition), option = as.character(option) )
+  }
+  return(a)
 }
 
 build_options <- function(language, word, special_cases) {
@@ -201,8 +211,8 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data=NULL) {
 
   metrics_mapped <- token_metrics |>
     mutate(token_stem = stem(token, convert_lang_stemmer(lang))) |>
-    inner_join(uni_lemma_map |> rename(token = option)) |>
-    inner_join(uni_lemma_map |> rename(token_stem = option)) |>
+    inner_join(uni_lemma_map |> mutate(option = tolower(option))  |> rename(token = option)) |>
+    inner_join(uni_lemma_map |> mutate(option = tolower(option)) |> rename(token_stem = option)) |>
     select(-language, -token_stem) |>
     rename(tokens = token) |>
     group_by(uni_lemma)
