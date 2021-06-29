@@ -156,8 +156,11 @@ uni_joined <- uni_lemmas |>
 ```
 
 Residualize solo freq and final freq
-
 ```{r}
+# residualize frequency out of final and solo frequencies
+uni_joined$final_frequency <- do_residualization(final_frequency, frequency, data = uni_joined)
+
+uni_joined$solo_frequency  <- do_residualization(solo_frequency, frequency, data = uni_joined)
 ```
 
 ```{r impute}

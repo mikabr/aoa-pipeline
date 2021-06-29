@@ -21,13 +21,10 @@ normalize_frequency<- function(uni_childes) {
 
 
 # residualize - do each of these get their own functions? w/ an argument
-get_final_freq <- function(uni_childes) {
-  return(lm(final_freq ~ requency, data = uni_childes)$residuals)
-}
-get_solo_freq <- function(uni_childes) {
-  return(lm(final_freq ~ requency, data = uni_childes)$residuals)
-}
 
+do_residualization <- function(target_column, residualizing_column, data){
+  returm(lm(target_column ~ residualizing_column, data = data)$residuals)
+}
 
 fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources |> discard(\(s) pred %in% s) |> unlist()
