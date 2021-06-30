@@ -22,6 +22,7 @@ walk(list.files("scripts", pattern = "*.R", full.names = TRUE), source)
 #target_langs <- c("Russian", "Turkish", "Croatian", "Danish", "Italian")
 target_langs <- c("Danish", "Croatian", "Russian", "Turkish", "Croatian", "Danish", "Italian", "French (Quebecois)", "English (American)", "Swedish")
 
+
 childes_path <- "data/childes/"
 
 metric_funs <- list(compute_count, compute_mlu, compute_positions,
@@ -56,7 +57,7 @@ load_cdi<- function(lang) {
 
 split_half <-function(lang){ #word_class
   childes_lang <- convert_lang_childes(lang)
-  tokens <-readRDS(glue(childes_path, "{childes_lang}_tokens.rds"))
+  tokens <-readRDS(glue(childes_path, "{childes_lang}_tokens.rds")) %>% mutate(gloss=tolower(gloss))
   ind <- sample(c(TRUE, FALSE), nrow(tokens), replace=TRUE, prob=c(0.5, 0.5)) #split tokens
   tokens1 <- tokens[ind, ] #split in two
   tokens2 <- tokens[!ind, ] #split in two
@@ -122,7 +123,8 @@ same_size_df <- function(df1, df2) {
 split_predictors<- function(tokens, lang){
      childes_lang <- convert_lang_childes(lang)
      utterances <- readRDS(glue(childes_path, "{childes_lang}_utterances.rds")) %>%
-     filter(id %in% tokens$utterance_id)
+      filter(id %in% tokens$utterance_id) %>%
+      mutate(gloss=tolower(gloss))
      half <- list("utterances" = utterances, "tokens" = tokens)
      token_metrics<- get_childes_metrics(lang=lang, metric_funs, corpus_args, import_data=half)
      uni_metrics<- get_uni_lemma_metrics(lang=lang, build_uni_lemma_map(uni_lemmas), token_metrics)
@@ -167,7 +169,9 @@ word_values <- aoas |>
               #select(-data) |>
               #unnest(cols = c(imputed)), 
           #  by = c("language", "uni_lemma"))
-joined_data <- wb_data |>
+
+#joined_data <- word_values %>%
+joined_data <- wb_data %>% select(language, measure, uni_lemma, items, prop) %>% filter(language==lang) |>
   left_join(word_values, by = c("language", "measure", "uni_lemma"))%>%
   filter(!is.na(aoa), !is.na(uni_lemma), !is.na(count))  %>%
   unique()
@@ -222,7 +226,6 @@ splitpath<- glue("{childes_path}split_corpora.rds")
   saveRDS(split_corpora, splitpath)
 
 
-
 reliabilities <- expand_grid(lang = target_langs,
                             word_class = c("all"),
                             pred = c("length_char","n_tokens", "mlu", "count", "freq_raw","frequency", "solo_frequency", "first_frequency", "final_frequency")) %>%  #"nouns","adjectives","verbs","function_words","other
@@ -234,6 +237,9 @@ reliabilities %>%
   knitr::kable(digits = 2)
 
 
+target_langs <- c("Danish", "Croatian", "Russian", "Turkish", "Croatian", "Danish", "Italian", "French (Quebecois)", "English (American)")
+####Swedish
+
 reliabilities_aoa <- expand_grid(language = target_langs,
                                  measure = c("produces", "understands"),
                             word_class = c("all")) %>% # "nouns","adjectives","verbs",   "function_words","other"
@@ -244,6 +250,10 @@ reliabilities_aoa <- expand_grid(language = target_langs,
   #                           split_half_cor_aoa(language, measure),
   #                           split_half_cor_aoa(language, word_class)),
   #      
+pathrelaoa<- glue("{childes_path}reliabilities_aoa.rds")
+  saveRDS(reliabilities_aoa, pathrelaoa)
+
+
 
 reliabilities_aoa %>%
   knitr::kable(digits = 2)
@@ -276,21 +286,30 @@ rsq <- expand_grid(lang = target_langs,
 #  mutate(r2=r$rsquared[1]) 
   rename( language = lang)
 
+reliabilities <- reliabilities %>% select(language, predictor, corrr, sbr) %>% unique()
+reliabilities_aoa <- reliabilities_aoa %>% select(language, measure, split_half_aoa, split_half_aoa_sb) %>% unique() %>% filter(! language =="Danish", !language=="Croatian")
+rsq <- rsq %>% rename(measure = measures)
+
+
 dfinal <- reliabilities %>%
-  mutate(word_class = ifelse(word_class == "", 
-                            "all", word_class)) %>%
-  rename(language=lang, predictor=pred) %>%
   left_join(reliabilities_aoa) %>%
+    unique() %>%
+   filter(!is.na(measure)) %>% 
+   filter(!is.na(corrr)) %>%
     mutate(threshold_half = sbr * split_half_aoa_sb) %>%
-      left_join(unique(r2))
+    left_join(unique(rsq)) %>%
+  filter(!is.na(r)) %>% 
+  unique()
+
+dfinal1<- dfinal %>% filter(!language == "Russian", !language == "Italian", ! predictor =="count") 
 
 dfinal %>%
   knitr::kable(digits = 2)
 
-ggplot(dfinal, aes(y = r2, x=predictor)) + 
+ggplot(dfinal, aes(y = r, x=predictor)) + 
    geom_bar(stat="identity") + 
-  geom_point() + 
-  facet_grid(cols = vars(word_class), rows = vars(language)) +
+  #geom_point() + 
+  facet_grid(cols = vars(measure), rows = vars(language)) +
   geom_errorbar(data  = dfinal, aes(y=threshold_half, ymax=threshold_half, ymin=threshold_half)) + 
   theme(legend.position = "bottom") + 
   ylab("R2") + 

@@ -8,15 +8,12 @@
 #Normalize frequency: log transform and smoothing (+1)
 normalize_frequency<- function(uni_childes) {
   uni_childes |>
-  mutate(count = count + 1,
-         frequency=log(count/sum(count)),
-         count_last=count_last +1,
-         final_frequency=log(count_last/sum(count_last)),
-         count_first=count_first+1,
-         first_frequency=log(count_first/sum(count_first)),
-         count_solo=count_solo+1,
-         solo_frequency=log(count_solo/sum(count_solo)))
+    mutate(frequency=log(count/sum(count) + 1),
+           final_frequency=log(count_last/sum(count_last) +1),
+           first_frequency=log(count_first/sum(count_first) + 1),
+           solo_frequency=log(count_solo/sum(count_solo)+1))
 }
+
 
 
 
