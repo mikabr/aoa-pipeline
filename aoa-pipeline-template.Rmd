@@ -41,10 +41,9 @@ eng_wb_data
 
 Loading cached Wordbank data for multiple languages:
 ```{r}
-# target_langs <- c("Croatian", "Danish", "English (American)",
-#                   "French (Quebecois)", "Italian", "Norwegian", "Russian",
-#                   "Spanish (Mexican)", "Swedish", "Turkish")
-target_langs <- c("French (Quebecois)", "Croatian")
+target_langs <- c("Croatian", "Danish", "English (American)", "Nowegian", "Russian", "Turkish", "French (French)", "Spanish (Mexican)", "Italian", "Swedish",  "English (Australian)", "German", "English (British)")
+# "Croatian", "Danish", "English (American)", , "Italian", "Norwegian", "Russian", "Spanish #(Mexican)", "Swedish", "Turkish",  "German","English (Australian)", "English (British)", #"French (French)")
+#"Spanish (European)" Portuguese (European) French (Quebecois)
 
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
@@ -55,7 +54,7 @@ wb_data <- map_df(target_langs, function(lang) {
 
 Creating saved Wordbank data for English:
 ```{r, eval=FALSE}
-create_wb_data("English (American)")
+create_wb_data("Portuguese (European)")
 ```
 
 Creating saved Wordbank data for many languages:
@@ -122,16 +121,14 @@ metric_funs <- list(compute_count, compute_mlu, compute_positions,
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
-tur_token_metrics <- get_childes_metrics("French (Quebecois)", metric_funs,
-                                         corpus_args)
-tur_uni_lemma_metrics <- get_uni_lemma_metrics("Croatian",
-                                               uni_lemma_map)
+get_childes_metrics("French (Quebecois)", metric_funs, corpus_args)
+get_uni_lemma_metrics("French (Quebecois)", uni_lemma_map)
 ```
 
 Creating saved CHILDES data for many languages:
 ```{r, eval=FALSE}
-walk(target_langs, get_childes_metrics)
-walk(target_langs, get_uni_lemma_metrics, uni_lemmas)
+walk(target_langs, get_childes_metrics, metric_funs, corpus_args)
+walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
 Normalize frequency:
@@ -140,10 +137,14 @@ Normalize frequency:
 #1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
 #2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
 #3. freq_raw is the raw frequency (dividing count / sumcount)
-
 childes_metrics <- normalize_frequency(childes_metrics)  
 
-#4. log transformed smoothed frequencies (frequency, final_frequency, first_frequency, solo_frequency)
+# residualize frequency out of final and solo frequencies
+
+childes_metrics$final_frequency <- do_residualization(childes_metrics$final_frequency, childes_metrics$frequency)
+childes_metrics$solo_frequency  <- do_residualization(childes_metrics$solo_frequency, childes_metrics$frequency)
+childes_metrics$first_frequency  <- do_residualization(childes_metrics$first_frequency, childes_metrics$frequency)
+
 ```
 
 Combine mapped predictors and CHILDES predictors:
@@ -153,14 +154,16 @@ uni_joined <- uni_lemmas |>
   left_join(valence, by = c("language", "uni_lemma")) |>
   left_join(concreteness, by = c("language", "uni_lemma")) |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
+
+#uni_joined <- uni_joined %>% filter(!is.na(frequency))
+
 ```
 
 Residualize solo freq and final freq
-```{r}
-# residualize frequency out of final and solo frequencies
-uni_joined$final_frequency <- do_residualization(final_frequency, frequency, data = uni_joined)
 
-uni_joined$solo_frequency  <- do_residualization(solo_frequency, frequency, data = uni_joined)
+```{r}
+
+
 ```
 
 ```{r impute}
@@ -183,9 +186,12 @@ pred_sources <- list(
   c("frequency", "mlu", "final_frequency", "first_frequency", "solo_frequency"),
   c("valence", "arousal"),
   c("concreteness", "babiness"),
-  c("length_char"))
+  c("length_char"),
+  c("n_tokens"))
+
 
 imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
+
 ```
 
 
@@ -193,10 +199,14 @@ imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 
 aoa lm model:
 ```{r aoa-lm}
+
+
+
 wb_data <- wb_data |>
   mutate(num_false = total - num_true,
          prop = num_true / total) |>
-  select(language, measure, uni_lemma, age, prop, num_true, num_false, total, items)
+  select(language, measure, uni_lemma, prop, num_true,age, num_false, total, items) %>%
+         unique()
 
 aoas <- wb_data |>
   group_by(language, measure) |>
@@ -209,27 +219,110 @@ word_values <- aoas |>
   left_join(imputed_data |>
               select(-data) |>
               unnest(cols = c(imputed)), 
-            by = c("language", "uni_lemma"))
+            by = c("language", "uni_lemma")) 
+
 
 joined_data <- wb_data |>
   left_join(word_values, by = c("language", "measure", "uni_lemma"))
 
-predictors <- pred_sources |> unlist()
 
-fitted_aoa_models <- fit_models(joined_data, predictors, full = FALSE)
+predictors <- pred_sources |> unlist() 
+list1= c("frequency", "mlu","final_frequency","valence", "arousal", "concreteness", 
+             "babiness", "first_frequency", "solo_frequency") #, "char_length", "n_tokens"
+list2=c("frequency","final_frequency", "first_frequency", "solo_frequency")
+list3=c("valence", "arousal", "concreteness", "babiness")
+list4= c("frequency", "mlu","final_frequency", "first_frequency", "solo_frequency")
+list5= c("frequency", "mlu")
+list6= c("frequency", "valence", "arousal", "concreteness", "babiness")
+#list7= c("mlu", "valence", "arousal", "concreteness", "babiness")
+
+preds=list(list1,list2, list3, list4, list5, list6, c("frequency"), c("mlu"), c("final_frequency"), c("valence"), c("arousal"), c("concreteness"), c("babiness"), c("first_frequency"), c("solo_frequency"))#c("char_length"), c("n_tokens")
+
+
+fitted_aoa_models <- map_df(preds, fit_models, joined_data, full = FALSE)
+saveRDS(fitted_aoa_models, "data/fitted_aoa_models_whole.rds")
+
+
+fitted_aoa_models <- fit_models(predictors,joined_data,  full = FALSE)
+
+saveRDS(fitted_aoa_models, "data/fitted_aoa_models.rds")
+
 ```
 
 age glmer model:
 ```{r age-glmer}
 ## TODO: fix fit_models; currently failing in Julia
-fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
+#fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
 ```
 
 Cross-validation:
 ```{r}
-loo_df <- crossv_loo(ungroup(word_values))
-loo_models <- fit_cv_models(word_values, list(make_effs_formula(predictors, FALSE, TRUE)), loo_df)
-loo_preds <- get_cv_preds(loo_models, word_values)
-cv_results <- get_cv_results(loo_preds)
+
+cv_model <- function(preds, loo_df, lang, meas){
+ loo_models <- fit_cv_models(word_values, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
+ loo_preds <- get_cv_preds(loo_models, word_values)
+ cv_results <- get_cv_results(loo_preds) 
+ cv <-cv_results %>%
+ select(mean_abs_dev, ci_mad_min, ci_mad_max) %>% 
+ mutate(language=lang, measure=meas, pr=list(preds))
+ return(cv)
+}
+
+
+cv_model_lex <- function(preds, loo_df, lang, meas){
+ loo_models <- fit_cv_models(word_values, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
+ loo_preds <- get_cv_preds(loo_models, word_values)
+ a<- head(arrange(loo_preds, desc(abs_dev)),50) %>% 
+  group_by(lexical_category) %>%
+  summarise(count=n()) %>%
+  mutate(language=lang, measure=meas, pr=list(preds))
+ return(a)
+}
+
+
+main_cvpred <- function(lang, meas){
+word_v<- word_values %>%  filter(measure ==meas, language==lang)
+targetl<- unique(word_v$language) 
+cv_df<-function(lang, meas){
+ word_values<- word_values %>%  filter(measure ==meas, language==lang)
+ loo_df <- crossv_loo(ungroup(word_values))
+ m<-map_df(preds, cv_model, loo_df, lang, meas)
+ return(m)
+} 
+if (length(targetl) != 0){
+r<- map_df(targetl, cv_df, meas)
+return(r)
+}
+}
+
+cv_across_lang <- map_df(target_langs, main_cvpred, meas="produces") %>%
+  rbind(map_df(target_langs, main_cvpred, meas="understands") )
+
+saveRDS(cv_across_lang, "data/cv_across_lang.rds")
+
+
+main_cvpredlex <- function(lang, meas){
+word_v<- word_values %>%  filter(measure ==meas, language==lang)
+targetl<- unique(word_v$language) 
+cv_df_l<-function(lang, meas){
+ word_values<- word_values %>%  filter(measure ==meas, language==lang)
+ loo_df <- crossv_loo(ungroup(word_values))
+ m<-map_df(preds, cv_model_lex, loo_df, lang, meas)
+ return(m)
+} 
+if (length(targetl) != 0){
+r<- map_df(targetl, cv_df_l, meas)
+return(r)
+}
+}
+
+cv_across_lang_lex <- map_df(target_langs, main_cvpredlex, meas="produces") %>%
+  rbind(map_df(target_langs, main_cvpredlex, meas="understands") )
+
+saveRDS(cv_across_lang_lex, "data/cv_across_lang_lex.rds")
+
+
+
+
 ```
 
