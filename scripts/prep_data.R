@@ -8,19 +8,18 @@
 #Normalize frequency: log transform and smoothing (+1)
 normalize_frequency<- function(uni_childes) {
   uni_childes |>
-    mutate(frequency=log(count/sum(count) + 1),
-           final_frequency=log(count_last/sum(count_last) +1),
-           first_frequency=log(count_first/sum(count_first) + 1),
-           solo_frequency=log(count_solo/sum(count_solo)+1))
+  mutate(frequency=log((count + 1)/sum(count)),
+         final_frequency=log((count_last + 1)/sum(count_last)),
+         first_frequency=log((count_first + 1)/sum(count_first)),
+         solo_frequency=log((count_solo +1)/sum(count_solo)))
 }
-
 
 
 
 # residualize - do each of these get their own functions? w/ an argument
 
-do_residualization <- function(target_column, residualizing_column, data){
-  returm(lm(target_column ~ residualizing_column, data = data)$residuals)
+do_residualization <- function(target_column, residualizing_column){
+  return(lm(target_column ~ residualizing_column)$residuals)
 }
 
 fit_predictor <- function(pred, d, pred_sources) {

@@ -75,7 +75,7 @@ fit_group_model <- function(group_df, predictors, formula,
 }
 
 # if `formula` is not specified, constructs one from `predictors` and `lex_effects`
-fit_models <- function(df, predictors, full = FALSE, lex_effects = TRUE, formula = NULL,
+fit_models <- function(predictors,df,  full = FALSE, lex_effects = TRUE, formula = NULL,
                        contrasts = list(lexical_category = "effects")) {
   if (full & !lex_effects) { contrasts$lexical_category <- NULL }
   if (length(contrasts) == 0) { contrasts <- NULL }
@@ -83,7 +83,8 @@ fit_models <- function(df, predictors, full = FALSE, lex_effects = TRUE, formula
   nest_data(df, predictors, full) |>
     mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
            results = map(model, tidy),
-           rsquared = map(model, glance))
+           rsquared = map(model, glance),
+           preds = list(predictors))
 }
 
 ####### TEST CASE
