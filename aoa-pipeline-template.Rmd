@@ -41,15 +41,19 @@ eng_wb_data
 
 Loading cached Wordbank data for multiple languages:
 ```{r}
-target_langs <- c("Croatian", "Danish", "English (American)", "Nowegian", "Russian", "Turkish", "French (French)", "Spanish (Mexican)", "Italian", "Swedish",  "English (Australian)", "German", "English (British)")
-# "Croatian", "Danish", "English (American)", , "Italian", "Norwegian", "Russian", "Spanish #(Mexican)", "Swedish", "Turkish",  "German","English (Australian)", "English (British)", #"French (French)")
-#"Spanish (European)" Portuguese (European) French (Quebecois)
+target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "French (French)", "Spanish (Mexican)", "Italian", "Swedish",  "English (Australian)", "German", "English (British)","French (Quebecois)")
+
+#Issues:
+#Portuguese (European) Spanish (European)" give NA in unilemmas 
+#coefs out of -1 1 
+#compare different models cross validation
 
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
   norm_lang <- normalize_language(lang)
   readRDS(glue("data/wordbank/{norm_lang}.rds"))
 })
+
 ```
 
 Creating saved Wordbank data for English:
@@ -64,8 +68,8 @@ walk(target_langs, create_wb_data)
 
 Creating saved Wordbank data one step at a time (potentially making changes between steps):
 ```{r, eval=FALSE}
-eng_wg <- create_inst_data("English (American)", "WG")
-eng_ws <- create_inst_data("English (American)", "WS")
+eng_wg <- create_inst_data("Portuguese (European)", "WG")
+eng_ws <- create_inst_data("Portuguese (European)", "WS")
 eng_wg_summary <- collapse_inst_data(eng_wg)
 eng_ws_summary <- collapse_inst_data(eng_ws)
 eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
@@ -78,6 +82,12 @@ Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemma
 
 ```{r}
 uni_lemmas <- get_uni_lemmas(wb_data)
+uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+
+
+```
+
+```{r, eval=FALSE}
 
 babiness_map <- c(word = "word", babiness = "babyAVG")
 babiness <- uni_lemmas |> map_predictor("babiness", babiness_map)
@@ -87,9 +97,7 @@ valence <- uni_lemmas |> map_predictor("valence", valence_map)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
-```
 
-```{r, eval=FALSE}
 # TODO: requires espeak
 # http://espeak.sourceforge.net
 
@@ -105,13 +113,21 @@ eng_childes
 
 Loading cached CHILDES data for multiple languages:
 ```{r}
-uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
 
 childes_metrics <- map_df(target_langs, function(lang) {
   message(glue("Loading CHILDES data for {lang}..."))
   norm_lang <- normalize_language(lang)
   readRDS(glue("data/childes/uni_metrics_{norm_lang}.rds"))
 })
+
+#Normalized smoothed frequencies
+#the output has: 
+#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
+#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
+#3. freq_raw is the raw frequency (dividing count / sumcount)
+
+childes_metrics<-map_df(target_langs, prepare_cdata, childes_metrics, uni_lemmas)
+
 ```
 
 Creating saved CHILDES data for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr`:
@@ -121,8 +137,8 @@ metric_funs <- list(compute_count, compute_mlu, compute_positions,
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
-get_childes_metrics("French (Quebecois)", metric_funs, corpus_args)
-get_uni_lemma_metrics("French (Quebecois)", uni_lemma_map)
+get_childes_metrics("Portuguese (European)", metric_funs, corpus_args)
+get_uni_lemma_metrics("Portuguese (European)", uni_lemma_map)
 ```
 
 Creating saved CHILDES data for many languages:
@@ -131,21 +147,6 @@ walk(target_langs, get_childes_metrics, metric_funs, corpus_args)
 walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
-Normalize frequency:
-```{r}
-#the output has: 
-#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
-#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
-#3. freq_raw is the raw frequency (dividing count / sumcount)
-childes_metrics <- normalize_frequency(childes_metrics)  
-
-# residualize frequency out of final and solo frequencies
-
-childes_metrics$final_frequency <- do_residualization(childes_metrics$final_frequency, childes_metrics$frequency)
-childes_metrics$solo_frequency  <- do_residualization(childes_metrics$solo_frequency, childes_metrics$frequency)
-childes_metrics$first_frequency  <- do_residualization(childes_metrics$first_frequency, childes_metrics$frequency)
-
-```
 
 Combine mapped predictors and CHILDES predictors:
 ```{r}
@@ -156,13 +157,6 @@ uni_joined <- uni_lemmas |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
 
 #uni_joined <- uni_joined %>% filter(!is.na(frequency))
-
-```
-
-Residualize solo freq and final freq
-
-```{r}
-
 
 ```
 
@@ -183,12 +177,12 @@ prepped_data <- uni_joined |>
   select(-lexical_class)
 
 pred_sources <- list(
-  c("frequency", "mlu", "final_frequency", "first_frequency", "solo_frequency"),
-  c("valence", "arousal"),
-  c("concreteness", "babiness"),
+  c("frequency","final_frequency", "first_frequency", "solo_frequency"),
+  c("concreteness", "babiness", "valence"),
+  c("mlu"),
   c("length_char"),
   c("n_tokens"))
-
+#  c("length_char", "n_tokens"))
 
 imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 
@@ -199,8 +193,6 @@ imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 
 aoa lm model:
 ```{r aoa-lm}
-
-
 
 wb_data <- wb_data |>
   mutate(num_false = total - num_true,
@@ -225,28 +217,33 @@ word_values <- aoas |>
 joined_data <- wb_data |>
   left_join(word_values, by = c("language", "measure", "uni_lemma"))
 
-
-predictors <- pred_sources |> unlist() 
-list1= c("frequency", "mlu","final_frequency","valence", "arousal", "concreteness", 
-             "babiness", "first_frequency", "solo_frequency") #, "char_length", "n_tokens"
-list2=c("frequency","final_frequency", "first_frequency", "solo_frequency")
-list3=c("valence", "arousal", "concreteness", "babiness")
-list4= c("frequency", "mlu","final_frequency", "first_frequency", "solo_frequency")
-list5= c("frequency", "mlu")
-list6= c("frequency", "valence", "arousal", "concreteness", "babiness")
-#list7= c("mlu", "valence", "arousal", "concreteness", "babiness")
-
-preds=list(list1,list2, list3, list4, list5, list6, c("frequency"), c("mlu"), c("final_frequency"), c("valence"), c("arousal"), c("concreteness"), c("babiness"), c("first_frequency"), c("solo_frequency"))#c("char_length"), c("n_tokens")
+preds=list(c("frequency","mlu","final_frequency","valence", "concreteness", "babiness", "first_frequency", "solo_frequency", "length_char", "n_tokens"))
 
 
-fitted_aoa_models <- map_df(preds, fit_models, joined_data, full = FALSE)
+fitted_aoa_models <- map_df(preds, fit_models, joined_data)
 saveRDS(fitted_aoa_models, "data/fitted_aoa_models_whole.rds")
 
 
-fitted_aoa_models <- fit_models(predictors,joined_data,  full = FALSE)
+#####plots
+lang_coefs <- fitted_aoa_models %>%
+  unnest(results) %>%
+  mutate(signif=ifelse(p.value<0.05, TRUE, FALSE)) %>%
+  filter(term %in% predictors) %>%
+  mutate(term = fct_relevel(term,
+                            "frequency", "solo_frequency", "first_frequency",
+                            "final_frequency", "mlu", "lenght_char", "n_tokens",
+                            "babiness", "concreteness", "valence"))
+pdf(file = "data/lang_coefs.pdf",   # The directory you want to save the file in
+    width = 6, # The width of the plot in inches
+    height = 15) 
+coefs_by_lang(lang_coefs)
+dev.off()
 
-saveRDS(fitted_aoa_models, "data/fitted_aoa_models.rds")
-
+pdf(file = "data/pred_coefs.pdf",   # The directory you want to save the file in
+    width = 8, # The width of the plot in inches
+    height = 6) 
+coefs_by_pred(lang_coefs)
+dev.off()
 ```
 
 age glmer model:
@@ -297,8 +294,15 @@ return(r)
 
 cv_across_lang <- map_df(target_langs, main_cvpred, meas="produces") %>%
   rbind(map_df(target_langs, main_cvpred, meas="understands") )
-
 saveRDS(cv_across_lang, "data/cv_across_lang.rds")
+
+#plot
+pdf(file = "data/cv_lang.pdf",   
+    width = 6, 
+    height = 4) 
+cv_dev_lang(cv_across_lang)
+dev.off()
+
 
 
 main_cvpredlex <- function(lang, meas){
@@ -316,10 +320,16 @@ return(r)
 }
 }
 
-cv_across_lang_lex <- map_df(target_langs, main_cvpredlex, meas="produces") %>%
+cv_across_lang_lex <- map_df(target_langs, main_cvpredlex, meas="produces")%>%
   rbind(map_df(target_langs, main_cvpredlex, meas="understands") )
-
 saveRDS(cv_across_lang_lex, "data/cv_across_lang_lex.rds")
+
+#plot
+pdf(file = "data/cv_lex_cat.pdf",   
+    width = 4, 
+    height = 4) 
+cv_dev_lang_lex(cv_across_lang_lex)
+dev.off()
 
 
 

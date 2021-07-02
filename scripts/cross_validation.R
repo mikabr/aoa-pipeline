@@ -11,8 +11,10 @@ fit_cv_models <- function(word_values, formulae, loo_df = NULL) {
 
     try(models <- fit_with(train_df, lm, formulae))
 
+   # result <- summary(models)
     result <- enframe(models) |>
-      mutate(model = value,
+      mutate(
+             model = value,
              train = list(train_idx),
              test = list(test_idx)) |>
       select(-c(value))
@@ -23,7 +25,6 @@ fit_cv_models <- function(word_values, formulae, loo_df = NULL) {
   loo_models <- loo_df$.id |>
     map(~ fit_cv_models_single(.)) |>
     reduce(rbind)
-
   return(loo_models)
 }
 

@@ -4,6 +4,19 @@
 
 # HELPER FUNCTIONS --------------
 
+prepare_cdata <- function(lang, childes_metrics, uni_lemmas){
+
+  childes_metrics_ <- childes_metrics %>% filter(language==lang)
+  childes_metrics_ <- normalize_frequency(childes_metrics_)
+
+  # residualize frequency out of final and solo frequencies
+
+  childes_metrics_$final_frequency <- do_residualization(childes_metrics_$final_frequency, childes_metrics_$frequency)
+  childes_metrics_$solo_frequency  <- do_residualization(childes_metrics_$solo_frequency, childes_metrics_$frequency)
+  childes_metrics_$first_frequency  <- do_residualization(childes_metrics_$first_frequency, childes_metrics_$frequency)
+  return(childes_metrics_)
+}
+
 
 #Normalize frequency: log transform and smoothing (+1)
 normalize_frequency<- function(uni_childes) {

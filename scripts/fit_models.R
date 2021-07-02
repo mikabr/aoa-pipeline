@@ -37,8 +37,7 @@ nest_data <- function(df, predictors, full = FALSE) {
   keep_data <- df |>
     mutate(group = paste(language, measure),
            lexical_category = lexical_category |> fct_relevel("other")) |>
-    select(language, measure, group, lexical_category, item = uni_lemma, prop,
-           total, age, !!predictors)
+    select(language, measure, group, lexical_category, item = uni_lemma, !!predictors)
   if (!full) { keep_data <- keep_data |> cbind(aoa = df$aoa) }
   keep_data |>
     group_by(language, measure) |>
@@ -69,19 +68,22 @@ fit_group_model <- function(group_df, predictors, formula,
     full,
     return(jglmm(formula = formula, data = group_df, family = "binomial",
                  weights = group_df$total, contrasts = contrasts)),
-    return(lm(formula = formula, data = group_df,
-              weights = total)) # not sure how to pass `contrasts` into `lm`
+    return(lm(formula = formula, data = group_df)) # not sure how to pass `contrasts` into `lm`
   )
 }
 
 # if `formula` is not specified, constructs one from `predictors` and `lex_effects`
 fit_models <- function(predictors,df,  full = FALSE, lex_effects = TRUE, formula = NULL,
                        contrasts = list(lexical_category = "effects")) {
-  if (full & !lex_effects) { contrasts$lexical_category <- NULL }
-  if (length(contrasts) == 0) { contrasts <- NULL }
-  if (is.null(formula)) { formula <- make_effs_formula(predictors, full, lex_effects) }
+#  if (full & !lex_effects) { contrasts$lexical_category <- NULL }
+#  if (length(contrasts) == 0) { contrasts <- NULL }
+#  if (is.null(formula)) { formula <- make_effs_formula(predictors, full, lex_effects) }
+  formula <- make_effs_formula(predictors, full, lex_effects)
+  df <- df %>%
+  select(language, measure, uni_lemma, aoa, items, final_frequency, frequency, solo_frequency, first_frequency, valence, concreteness, babiness, mlu, length_char, n_tokens, lexical_category) %>%
+  unique()
   nest_data(df, predictors, full) |>
-    mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
+  mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
            results = map(model, tidy),
            rsquared = map(model, glance),
            preds = list(predictors))
