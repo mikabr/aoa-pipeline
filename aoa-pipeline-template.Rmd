@@ -254,6 +254,21 @@ age glmer model:
 
 Cross-validation:
 ```{r}
+# for simple cv result extraction
+loo_df <- word_values |>
+  group_nest() |>
+  mutate(loo_data = map(data, crossv_loo),
+         loo_models = map(data, fit_cv_models, list(make_effs_formula(predictors, FALSE, TRUE))),
+         loo_preds = map2(loo_models, data, get_cv_preds),
+         cv_results = map(loo_preds, get_cv_results))
+
+cv_results <- loo_df |>
+  select(c(language, measure, cv_results)) |>
+  unnest(cols = c(cv_results))
+```
+
+
+```{r}
 
 cv_model <- function(preds, loo_df, lang, meas){
  loo_models <- fit_cv_models(word_values, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
