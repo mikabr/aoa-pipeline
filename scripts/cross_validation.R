@@ -11,10 +11,8 @@ fit_cv_models <- function(word_values, formulae, loo_df = NULL) {
 
     try(models <- fit_with(train_df, lm, formulae))
 
-   # result <- summary(models)
     result <- enframe(models) |>
-      mutate(
-             model = value,
+      mutate(model = value,
              train = list(train_idx),
              test = list(test_idx)) |>
       select(-c(value))
@@ -55,7 +53,7 @@ get_cv_results <- function(loo_preds) {
     summarise(mean_abs_dev = mean(abs_dev),
               sd_abs_dev = sd(abs_dev),
               rmse = sqrt(mean(se)), mse = mean(se)) |>
-    mutate(ci_mad = 1.96 * (sd_abs_dev / sqrt(314)), # why scale by sqrt(314)??
+    mutate(ci_mad = 1.96 * (sd_abs_dev / sqrt(n())),
       ci_mad_min = mean_abs_dev - ci_mad,
       ci_mad_max = mean_abs_dev + ci_mad)
   return(results)

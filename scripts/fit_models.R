@@ -84,7 +84,7 @@ fit_models <- function(predictors,df,  full = FALSE, lex_effects = TRUE, formula
   unique()
   nest_data(df, predictors, full) |>
   mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
-           results = map(model, tidy),
+           coefficients = map(model, tidy),
            rsquared = map(model, glance),
            preds = list(predictors))
 }
