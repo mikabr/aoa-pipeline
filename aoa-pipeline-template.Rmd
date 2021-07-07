@@ -43,10 +43,7 @@ Loading cached Wordbank data for multiple languages:
 ```{r}
 target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "French (French)", "Spanish (Mexican)", "Italian", "Swedish",  "English (Australian)", "German", "English (British)","French (Quebecois)")
 
-#Issues:
-#Portuguese (European) Spanish (European)" give NA in unilemmas 
-#coefs out of -1 1 
-#compare different models cross validation
+#Issues:#Portuguese (European) Spanish (European)" give NA in unilemmas 
 
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
@@ -217,34 +214,18 @@ word_values <- aoas |>
 joined_data <- wb_data |>
   left_join(word_values, by = c("language", "measure", "uni_lemma"))
 
-preds=list(c("frequency","mlu","final_frequency","valence", "concreteness", "babiness", "first_frequency", "solo_frequency", "length_char", "n_tokens"))
+#preds=list(c("frequency","mlu","final_frequency","valence", "concreteness", "babiness", "first_frequency", "solo_frequency", "length_char", "n_tokens"))
 
+#preds_ind=list(c("frequency"),c("mlu"),c("final_frequency"), c("first_frequency"), c("solo_frequency"), c("length_char"), c("n_tokens"))
 
 fitted_aoa_models <- map_df(preds, fit_models, joined_data)
 saveRDS(fitted_aoa_models, "data/fitted_aoa_models_whole.rds")
 
+fitted_aoa_models_reliability <- map_df(preds_ind, fit_models, joined_data, lex_effects=FALSE)
+saveRDS(fitted_aoa_models_reliability, "data/fitted_aoa_models_reliability.rds")
 
-#####plots
-lang_coefs <- fitted_aoa_models %>%
-  unnest(results) %>%
-  mutate(signif=ifelse(p.value<0.05, TRUE, FALSE)) %>%
-  filter(term %in% predictors) %>%
-  mutate(term = fct_relevel(term,
-                            "frequency", "solo_frequency", "first_frequency",
-                            "final_frequency", "mlu", "lenght_char", "n_tokens",
-                            "babiness", "concreteness", "valence"))
-pdf(file = "data/lang_coefs.pdf",   # The directory you want to save the file in
-    width = 6, # The width of the plot in inches
-    height = 15) 
-coefs_by_lang(lang_coefs)
-dev.off()
-
-pdf(file = "data/pred_coefs.pdf",   # The directory you want to save the file in
-    width = 8, # The width of the plot in inches
-    height = 6) 
-coefs_by_pred(lang_coefs)
-dev.off()
 ```
+
 
 age glmer model:
 ```{r age-glmer}
@@ -255,24 +236,9 @@ age glmer model:
 Cross-validation:
 ```{r}
 # for simple cv result extraction
-loo_df <- word_values |>
-  group_nest() |>
-  mutate(loo_data = map(data, crossv_loo),
-         loo_models = map(data, fit_cv_models, list(make_effs_formula(predictors, FALSE, TRUE))),
-         loo_preds = map2(loo_models, data, get_cv_preds),
-         cv_results = map(loo_preds, get_cv_results))
-
-cv_results <- loo_df |>
-  select(c(language, measure, cv_results)) |>
-  unnest(cols = c(cv_results))
-```
-
-
-```{r}
-
-cv_model <- function(preds, loo_df, lang, meas){
- loo_models <- fit_cv_models(word_values, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
- loo_preds <- get_cv_preds(loo_models, word_values)
+cv_model <- function(preds, loo_df, lang, meas, w_v){
+ loo_models <- fit_cv_models(w_v, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
+ loo_preds <- get_cv_preds(loo_models, w_v)
  cv_results <- get_cv_results(loo_preds) 
  cv <-cv_results %>%
  select(mean_abs_dev, ci_mad_min, ci_mad_max) %>% 
@@ -281,24 +247,11 @@ cv_model <- function(preds, loo_df, lang, meas){
 }
 
 
-cv_model_lex <- function(preds, loo_df, lang, meas){
- loo_models <- fit_cv_models(word_values, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
- loo_preds <- get_cv_preds(loo_models, word_values)
- a<- head(arrange(loo_preds, desc(abs_dev)),50) %>% 
-  group_by(lexical_category) %>%
-  summarise(count=n()) %>%
-  mutate(language=lang, measure=meas, pr=list(preds))
- return(a)
-}
-
-
-main_cvpred <- function(lang, meas){
-word_v<- word_values %>%  filter(measure ==meas, language==lang)
-targetl<- unique(word_v$language) 
+main_cvpred <- function(w_v){
+targetl<- unique(w_v$language) 
 cv_df<-function(lang, meas){
- word_values<- word_values %>%  filter(measure ==meas, language==lang)
- loo_df <- crossv_loo(ungroup(word_values))
- m<-map_df(preds, cv_model, loo_df, lang, meas)
+ loo_df <- crossv_loo(ungroup(w_v))
+ m<-map_df(preds, cv_model, loo_df, lang, meas, w_v)
  return(m)
 } 
 if (length(targetl) != 0){
@@ -307,18 +260,27 @@ return(r)
 }
 }
 
-cv_across_lang <- map_df(target_langs, main_cvpred, meas="produces") %>%
-  rbind(map_df(target_langs, main_cvpred, meas="understands") )
+cv<- function(lang, word_values, meas){
+# if (lang=="English (American)"){
+#    word_values<- word_values %>% filter(!(language=="English (American)" & #uni_lemma=="hi")) #crazy value
+#  }
+cv_lang <-  main_cvpred(word_values %>% filter(language==lang, measure==meas)) %>%
+  mutate(measure=meas) 
+return(cv_lang)
+}
+
+#####apply cross-validation
+cv_across_lang <- map_df(target_langs, cv, word_values, "produces") %>% 
+  rbind(map_df(target_langs_understand, cv, word_values, "understands"))
 saveRDS(cv_across_lang, "data/cv_across_lang.rds")
 
-#plot
-pdf(file = "data/cv_lang.pdf",   
-    width = 6, 
-    height = 4) 
-cv_dev_lang(cv_across_lang)
-dev.off()
 
-
+cv_model_lex <- function(preds, loo_df, lang, meas){
+ loo_models <- fit_cv_models(word_values, list(make_effs_formula(preds, FALSE, TRUE)), loo_df)
+ loo_preds <- get_cv_preds(loo_models, word_values) %>%
+  mutate(language=lang, measure=meas, pr=list(preds))
+ return(loo_preds)
+}
 
 main_cvpredlex <- function(lang, meas){
 word_v<- word_values %>%  filter(measure ==meas, language==lang)
@@ -335,19 +297,55 @@ return(r)
 }
 }
 
-cv_across_lang_lex <- map_df(target_langs, main_cvpredlex, meas="produces")%>%
-  rbind(map_df(target_langs, main_cvpredlex, meas="understands") )
-saveRDS(cv_across_lang_lex, "data/cv_across_lang_lex.rds")
+####check lexical category distribution english
+eng_cv_across_lang_lex <- map_df("English (American)", main_cvpredlex, meas="understands")
+eng_across_lang_lex_desc <-  head(arrange(eng_cv_across_lang_lex, desc(abs_dev)), 50) 
 
-#plot
-pdf(file = "data/cv_lex_cat.pdf",   
-    width = 4, 
-    height = 4) 
-cv_dev_lang_lex(cv_across_lang_lex)
+```
+
+```{r plots}
+
+#####plots
+lang_coefs <- fitted_aoa_models %>%
+  unnest(coeffs) %>%
+  mutate(signif=ifelse(p.value<0.05, TRUE, FALSE)) %>%
+  filter(term %in% predictors) 
+
+lang_coefs$term = factor(lang_coefs$term, levels = c("frequency", "solo_frequency", "first_frequency", "final_frequency", "mlu", "length_char", "n_tokens",
+                            "babiness", "concreteness", "valence"))
+
+lang_coefs$language = factor(lang_coefs$language, levels=c("English (American)","English (British)","English (Australian)",   "German", "French (French)", "French (Quebecois)", "Spanish (Mexican)","Swedish",  "Italian", "Croatian", "Danish",  "Norwegian",  "Turkish","Russian"))
+
+
+
+pdf(file = "data/rus_coefs.pdf",  width = 6,  height = 4) 
+russian_coefs <- lang_coefs %>% filter(language =="Russian", measure =="produces")
+coefs_by_lang(russian_coefs)
 dev.off()
 
+pdf(file = "data/eng_coefs.pdf",   width = 5,  height = 3) 
+coefs_by_lang(lang_coefs %>% filter(language=="English (American)"))
+dev.off()
 
+pdf(file = "data/lang_coefs.pdf",    width = 20, height = 5) 
+coefs_by_lang(lang_coefs %>% filter(!language =="Russian"))
+dev.off()
 
+pdf(file = "data/pred_coefs.pdf",  width = 8,   height = 5) 
+coefs_by_pred(lang_coefs%>% filter(!language =="Russian"))
+dev.off()
+
+pdf(file = "data/cv_lang.pdf",    width = 8,  height = 4) 
+cv_dev_lang(cv_across_lang%>% filter(!language=="English (British)", !language=="Russian"))
+dev.off()
+
+pdf(file = "data/dev_words_eng_compre.pdf", width = 7, height = 5) 
+dev_words(eng_across_lang_lex_desc)
+dev.off()
+
+pdf(file = "data/aoa_mad_lex_eng_understands.pdf", width = 7, height = 5) 
+aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "understands", wb_data, preds)  
+dev.off()
 
 ```
 
