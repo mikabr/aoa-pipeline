@@ -347,5 +347,8 @@ pdf(file = "data/aoa_mad_lex_eng_understands.pdf", width = 7, height = 5)
 aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "understands", wb_data, preds)  
 dev.off()
 
+pdf(file = "data/reliability_plot.pdf", width = 12, height = 3.5)
+relia_plot(dfinal, lang_list)
+dev.off()
 ```
 
