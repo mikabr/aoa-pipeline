@@ -17,6 +17,7 @@ fit_bglm <- function(data, max_steps = 200) {
   aoa <- -model$coefficients[["(Intercept)"]] / model$coefficients[["age"]]
 
   tibble(uni_lemma = data$uni_lemma[1],
+         intercept = model$coefficients[["(Intercept)"]],
          slope = model$coefficients[["age"]],
          aoa = aoa)
 }
