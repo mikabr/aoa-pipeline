@@ -15,6 +15,7 @@ library(glue)
 library(wordbankr)
 library(childesr)
 library(broom)
+library(car)
 library(jglmm)
 library(modelr)
 
@@ -314,6 +315,11 @@ return(r)
 eng_cv_across_lang_lex <- map_df("English (American)", main_cvpredlex, meas="understands")
 eng_across_lang_lex_desc <-  head(arrange(eng_cv_across_lang_lex, desc(abs_dev)), 50) 
 
+```
+
+Evaluate collinearity between predictors using variance inflation factor (VIF).
+```{r vif}
+vif_scores <- get_vif_collinearity_scores(joined_data, 'aoa', preds)
 ```
 
 ```{r plots}
