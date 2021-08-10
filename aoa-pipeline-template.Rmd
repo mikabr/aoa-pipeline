@@ -145,6 +145,20 @@ walk(target_langs, get_childes_metrics, metric_funs, corpus_args)
 walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
+Normalize frequency:
+```{r}
+#the output has: 
+#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
+#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
+#3. freq_raw is the raw frequency (dividing count / sumcount)
+
+childes_metrics <- normalize_frequency(childes_metrics)  
+
+# residualize frequency out of final and solo frequencies
+childes_metrics$final_frequency <- do_residualization(childes_metrics$final_frequency, childes_metrics$frequency)
+childes_metrics$solo_frequency  <- do_residualization(childes_metrics$solo_frequency, childes_metrics$frequency)
+childes_metrics$first_frequency  <- do_residualization(childes_metrics$first_frequency, childes_metrics$frequency)
+```
 
 Combine mapped predictors and CHILDES predictors:
 ```{r}
