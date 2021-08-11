@@ -163,7 +163,7 @@ childes_metrics$first_frequency  <- do_residualization(childes_metrics$first_fre
 Combine mapped predictors and CHILDES predictors:
 ```{r}
 uni_joined <- uni_lemmas |>
-  left_join(babiness, by = c("language", "uni_lemma")) |>
+  #left_join(babiness, by = c("language", "uni_lemma")) |>
   left_join(valence, by = c("language", "uni_lemma")) |>
   left_join(concreteness, by = c("language", "uni_lemma")) |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
@@ -331,9 +331,17 @@ eng_across_lang_lex_desc <-  head(arrange(eng_cv_across_lang_lex, desc(abs_dev))
 
 ```
 
-Evaluate collinearity between predictors using variance inflation factor (VIF).
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
 ```{r vif}
-vif_scores <- get_vif_collinearity_scores(joined_data, 'aoa', preds)
+eng_joined_data <- word_values |> filter(language == "English (American)")
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
+```
+
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
+```{r vif}
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
 ```
 
 ```{r plots}
