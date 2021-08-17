@@ -7,8 +7,8 @@ convert_lang_childes <- function(lang) {
   lang_map |> filter(wordbank == lang) |> pull(childes)
 }
 
-convert_lang_stemmer <- function(lang) {
-  lang_map |> filter(wordbank == lang) |> pull(snowball)
+convert_lang_stemmer <- function(lang, method = "snowball") {
+  lang_map |> filter(wordbank == lang) |> pull(get(method))
 }
 
 compute_count <- function(metric_data) {
