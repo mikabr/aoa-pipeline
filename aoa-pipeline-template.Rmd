@@ -270,7 +270,7 @@ cv_model_lex <- function(preds, loo_df, lang, meas, word_values){
  return(loo_preds)
 }
 
-cv_df<-function(lang, word_values, meas, lex=FALSE){
+cv_main<-function(lang, word_values, meas, lex=FALSE){
   word_values_ <- word_values %>% filter(language==lang, measure==meas) 
   if (length(unique(word_values_$language) ) == 0){break}
   else {if (lex==FALSE){
@@ -283,12 +283,12 @@ cv_df<-function(lang, word_values, meas, lex=FALSE){
   }
 } 
 
-cv_across_lang <- map_df(unique(word_values_$language), cv_df, word_values, "produces") %>%
-  rbind(map_df(unique(word_values_$language), cv_df, word_values, "understands")) #####cross-validation for each language
+cv_across_lang <- map_df(unique(word_values_$language), cv_main, word_values, "produces") %>%
+  rbind(map_df(unique(word_values_$language), cv_main, word_values, "understands")) #####cross-validation for each language
 
 
-cv_across_lang_lex <- map_df(unique(word_values_$language), cv_df, word_values, meas="understands", lex=TRUE) %>%
-  rbind(map_df(unique(word_values_$language), cv_df, word_values, "produces", lex=TRUE)) ####check lexical category distribution 
+cv_across_lang_lex <- map_df(unique(word_values_$language), cv_main, word_values, meas="understands", lex=TRUE) %>%
+  rbind(map_df(unique(word_values_$language), cv_main, word_values, "produces", lex=TRUE)) ####check lexical category distribution 
 
 head(arrange(cv_across_lang_lex %>% filter(language=="English (American)", measure=="produces"), desc(abs_dev)), 50) 
 ```
