@@ -103,6 +103,7 @@ phonemes <- uni_lemmas |> map_phonemes()
 # left_join(phonemes, by = c("language", "uni_lemma")) |>
 ```
 
+# CHILDES data
 Loading cached CHILDES data for English:
 ```{r}
 eng_childes <- readRDS("data/childes/uni_metrics_english_(american).rds")
@@ -141,7 +142,7 @@ walk(target_langs, get_childes_metrics, metric_funs, corpus_args)
 walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
-Prepare frequency:
+# Prepare frequency
 ```{r}
 #Normalize frequency, log transform and smoothing (+1)
 childes_metrics <- normalize_frequency(childes_metrics)  
@@ -238,7 +239,7 @@ age glmer model:
 #fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
 ```
 
-Cross-validation:
+# Cross-validation
 ```{r}
 # for simple cv result extraction
 loo_df <- word_values |>
@@ -293,6 +294,7 @@ cv_across_lang_lex <- map_df(unique(word_values_$language), cv_main, word_values
 head(arrange(cv_across_lang_lex %>% filter(language=="English (American)", measure=="produces"), desc(abs_dev)), 50) 
 ```
 
+# Collinearity
 Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
 ```{r vif}
 eng_joined_data <- word_values |> filter(language == "English (American)")
@@ -306,6 +308,9 @@ preds <- c("frequency", "concreteness", "mlu")
 vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
 ```
 
+
+
+# Plots
 ```{r plots}
 
 #####plots
