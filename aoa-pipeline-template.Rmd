@@ -38,7 +38,7 @@ The general steps are:
 - using the functions in `scripts/fit_models.R` to fit models and extract information from them
 
 
-# Wordbank data
+# Load Wordbank data
 
 Loading cached Wordbank data for English:
 ```{r load_wordbank_eng}
@@ -81,7 +81,7 @@ eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
 
 
-# Predictors
+# Load predictors
 
 Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
@@ -108,7 +108,7 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 #phonemes <- uni_lemmas |> map_phonemes()
 # left_join(phonemes, by = c("language", "uni_lemma")) |>
 ```
-
+#Load CHILDES
 Loading cached CHILDES data for English:
 ```{r load_childes_eng}
 eng_childes <- readRDS("data/childes/uni_metrics_english_(american).rds")
@@ -155,6 +155,7 @@ The output has:
 2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
 3. freq_raw is the raw frequency (dividing count / sumcount)
 
+# Prepare and impute
 Prepare frequency
 Order: Frequency, weighted, log transformed and Laplace smoothed, residualized
 ```{r prepare_frequency}
@@ -206,7 +207,6 @@ imputed_data
 
 
 # Model fitting
-
 Aoa lm model
 ```{r aoa-lm}
 
@@ -257,7 +257,7 @@ age glmer model:
 #fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
 ```
 
-# Cross-validation:
+# Cross-validation
 ```{r cross_validate}
 
 # for simple cv result extraction
@@ -295,7 +295,7 @@ Evaluate collinearity between predictors using variance inflation factor (VIF) o
 preds <- c("frequency", "concreteness", "mlu")
 vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
 ```
-
+# Plots
 ```{r plots1}
 
 #####plots
