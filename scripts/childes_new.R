@@ -163,7 +163,7 @@ build_special_case_map <- function(lang) {
       pivot_longer(-c(uni_lemma, definition),
                    names_to = "x", values_to = "option") |>
       filter(!is.na(option)) |>
-      select(-x) |>
+      dplyr::select(-x) |>
       mutate(language = lang)
   }
   else{
@@ -196,7 +196,7 @@ build_uni_lemma_map <- function(uni_lemmas) {
     left_join(special_case_map) |>
     mutate(option = pmap(list(language, definition, special_cases),
                          build_options)) |>
-    select(language, uni_lemma, option) |>
+    dplyr::select(language, uni_lemma, option) |>
     unnest(option)
 }
 
