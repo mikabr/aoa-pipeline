@@ -37,11 +37,11 @@ get_inst_data <- function(language, form, admins, items) {
     mutate(produces = !is.na(value) & value == "produces",
            understands = !is.na(value) &
              (value == "understands" | value == "produces")) |>
-    select(-value) |>
+    dplyr::select(-value) |>
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
     filter(measure == "produces" | form == "WG") |>
-    select(-num_item_id)
+    dplyr::select(-num_item_id)
 }
 
 collapse_inst_data <- function(inst_data) {
@@ -105,7 +105,7 @@ get_uni_lemmas <- function(wb_data) {
   wb_data |>
     distinct(language, uni_lemma, items) |>
     unnest(items) |>
-    select(-form, -item_id) |>
+    dplyr::select(-form, -item_id) |>
     distinct() |>
     nest(items = -c(language, uni_lemma))
 }
