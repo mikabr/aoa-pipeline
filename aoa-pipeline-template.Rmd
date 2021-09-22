@@ -141,10 +141,6 @@ walk(target_langs, get_childes_metrics, metric_funs, corpus_args)
 walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
-The output has: 
-1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
-2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
-3. freq_raw is the raw frequency (dividing count / sumcount)
 
 # Prepare and impute
 Prepare frequency
