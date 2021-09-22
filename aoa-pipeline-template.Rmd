@@ -265,12 +265,10 @@ cv_results <- loo_df |>
   select(c(language, measure, cv_results)) |>
   unnest(cols = c(cv_results))
 
-cv_results_lex <- loo_df |>
-  select(c(language, measure, loo_preds)) |>
-  unnest(cols = c(loo_preds))
-
 ############## plot by lex_Category /abstract category and prediction error 
-cv_results_pos <- cv_results_lex |> 
+cv_results_pos <- loo_df |>
+  select(c(language, measure, loo_preds)) |>
+  unnest(cols = c(loo_preds)) |> 
   group_by(language, lexical_category) |>
   summarise(mean_abs_dev=mean(abs_dev), mean_se=mean(se))
 
