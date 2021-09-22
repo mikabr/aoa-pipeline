@@ -142,7 +142,7 @@ walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
 
-# Prepare and impute
+# Prepare 
 Prepare frequency
 Order: Frequency, weighted, log transformed and Laplace smoothed, residualized
 ```{r prepare_frequency}
@@ -168,6 +168,7 @@ uni_joined <- uni_lemmas |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
 ```
 
+# Impute
 ```{r impute_data}
 prepped_data <- uni_joined |>
   # select out just the by lexical item data
@@ -198,7 +199,7 @@ imputed_data
 ```
 
 
-# Model fitting
+# Fit model
 Aoa lm model
 ```{r aoa-lm}
 
@@ -242,7 +243,7 @@ age glmer model:
 #fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
 ```
 
-# Cross-validation
+# Cross-validate
 ```{r cross_validate}
 
 # for simple cv result extraction
@@ -280,7 +281,7 @@ eng_across_lang_lex_desc
 
 
 ```
-
+# Evaluate collinearity
 Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
 ```{r vif}
 eng_joined_data <- word_values |> filter(language == "English (American)")
@@ -293,7 +294,7 @@ Evaluate collinearity between predictors using variance inflation factor (VIF) o
 preds <- c("frequency", "concreteness", "mlu")
 vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
 ```
-# Plots
+# Make plots
 ```{r plots1}
 
 #####plots
