@@ -38,7 +38,7 @@ nest_data <- function(df, predictors, full = FALSE) {
   keep_data <- df |>
     mutate(group = paste(language, measure),
            lexical_category = lexical_category |> fct_relevel("other")) |>
-    select(language, measure, group, lexical_category, item = uni_lemma, !!predictors)
+    dplyr::select(language, measure, group, lexical_category, item = uni_lemma, !!predictors)
   if (!full) { keep_data <- keep_data |> cbind(aoa = df$aoa) }
   keep_data |>
     group_by(language, measure) |>
@@ -81,7 +81,7 @@ fit_models <- function(predictors,df,  full = FALSE, lex_effects = TRUE, formula
 #  if (is.null(formula)) { formula <- make_effs_formula(predictors, full, lex_effects) }
   formula <- make_effs_formula(predictors, full, lex_effects)
   df <- df %>%
-  select(language, measure, uni_lemma, aoa, items, final_frequency, frequency, solo_frequency, first_frequency, valence, concreteness, babiness, mlu, length_char, n_tokens, lexical_category) %>%
+  dplyr::select(language, measure, uni_lemma, aoa, items, final_frequency, frequency, solo_frequency, first_frequency, valence, concreteness, babiness, mlu, length_char, n_tokens, lexical_category) %>%
   unique()
   nest_data(df, predictors, full) |>
   mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
