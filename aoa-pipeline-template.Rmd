@@ -122,11 +122,6 @@ childes_metrics <- map_df(target_langs, function(lang) {
   readRDS(glue("data/childes/uni_metrics_{norm_lang}.rds"))
 })
 
-#Normalized smoothed frequencies
-#the output has: 
-#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
-#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
-#3. freq_raw is the raw frequency (dividing count / sumcount)
 ```
 
 Creating saved CHILDES data for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr`:
@@ -157,10 +152,14 @@ Order: Frequency, weighted, log transformed and Laplace smoothed, residualized
 ```{r prepare_frequency}
 
 #Normalize frequency: log transform and smoothing (+1)
-childes_metrics <- normalize_frequency(childes_metrics, count, count_first, count_last, count_solo)
+#Normalized smoothed frequencies
+#the output has: 
+#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
+#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
+#3. freq_raw is the raw frequency (dividing count / sumcount)
 
 #Residualize frequency out of final and solo frequencies
-childes_metrics <- residualize_frequency(childes_metrics, frequency, first_frequency, final_frequency, solo_frequency)
+childes_metrics<-map_df(target_langs, prepare_frequency, childes_metrics, uni_lemmas)
 childes_metrics
 ```
 
