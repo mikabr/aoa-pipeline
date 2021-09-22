@@ -22,6 +22,7 @@ library(car)
 library(modelr)
 library(ggrepel)
 library(SnowballC)
+library(cowplot)
 #library(Hmisc)
 #library(arm)
 
@@ -50,8 +51,7 @@ Loading cached Wordbank data for multiple languages:
 ```{r loadwordbankxling}
 target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "Spanish (Mexican)", "Italian", "Swedish",  "French (Quebecois)") 
 #"French (French)" "English (Australian)", "German","English (British)",
-#target_langs <- "English (American)"
-#Issues#Portuguese (European) Spanish (European)" give NA in unilemmas 
+#Portuguese (European) Spanish (European)" have NA in unilemmas 
 
 wb_data <- map_df(target_langs, function(lang) {
   message(glue("Loading data for {lang}..."))
@@ -101,10 +101,8 @@ valence <- uni_lemmas |> map_predictor("valence", valence_map)
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 
-# TODO: requires espeak
+# TODO: PHONOLOGY requires espeak
 # http://espeak.sourceforge.net
-
-########?
 #phonemes <- uni_lemmas |> map_phonemes()
 # left_join(phonemes, by = c("language", "uni_lemma")) |>
 ```
@@ -195,11 +193,12 @@ prepped_data <- uni_joined |>
 
 pred_sources <- list(
   c("frequency","final_frequency", "first_frequency", "solo_frequency"),
-  c("concreteness", "valence", "babiness"), #"babiness",
+  c("concreteness", "valence", "babiness"), 
   c("mlu"),
   c("length_char"),
+  c("n_tokens"),
+  c("length_char"), 
   c("n_tokens"))
-#  c("length_char", "n_tokens"))
 
 imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 imputed_data
@@ -237,16 +236,9 @@ preds=list(c("frequency","mlu","final_frequency","valence", "concreteness","babi
 
 #################? How to pass contrasts to lm? TODO
 
-################# with and without lex cat
-
 fitted_aoa_models <- map_df(preds, fit_models, joined_data)
 fitted_aoa_models
 
-##############Check combined effect of lex cat and interaction
-
-#########Other and babiness TODO 
-
-###########other correctly coded TODO 
 
 ```
 
@@ -277,10 +269,21 @@ cv_results_lex <- loo_df |>
   select(c(language, measure, loo_preds)) |>
   unnest(cols = c(loo_preds))
 
+############## plot by lex_Category /abstract category and prediction error 
+cv_results_pos <- cv_results_lex |> 
+  group_by(language, lexical_category) |>
+  summarise(mean_abs_dev=mean(abs_dev), mean_se=mean(se))
+
+cv_results_cat <- loo_df |>
+  select(c(language, measure, loo_preds, data)) |>
+  unnest(cols = c(loo_preds, data), names_repair = "unique") |>
+  group_by(language, category) |>
+  summarise(mean_abs_dev=mean(abs_dev), mean_se=mean(se))
+
 eng_across_lang_lex_desc <- head(arrange(cv_results_lex %>% filter(language=="English (American)", measure=="produces"), desc(abs_dev)), 50) 
 eng_across_lang_lex_desc 
 
-############## plot by lex_Category and prediction error TODO 
+
 ```
 
 Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
@@ -325,7 +328,27 @@ coefs_by_lang(lang_coefs %>% filter(!language =="Russian"))
 
 ```
 
-```{r plots2}
+```{r plots_langcoeff_all}
+
+all_coefs <- fitted_aoa_models %>%
+  unnest(coefficients) %>%
+  mutate(signif=ifelse(p.value<0.05, TRUE, FALSE))  
+
+all_coefs <- all_coefs %>%
+  mutate(interact_lexcat=ifelse(grepl("adverbs",term),'adverbs',term))%>%
+  mutate(interact_lexcat=ifelse(grepl("verbs",term),'verbs',interact_lexcat))%>%
+  mutate(interact_lexcat=ifelse(grepl("other",term),'other',interact_lexcat))%>%
+  mutate(interact_lexcat=ifelse(grepl("adject",term),'adjectives',interact_lexcat))%>%
+  mutate(interact_lexcat=ifelse(grepl("function",term),'function_words',interact_lexcat))%>%
+  mutate(interact_lexcat=ifelse(grepl("^valence|^solo_frequency|^frequency|^concreteness|^length_char|^babiness|^n_tokens|^final_frequency|^first_frequency|^mlu|Intercept",term),'single',interact_lexcat))
+
+coefs_by_pred_all(all_coefs %>% filter(language !="Russian")) 
+
+
+```
+
+
+```{r plots_crossval}
 #pdf(file = "data/cv_lang.pdf",    width = 8,  height = 4) 
 cv_dev_lang(cv_results %>% filter(!language=="English (British)", !language=="Russian"))
 #dev.off()
@@ -335,9 +358,29 @@ dev_words(eng_across_lang_lex_desc)
 #dev.off()
 
 #pdf(file = "data/aoa_mad_lex_eng_understands.pdf", width = 7, height = 5) 
-aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "understands", wb_data, preds)  
+u<-aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "understands", wb_data, preds)  
+p<-aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "produces", wb_data, preds)
+plot_grid(u, p)
 #dev.off()
 
+cv_results_pos$mean_abs_dev = as.numeric(cv_results_pos$mean_abs_dev) 
+ggplot(aes(x = mean_abs_dev, y =language), data = cv_results_pos %>% filter(!language=="Russian")) +
+       facet_wrap(~lexical_category, nrow=5) +
+       geom_point(aes(colour = factor(lexical_category)), size = 4)+
+  geom_errorbar(aes(xmin=mean_abs_dev-mean_se, xmax=mean_abs_dev+mean_se))+
+       geom_smooth(method = "loess") +
+       scale_color_brewer(palette = "Set1") +
+       theme_bw(base_size = 14) +
+       theme(panel.grid = element_blank())
 
+cv_results_cat$mean_abs_dev = as.numeric(cv_results_cat$mean_abs_dev) 
+ggplot(aes(x = mean_abs_dev, y =language), data = cv_results_cat %>% filter(!language=="Russian")) +
+       facet_wrap(~category) +
+       geom_point(aes(colour = factor(category)), size = 4)+
+  geom_errorbar(aes(xmin=mean_abs_dev-mean_se, xmax=mean_abs_dev+mean_se))+
+       geom_smooth(method = "loess") +
+       theme_bw(base_size = 14) +
+       theme(panel.grid = element_blank())
 ```
+
 
