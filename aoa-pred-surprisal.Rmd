@@ -1,0 +1,70 @@
+---
+title: "aoa-pred-surprisal"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(dplyr.summarise.inform = FALSE)
+
+# load libraries
+library(tidyverse)
+library(glue)
+library(wordbankr)
+#install.packages("remotes")
+#remotes::install_github("langcog/childesr")
+library(childesr)
+library(broom)
+library(car)
+#library(jglmm)
+library(modelr)
+library(ggrepel)
+library(SnowballC)
+#library(Hmisc)
+#library(arm)
+
+# load functions
+walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
+```
+
+# Load Wordbank data
+
+Loading cached Wordbank data for multiple languages:
+```{r loadwordbankxling}
+target_langs <- c("English (American)", "Spanish (Mexican)", "French (Quebecois)")
+# "German", "Mandarin (Beijing)", "Mandarin (Taiwanese)", "French (French)", "English (Australian)", "English (British)", "Spanish (European)" --> none of these will load I guess because they aren't cashed yet?
+
+
+wb_data <- map_df(target_langs, function(lang) {
+  message(glue("Loading data for {lang}..."))
+  norm_lang <- normalize_language(lang)
+  readRDS(glue("data/wordbank/{norm_lang}.rds"))
+})
+wb_data
+```
+
+Creating saved Wordbank data for many languages: 
+Might want to change this into a multistep process if we want to combine all dialects of a language together
+```{r create_wordbank_xling, eval=FALSE}
+walk(target_langs, create_wb_data)
+```
+
+# Load predictors
+
+Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
+
+```{r merge_unilemmas}
+uni_lemmas <- get_uni_lemmas(wb_data)
+uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+```
+
+```{r load_predictors}
+
+babiness_map <- c(word = "word", babiness = "babyAVG")
+babiness <- uni_lemmas |> map_predictor("babiness", babiness_map)
+
+valence_map <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
+valence <- uni_lemmas |> map_predictor("valence", valence_map)
+
+concreteness_map <- c(word = "Word", concreteness = "Conc.M")
+concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
