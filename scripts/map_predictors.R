@@ -13,7 +13,7 @@ map_predictor <- function(uni_lemmas, predictor, variable_mapping) {
   # clean the predictors
   renamed_predictors <- predictor_data |>
     rename(all_of(variable_mapping)) |>
-    select(names(variable_mapping)) |>
+    dplyr::select(names(variable_mapping)) |>
     group_by(word) |>
     # in case a word appears in the list twice
     dplyr::summarize(across({{ predictors }}, mean))
@@ -27,9 +27,9 @@ map_predictor <- function(uni_lemmas, predictor, variable_mapping) {
       !is.na(replacement) & replacement != "" ~ replacement,
       TRUE ~ str_replace(uni_lemma, "\\s*\\([^\\)]+\\)", ""))
     ) |>
-    select(-replacement) |>
+    dplyr::select(-replacement) |>
     left_join(renamed_predictors) |>
-    select(-word) |>
+    dplyr::select(-word) |>
     group_by(language, uni_lemma) |>
     dplyr::summarize(across({{ predictors }}, mean)) |>
     ungroup()
