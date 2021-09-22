@@ -127,8 +127,6 @@ childes_metrics <- map_df(target_langs, function(lang) {
 #1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
 #2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
 #3. freq_raw is the raw frequency (dividing count / sumcount)
-
-childes_metrics<-map_df(target_langs, prepare_cdata, childes_metrics, uni_lemmas)
 ```
 
 Creating saved CHILDES data for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr`:
