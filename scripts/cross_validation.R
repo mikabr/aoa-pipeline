@@ -15,7 +15,7 @@ fit_cv_models <- function(word_values, formulae, loo_df = NULL) {
       mutate(model = value,
              train = list(train_idx),
              test = list(test_idx)) |>
-      select(-c(value))
+      dplyr::select(-c(value))
 
     return(result)
   }
