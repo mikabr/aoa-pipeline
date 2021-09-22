@@ -23,8 +23,8 @@ library(modelr)
 library(ggrepel)
 library(SnowballC)
 library(cowplot)
-#library(Hmisc)
-#library(arm)
+library(Hmisc)
+library(arm)
 
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
@@ -186,7 +186,7 @@ prepped_data <- uni_joined |>
            suppressWarnings(
              fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))
              )) |>
-  select(-lexical_class)
+  dplyr::select(-lexical_class)
 
 pred_sources <- list(
   c("frequency","final_frequency", "first_frequency", "solo_frequency"),
@@ -209,19 +209,19 @@ Aoa lm model
 wb_data <- wb_data |>
   mutate(num_false = total - num_true,
          prop = num_true / total) |>
-  select(language, measure, uni_lemma, prop, num_true,age, num_false, total, items) %>%
+  dplyr::select(language, measure, uni_lemma, prop, num_true,age, num_false, total, items) %>%
          unique()
 
 aoas <- wb_data |>
   group_by(language, measure) |>
   nest() |>
   mutate(aoa = map(data, get_aoas, max_steps = 400)) |>
-  select(-data) |>
+  dplyr::select(-data) |>
   unnest(cols = c(aoa))
 
 word_values <- aoas |>
   left_join(imputed_data |>
-              select(-data) |>
+              dplyr::select(-data) |>
               unnest(cols = c(imputed)), 
             by = c("language", "uni_lemma")) 
 
@@ -259,21 +259,25 @@ loo_df <- word_values |>
 loo_df
 
 cv_results <- loo_df |>
-  select(c(language, measure, cv_results)) |>
+  dplyr::select(c(language, measure, cv_results)) |>
   unnest(cols = c(cv_results))
 
-############## plot by lex_Category /abstract category and prediction error 
+############## plot by lex_category /abstract category and prediction error 
 cv_results_pos <- loo_df |>
-  select(c(language, measure, loo_preds)) |>
+  dplyr::select(c(language, measure, loo_preds)) |>
   unnest(cols = c(loo_preds)) |> 
   group_by(language, lexical_category) |>
   summarise(mean_abs_dev=mean(abs_dev), mean_se=mean(se))
 
 cv_results_cat <- loo_df |>
-  select(c(language, measure, loo_preds, data)) |>
+  dplyr::select(c(language, measure, loo_preds, data)) |>
   unnest(cols = c(loo_preds, data), names_repair = "unique") |>
   group_by(language, category) |>
   summarise(mean_abs_dev=mean(abs_dev), mean_se=mean(se))
+
+cv_results_lex <- loo_df |>
+  dplyr::select(c(language, measure, loo_preds)) |>
+  unnest(cols = c(loo_preds))
 
 eng_across_lang_lex_desc <- head(arrange(cv_results_lex %>% filter(language=="English (American)", measure=="produces"), desc(abs_dev)), 50) 
 eng_across_lang_lex_desc 
@@ -377,5 +381,3 @@ ggplot(aes(x = mean_abs_dev, y =language), data = cv_results_cat %>% filter(!lan
        theme_bw(base_size = 14) +
        theme(panel.grid = element_blank())
 ```
-
-
