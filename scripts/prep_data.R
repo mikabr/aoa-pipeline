@@ -38,7 +38,7 @@ fit_predictor <- function(pred, d, pred_sources) {
   x_str <- xs |> paste(collapse = " + ")
   lm(as.formula(glue("{pred} ~ {x_str}")), data = d) |>
     broom::augment(newdata = d) |>
-    select(uni_lemma, category, lexical_category, .fitted)
+    dplyr::select(uni_lemma, category, lexical_category, .fitted)
 }
 
 get_missing_data <- function(lang_data, predictors) {
@@ -46,7 +46,7 @@ get_missing_data <- function(lang_data, predictors) {
     pivot_longer(cols = !!predictors, names_to = "predictor",
                  values_to = "value") |>
     mutate(missing = is.na(value)) |>
-    select(-value) |>
+    dplyr::select(-value) |>
     pivot_wider(names_from = predictor, values_from = missing)
   return(missing)
 }
@@ -83,13 +83,13 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   for (pred in prediction_list) {
     imputation_fits <- fit_predictor(pred, imputation_data, pred_sources)
     imputation_data <- missing |>
-      select(uni_lemma, lexical_category, category, !!pred) |>
+      dplyr::select(uni_lemma, lexical_category, category, !!pred) |>
       rename(missing = !!pred) |>
       right_join(imputation_data) |>
       left_join(imputation_fits) |>
       #if the value is missing, replace it with the new value
       mutate_at(vars(pred), funs(if_else(is.na(missing), .fitted, .))) |>
-      select(-.fitted, -missing)
+      dplyr::select(-.fitted, -missing)
   }
   return(imputation_data)
 }
@@ -113,7 +113,7 @@ do_full_imputation <- function(model_data, pred_sources, max_steps) {
   # restrict to the sources in pred_sources
   # TODO: catch cases where a predictor in the predictor set isn't in the data
   nested_data <- model_data |>
-    select(language, uni_lemma, lexical_category, category, !!unlist(pred_sources)) |>
+    dplyr::select(language, uni_lemma, lexical_category, category, !!unlist(pred_sources)) |>
     distinct() |>
     group_by(language) |>
     nest()
