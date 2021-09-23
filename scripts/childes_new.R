@@ -178,8 +178,10 @@ build_options <- function(language, word, special_cases) {
   opts <- c(opts, word |> str_split("[,/]") |> unlist()) # "foo, bar", "foo/bar"
   opts <- c(opts, map(transforms, \(t) t(opts)))
   opts <- opts |> unlist() |> unique() |> str_trim()
-  stemmer_lang <- convert_lang_stemmer(language)
-  if (!is.na(stemmer_lang)) opts <- c(opts, stem(opts, stemmer_lang))
+  for (method in c("snowball", "hunspell")) {
+    stemmer_lang <- convert_lang_stemmer(language, method)
+    if (!is.na(convert_lang_stemmer(language, method))) opts <- c(opts, stem(opts, stemmer_lang, method))
+  }
   opts <- opts |> unique()
 }
 
@@ -210,7 +212,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data=NULL) {
   }
 
   metrics_mapped <- token_metrics |>
-    mutate(token_stem = stem(token, convert_lang_stemmer(lang))) |>
+    mutate(token_stem = stem(token, convert_lang_stemmer(lang))) |> # need to decide how to handle childes stemming
     inner_join(uni_lemma_map |> mutate(option = tolower(option))  |> rename(token = option)) |>
     inner_join(uni_lemma_map |> mutate(option = tolower(option)) |> rename(token_stem = option)) |>
     select(-language, -token_stem) |>
