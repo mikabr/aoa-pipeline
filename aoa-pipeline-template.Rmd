@@ -47,31 +47,12 @@ eng_wb_data <- readRDS("data/wordbank/english_(american).rds")
 eng_wb_data
 ```
 
-Loading cached Wordbank data for multiple languages:
-```{r loadwordbankxling}
-target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "Spanish (Mexican)", "Italian", "Swedish",  "French (Quebecois)") 
-#"French (French)" "English (Australian)", "German","English (British)",
-#Portuguese (European) Spanish (European)" have NA in unilemmas 
-
-wb_data <- map_df(target_langs, function(lang) {
-  message(glue("Loading data for {lang}..."))
-  norm_lang <- normalize_language(lang)
-  readRDS(glue("data/wordbank/{norm_lang}.rds"))
-})
-wb_data
-```
-
-Creating saved Wordbank data for English:
+Creating saved Wordbank data for uncashed language, example with English
 ```{r create_wordbank_eng, eval=FALSE}
-create_wb_data("Portuguese (European)")
+create_wb_data("English (American)")
 ```
 
-Creating saved Wordbank data for many languages:
-```{r create_wordbank_xling, eval=FALSE}
-walk(target_langs, create_wb_data)
-```
-
-Creating saved Wordbank data one step at a time (potentially making changes between steps):
+Creating saved Wordbank data one step at a time (potentially making changes between steps) for uncashed language, example with English :
 ```{r create_wordbank_eng_steps, eval=FALSE}
 eng_wg <- create_inst_data("English (American)", "WG")
 eng_ws <- create_inst_data("English (American)", "WS")
@@ -79,6 +60,33 @@ eng_wg_summary <- collapse_inst_data(eng_wg)
 eng_ws_summary <- collapse_inst_data(eng_ws)
 eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
+
+Loading Wordbank data for multiple languages (cashed or not):
+```{r loadwordbankxling}
+target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "Spanish (Mexican)", "Italian", "Swedish",  "French (Quebecois)") 
+#"French (French)" "English (Australian)", "German","English (British)",
+#Portuguese (European) Spanish (European)" have NA in unilemmas 
+
+wb_data <- map_df(target_langs, function(lang) {
+  print(glue("Loading data for {lang}..."))
+  norm_lang <- normalize_language(lang)
+  tryCatch( 
+    {
+      # If data for language X is already cashed, it will be loaded directly into the workspace
+      readRDS(glue("data/wordbank/{norm_lang}.rds"))
+    },
+    error = function(e) {
+      # If the data for language X is not cashed, it will download it for all available instruments types, cashe the data for future use and then load it into the workspace
+      print(glue("No cashed data for {lang}, downloading data now..."))
+      create_wb_data(lang)
+      readRDS(glue("data/wordbank/{norm_lang}.rds"))
+    }
+    )
+
+})
+wb_data
+```
+
 
 
 # Load predictors
