@@ -1,0 +1,175 @@
+---
+title: "aoa-pred-surprisal"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(dplyr.summarise.inform = FALSE)
+
+# load libraries
+library(tidyverse)
+library(glue)
+library(wordbankr)
+#install.packages("remotes")
+#remotes::install_github("langcog/childesr")
+library(childesr)
+library(broom)
+library(car)
+#library(jglmm)
+library(modelr)
+library(ggrepel)
+library(SnowballC)
+library(stringr)
+#library(Hmisc)
+#library(arm)
+
+# load functions
+walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
+```
+
+# Load Wordbank data
+
+Loading cached Wordbank data for multiple languages:
+```{r loadwordbankxling}
+target_langs <- c("French (Quebecois)", "German", "English (American)", "Spanish (Mexican)","Mandarin (Beijing)", "French (French)", "English (Australian)", "English (British)", "Mandarin (Taiwanese)", "Spanish (European)" )
+
+
+
+wb_data <- map_df(target_langs, function(lang) {
+  print(glue("Loading data for {lang}..."))
+  norm_lang <- normalize_language(lang)
+  tryCatch( 
+    {
+      # If data for language X is already cashed, it will be loaded directly into the workspace
+      readRDS(glue("data/wordbank/{norm_lang}.rds"))
+    },
+    error = function(e) {
+      # If the data for language X is not cashed, it will download it for all available instruments types, cashe the data for future use and then load it into the workspace
+      print(glue("No cashed data for {lang}, downloading data now..."))
+      create_wb_data(lang)
+      readRDS(glue("data/wordbank/{norm_lang}.rds"))
+    }
+    )
+
+})
+wb_data
+
+```
+
+# Get word lists and uni_lemmas for "Mandarin (Taiwanese)" and "Spanish (European)"
+These languages have now been cashed so there is no more need to run this. It is included in the event that we need to do this again for other language.
+
+There are currently (September 2021) no uni-lemmas in Wordbankr for "Mandarin (Taiwanese)" and "Spanish (European)", however we do have them in development. Here we combine the data from wordbankr and the uni-lemmas in development for them.
+
+```{r new_uni_lemmas, eval=FALSE}
+
+no_uni_lemma_langs <- c("Mandarin (Taiwanese)", "Spanish (European)")
+# No unilemmas for "Mandarin (Taiwanese)" and "Spanish (European)" 
+
+get_uni_lemmas_from_csv <- function(lang){
+  lang_norm <- normalize_language(lang)
+  name <- glue("../word_lists/Wordbank_{lang_norm}.csv")
+  new_uni_lemmas <- read_csv(name)
+  
+  new_uni_lemmas <- new_uni_lemmas |>
+    select(-c(gloss, new_gloss, new_uni_lemma, notes)) |>
+    filter(!is.na(uni_lemma))
+  
+  ws_new_uni_lemmas <- new_uni_lemmas |>
+    mutate(item_id = WS) |>
+    select(-c(WG, WS)) |>
+    filter(!is.na(item_id)) |>
+    mutate(form = "WS")
+  
+  wg_new_uni_lemmas <- new_uni_lemmas |>
+    mutate(item_id = WG) |>
+    select(-c(WG, WS)) |>
+    filter(!is.na(item_id)) |>
+    mutate(form = "WG")
+  
+  new_uni_lemmas <- rbind(ws_new_uni_lemmas, wg_new_uni_lemmas) |>
+    mutate(language = lang)
+  
+  lang_wg <- create_inst_data(lang, "WG") |>
+    select(-c(uni_lemma)) |>
+    left_join(new_uni_lemmas)
+
+  lang_ws <- create_inst_data(lang, "WS") |>
+    select(-c(uni_lemma)) |>
+    left_join(new_uni_lemmas)
+  
+  wg_summary <- collapse_inst_data(lang_wg)
+  ws_summary <- collapse_inst_data(lang_ws)
+  comb_summary <- combine_form_data(list(wg_summary, ws_summary))
+  
+  saveRDS(comb_summary, file = glue("data/wordbank/{lang_norm}.rds"))
+  
+  return(comb_summary)
+}
+
+wb_data_new_unilemmas <- map_df(no_uni_lemma_langs, get_uni_lemmas_from_csv)
+
+```
+
+# Make word lists for each language
+
+Get match unilemmas for each item
+```{r get_word_lists}
+
+get_word_lists <- function(wb_data) {
+  split_words <- wb_data |>
+    distinct(language, uni_lemma, items) |>
+    unnest(items) |>
+    select(-c(form, item_id)) |>
+    filter(lexical_class != "other") |>
+    distinct() |>
+    mutate(word_clean = gsub("[(].*$","", definition)) |>
+    mutate(word_clean = tolower(gsub(" $","", word_clean))) |>
+    separate(col=word_clean, into=c("word_clean1", "word_clean2", "word_clean3"), sep="/")
+  words <- split_words |>
+    mutate(word_clean = word_clean1) |>
+    select(-c( word_clean1, word_clean2, word_clean3))
+  words2 <- split_words |>
+    mutate(word_clean = word_clean2) |>
+    select(-c( word_clean1, word_clean2, word_clean3)) |>
+    filter(! is.na(word_clean))
+  words3 <- split_words |>
+    mutate(word_clean = word_clean3) |>
+    select(-c( word_clean1, word_clean2, word_clean3)) |>
+    filter(! is.na(word_clean))  
+  word_lists <- rbind(words, words2, words3)
+}
+
+word_lists <- get_word_lists(wb_data)
+
+```
+
+```{r save_word_list_by_lang}
+save_lang_word_list <- function(lang){
+  lang_word_list <- word_lists |>
+    filter(language == lang)
+  norm_lang <- normalize_language(lang)
+  name <- glue("../word_lists/word_list_{norm_lang}.csv")
+  write.csv(lang_word_list, file=name, sep=",")
+  return(lang_word_list)
+}
+
+map_df(target_langs, save_lang_word_list)
+
+```
+
+
+# Load predictors
+
+Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
+
+```{r merge_unilemmas}
+uni_lemmas <- get_uni_lemmas(wb_data)
+#uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+```
+
+```{r load_predictors}
+
+concreteness_map <- c(word = "Word", concreteness = "Conc.M")
+concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
