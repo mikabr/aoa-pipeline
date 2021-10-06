@@ -174,3 +174,4 @@ uni_lemmas <- get_uni_lemmas(wb_data)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
+```

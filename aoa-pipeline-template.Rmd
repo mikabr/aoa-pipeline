@@ -13,12 +13,9 @@ options(dplyr.summarise.inform = FALSE)
 library(tidyverse)
 library(glue)
 library(wordbankr)
-install.packages("remotes")
-remotes::install_github("langcog/childesr")
 library(childesr)
 library(broom)
 library(car)
-#library(jglmm)
 library(modelr)
 library(ggrepel)
 library(SnowballC)
@@ -47,12 +44,12 @@ eng_wb_data <- readRDS("data/wordbank/english_(american).rds")
 eng_wb_data
 ```
 
-Creating saved Wordbank data for uncashed language, example with English
+Creating saved Wordbank data for uncached language, example with English
 ```{r create_wordbank_eng, eval=FALSE}
 create_wb_data("English (American)")
 ```
 
-Creating saved Wordbank data one step at a time (potentially making changes between steps) for uncashed language, example with English :
+Creating saved Wordbank data one step at a time (potentially making changes between steps) for uncached language, example with English :
 ```{r create_wordbank_eng_steps, eval=FALSE}
 eng_wg <- create_inst_data("English (American)", "WG")
 eng_ws <- create_inst_data("English (American)", "WS")
@@ -61,7 +58,7 @@ eng_ws_summary <- collapse_inst_data(eng_ws)
 eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
 
-Loading Wordbank data for multiple languages (cashed or not):
+Loading Wordbank data for multiple languages (cached or not):
 ```{r loadwordbankxling}
 target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "Spanish (Mexican)", "Italian", "Swedish",  "French (Quebecois)") 
 #"French (French)" "English (Australian)", "German","English (British)",
@@ -72,12 +69,12 @@ wb_data <- map_df(target_langs, function(lang) {
   norm_lang <- normalize_language(lang)
   tryCatch( 
     {
-      # If data for language X is already cashed, it will be loaded directly into the workspace
+      # If data for language X is already cached, it will be loaded directly into the workspace
       readRDS(glue("data/wordbank/{norm_lang}.rds"))
     },
     error = function(e) {
-      # If the data for language X is not cashed, it will download it for all available instruments types, cashe the data for future use and then load it into the workspace
-      print(glue("No cashed data for {lang}, downloading data now..."))
+      # If the data for language X is not cached, it will download it for all available instruments types, cache the data for future use and then load it into the workspace
+      print(glue("No cached data for {lang}, downloading data now..."))
       create_wb_data(lang)
       readRDS(glue("data/wordbank/{norm_lang}.rds"))
     }
@@ -90,6 +87,8 @@ wb_data
 
 
 # Load predictors
+
+## Ratings and phonemes
 
 Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
@@ -114,7 +113,9 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 #phonemes <- uni_lemmas |> map_phonemes()
 # left_join(phonemes, by = c("language", "uni_lemma")) |>
 ```
-#Load CHILDES
+
+## CHILDES
+
 Loading cached CHILDES data for English:
 ```{r load_childes_eng}
 eng_childes <- readRDS("data/childes/uni_metrics_english_(american).rds")
@@ -150,8 +151,10 @@ walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 ```
 
 
-# Prepare 
-Prepare frequency
+# Prepare data for modeling
+
+## Frequency transformations
+
 Order: Frequency, weighted, log transformed and Laplace smoothed, residualized
 ```{r prepare_frequency}
 
@@ -176,7 +179,8 @@ uni_joined <- uni_lemmas |>
   left_join(childes_metrics, by = c("language", "uni_lemma"))
 ```
 
-# Impute
+## Imputation
+
 ```{r impute_data}
 prepped_data <- uni_joined |>
   # select out just the by lexical item data
@@ -206,9 +210,25 @@ imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 imputed_data
 ```
 
+## Evaluate collinearity
 
-# Fit model
-Aoa lm model
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
+```{r vif}
+eng_joined_data <- word_values |> filter(language == "English (American)")
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
+```
+
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
+```{r vif x-ling}
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
+```
+
+# Fit models
+
+## AoA lm model
+
 ```{r aoa-lm}
 
 wb_data <- wb_data |>
@@ -244,14 +264,8 @@ fitted_aoa_models
 
 ```
 
+## Cross-validatation
 
-age glmer model:
-```{r age-glmer}
-## TODO: fix fit_models; currently failing in Julia
-#fitted_age_models <- fit_models(joined_data, predictors, full = TRUE)
-```
-
-# Cross-validate
 ```{r cross_validate}
 
 # for simple cv result extraction
@@ -285,24 +299,11 @@ cv_results_lex <- loo_df |>
   unnest(cols = c(loo_preds))
 
 eng_across_lang_lex_desc <- head(arrange(cv_results_lex %>% filter(language=="English (American)", measure=="produces"), desc(abs_dev)), 50) 
-eng_across_lang_lex_desc 
-
-
-```
-# Evaluate collinearity
-Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
-```{r vif}
-eng_joined_data <- word_values |> filter(language == "English (American)")
-preds <- c("frequency", "concreteness", "mlu")
-vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
+eng_across_lang_lex_desc
 ```
 
-Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
-```{r vif x-ling}
-preds <- c("frequency", "concreteness", "mlu")
-vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
-```
-# Make plots
+## Plot model results
+
 ```{r plots1}
 
 #####plots
