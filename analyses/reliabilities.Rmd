@@ -11,15 +11,8 @@ library(tidyverse)
 library(glue)
 library(wordbankr)
 library(broom)
-install.packages("remotes")
-remotes::install_github("langcog/childesr")
 library(childesr)
 library(modelr)
-#library(childesr)
-
-normalize_language <- function(language) {
-  language %>% str_replace(" ", "_") %>% str_to_lower()
-}
 
 walk(list.files("scripts", pattern = "*.R", full.names = TRUE), source)
 
