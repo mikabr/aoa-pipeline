@@ -210,21 +210,6 @@ imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
 imputed_data
 ```
 
-## Evaluate collinearity
-
-Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
-```{r vif}
-eng_joined_data <- word_values |> filter(language == "English (American)")
-preds <- c("frequency", "concreteness", "mlu")
-vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
-```
-
-Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
-```{r vif x-ling}
-preds <- c("frequency", "concreteness", "mlu")
-vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
-```
-
 # Fit models
 
 ## AoA lm model
@@ -264,7 +249,22 @@ fitted_aoa_models
 
 ```
 
-## Cross-validatation
+## Evaluate collinearity
+
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
+```{r vif}
+eng_joined_data <- word_values |> filter(language == "English (American)")
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
+```
+
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
+```{r vif x-ling}
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
+```
+
+## Cross-validation
 
 ```{r cross_validate}
 
