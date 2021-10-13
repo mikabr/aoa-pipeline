@@ -15,14 +15,14 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
 
   }
 
-  admins |> select(language, form, age, data_id)
+  admins |> dplyr::select(language, form, age, data_id)
 }
 
 get_inst_words <- function(language, form) {
   print(glue("Getting words for {language} {form}..."))
   get_item_data(language = language, form = form) |>
     filter(type == "word") |>
-    select(language, form, lexical_class, category, uni_lemma, definition,
+    dplyr::select(language, form, lexical_class, category, uni_lemma, definition,
            item_id, num_item_id)
 }
 
