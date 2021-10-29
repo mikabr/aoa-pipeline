@@ -177,3 +177,233 @@ reliabilities_aoa %>%
   knitr::kable(digits = 2)
 
 ```
+```{r functions childes}
+
+# main function for reliabilities of predictors within childes
+get_main_rel <-function(lang){
+  both<-split_half(lang)
+  df<- same_size_df(both[[1]],both[[2]])
+  r=c(pred_cor("length_char", df),pred_cor("n_tokens", df), pred_cor("mlu", df),  pred_cor("frequency", df), pred_cor("solo_frequency", df), pred_cor("first_frequency", df), pred_cor("final_frequency", df))
+  names= predictor_list
+  rdata <- data.frame(names, r)
+  rdata <- rdata %>% mutate(language=lang)
+  return(rdata)
+}
+
+######################
+
+# add lemmas of one CHILDES half not existing at other half and do same size and order
+same_size_df <- function(df1, df2) { 
+  if (nrow(df1)>3){
+  df1 <- df1 %>% 
+    drop_na(frequency)
+  df2 <- df2 %>% 
+    drop_na(frequency)
+  firstlistlemma<-(df1$uni_lemma)
+    secondlistlemma<-(df2$uni_lemma)
+    diff1<-setdiff(firstlistlemma,secondlistlemma) 
+    diff2<-setdiff(secondlistlemma,firstlistlemma) 
+    df<-as.data.frame(c(diff1, diff2)) %>%
+      rename(uni_lemma = "c(diff1, diff2)" )
+    df1<- anti_join(df1, df, by='uni_lemma')
+    df2<- anti_join(df2, df, by='uni_lemma')
+     both=list(tibble(df1[!duplicated(df1$uni_lemma),]), tibble(df2[!duplicated(df2$uni_lemma),]))
+  return(both)
+     }
+     else{
+    both=list(tibble(df1), tibble(df2))
+    return(both)
+  }
+}
+
+##########################
+
+# extracts corr number from df
+lang_pred_half <- function(lang, pred, split_corpora){
+ s=split_corpora %>% filter(language==lang, names==pred)
+ r=s[1,2]
+return(as.numeric(r) ) 
+}
+
+#####################
+
+# measure correlation between two vectors
+pred_cor <- function(pred, df){
+r<- cor(df[[1]][[pred]], df[[2]][[pred]], method="pearson")
+return(r)  
+}
+
+#######################  
+
+#get unilemmas for words, and predictors for unilemmas
+get_predictors<- function(half, lang){
+     token_metrics<- get_childes_metrics(lang=lang, metric_funs, corpus_args, import_data=half)
+     wg <- tryCatch({create_inst_data(lang, "WG")}, error = function(e){})
+     ws <- tryCatch({create_inst_data(lang, "WS")}, error = function(e){})
+     wg_summary <- tryCatch({collapse_inst_data(wg)}, error = function(e){})
+     ws_summary <- tryCatch({collapse_inst_data(ws)}, error = function(e){})
+     if (!is.null(wg) & !is.null(ws)){
+      comb_summary <- combine_form_data(list(wg_summary, ws_summary))
+     } else if (!is.null(wg)){
+      comb_summary <- wg_summary 
+     } else if (!is.null(ws)){
+      comb_summary <- ws_summary 
+     } else{
+      comb_summary <- NULL 
+     }
+     if (!is.null(comb_summary)){
+      uni_lemmas <- get_uni_lemmas(comb_summary)
+      uni_metrics<- get_uni_lemma_metrics(lang, build_uni_lemma_map(uni_lemmas), token_metrics)
+      uni_metrics <- prepare_frequency(lang, uni_metrics, uni_lemmas, count, count_first, count_last, count_solo, frequency, first_frequency, final_frequency, solo_frequency) 
+     return(uni_metrics[order(uni_metrics$uni_lemma),])
+     } else{
+      uni_metrics <- NA  
+     return(uni_metrics)   
+     }
+}
+#############################
+
+#get CHILDES and randomly splits words in half
+split_half <-function(lang){ 
+  childes_lang <- convert_lang_childes(lang)
+  file_t <- file.path(childes_path, glue("{childes_lang}_tokens.rds"))
+  if(file.exists(file_t)) {
+   tokens <-readRDS(file_t)
+  }else{
+   tokens <- get_childes_data(childes_lang, corpus_args)[[2]] 
+  }
+  tokens <- tokens %>% mutate(gloss=tolower(gloss))
+  file_u <- file.path(childes_path, glue("{childes_lang}_utterances.rds"))
+  if(file.exists(file_u)) {
+   utterances <- readRDS(file_u)
+  }else{
+   utterances <- get_childes_data(childes_lang, corpus_args)[[1]] 
+  } 
+ 
+  ind <- sample(c(TRUE, FALSE), nrow(tokens), replace=TRUE, prob=c(0.5, 0.5)) #split tokens
+  tokens1 <- tokens[ind, ] #split in two
+  tokens2 <- tokens[!ind, ] 
+  
+   utterances1 <- utterances %>%
+     filter(id %in% tokens1$utterance_id) %>%
+     mutate(gloss=tolower(gloss))  
+
+    utterances2 <- utterances %>%
+     filter(id %in% tokens2$utterance_id) %>%
+     mutate(gloss=tolower(gloss)) 
+    
+  half1 <- list("utterances" = utterances1, "tokens" = tokens1)
+  half2 <- list("utterances" = utterances2, "tokens" = tokens2)
+
+  both=list(tibble(get_predictors(half1, lang)), tibble(get_predictors(half2, lang)))
+  return(both)  
+  }
+
+```
+
+
+
+### Measure reliabilities for CHILDES predictors
+
+Implement functiosn above, for each target language, measure (and optionally word_class). The mean correlation r is selected from 5 random splits of the corpus. 
+
+```{r childes, warning = FALSE, message=FALSE}
+
+rel <- file.path(glue("data/reliabilities.rds")) #check whether cached data exist
+  if(!file.exists(rel)) {
+ 
+split_corpora <- lapply(target_langs, get_main_rel) %>% bind_rows()
+
+split_corpora1 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+
+split_corpora2 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+
+split_corpora3 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+
+split_corpora4 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+
+
+reliabilities <- expand_grid(lang = target_langs,
+                            word_class = c("all"),
+                            pred = predictor_list) %>%  
+                            rowwise %>%            
+                            mutate(r =  (sum(lang_pred_half(lang, pred, split_corpora), lang_pred_half(lang, pred, split_corpora1), lang_pred_half(lang, pred, split_corpora2), lang_pred_half(lang, pred, split_corpora3), lang_pred_half(lang, pred, split_corpora4)))/5) %>% 
+  mutate(sbr = sbformula(as.numeric(r)))
+
+reliabilities %>%
+  knitr::kable(digits = 2)
+
+splitpath<- glue("data/reliabilities.rds")
+saveRDS(reliabilities, splitpath)
+  }else{
+reliabilities <-  readRDS(rel)
+}
+
+
+```
+
+### Measure R squared from cross-validation 
+
+The rsq_cv function measures the R squared of the cross-validated test models
+```{r x-validation}
+
+rsq <- file.path(glue("data/rsq.rds")) #check whether cached data exist
+  if(!file.exists(rsq)) {
+
+#Italian: 25, 308 (bath, sit, a)
+rsq_cv<- function(word_values, predictor, lang, meas) {
+  r<-word_values |>
+  filter(language==lang, measure==meas) |>
+  group_nest() |>
+  mutate(loo_data = map(data, crossv_loo),
+         loo_models = map(data, fit_cv_models, list(make_effs_formula(predictor, FALSE, TRUE))),
+         loo_preds = map2(loo_models, data, get_cv_preds),
+         cv_results = map(loo_preds, get_cv_results))
+  r_lp<- r |>
+    unnest(cv_results) %>% 
+    dplyr::select(r2) %>%
+   unique()
+  r=r_lp[1,1]
+  return(as.character(r)) 
+  }
+
+file_wv <- file.path(glue("/Users/lscpuser/Documents/aoa-pipeline8/aoa-pipeline-main-1/data/word_values.rds"))
+word_values <- readRDS(file_wv) ####data needed from aoa-template
+word_values <- word_values %>% 
+  filter(!(language=="Russian" & category=="sounds"))
+
+rsq <- expand_grid(  #     class = c("all"),
+                   pred = predictor_list,
+                   lang = target_langs,
+                   meas = c("produces", "understands")) %>% 
+                   rowwise %>%
+                   mutate(r2= rsq_cv(word_values, pred, lang, meas))
+
+rsqpath<- glue("data/rsq.rds")
+saveRDS(rsq, rsqpath)
+
+}else{
+rsq<-  readRDS(rsq)
+}
+
+```
+
+### Merge to create final corpus 
+```{r final corpus}
+
+dfinal <- reliabilities %>%
+  left_join(reliabilities_aoa) %>%
+  unique() %>%
+  filter(!is.na(meas)) %>% 
+  mutate(threshold = sbr * sbr_aoa) %>%
+  left_join(unique(rsq)) %>%
+ # filter(!is.infinite(as.numeric(r2))) %>%
+  unique()
+
+
+dfinalpath<- glue("data/dfinal.rds")
+saveRDS(dfinal, dfinalpath)
+
+dfinal %>%
+  knitr::kable(digits = 2)
+```
