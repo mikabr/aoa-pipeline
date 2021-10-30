@@ -4,6 +4,12 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
   admins <- get_administration_data(language = language,
                                     form = form,
                                     original_ids = TRUE)
+  
+   if (is.na(unique(admins$original_id[1]))==TRUE){
+    admins <- admins %>%
+      select(-(original_id)) %>%
+      rename(original_id = data_id)
+  }
 
   if (exclude_longitudinal) {
     # take earliest administration for any child with multiple administrations
@@ -14,6 +20,10 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
       ungroup()
 
   }
+ if (!("data_id" %in% colnames(admins))){
+   admins <- admins %>%
+   rename(data_id = original_id)
+ }
 
   admins |> dplyr::select(language, form, age, data_id)
 }
