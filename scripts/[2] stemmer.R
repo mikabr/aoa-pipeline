@@ -41,8 +41,7 @@ stem <- function(words, language, method = "snowball") {
     }
 
   } else {
-    warning(sprintf("invalid stemming method %s",
-                    method))
+    warning(sprintf("invalid stemming method %s", method))
     words
   }
 }

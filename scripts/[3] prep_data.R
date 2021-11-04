@@ -1,37 +1,37 @@
 ##...................................
-## data prep -- scaling, imputation, etc
+## Data prep -- scaling, imputation, etc
 ##...................................
 
-# HELPER FUNCTIONS --------------
+# transform any column that starts with "count" by smoothing (add 1),
+# normalizing, and log transforming, then rename "count_x" to "freq_x"
+transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
+                             log_transform = TRUE) {
+  trans_metrics <- childes_metrics |> group_by(language)
+  trans_funs <- c()
+  if (smooth) trans_funs <- c(trans_funs, \(count) count + 1)
+  if (normalize) trans_funs <- c(trans_funs, \(count) count / sum(count))
+  if (log_transform) trans_funs <- c(trans_funs, \(count) log(count))
 
-prepare_frequency <- function(lang, childes_metrics, uni_lemmas, count, count_first, count_last, count_solo, frequency, first_frequency, final_frequency, solo_frequency){
+  for (fun in trans_funs) {
+    trans_metrics <- trans_metrics |> mutate(across(starts_with("count"), fun))
+  }
 
-  childes_metrics <- childes_metrics %>% filter(language==lang)
-  childes_metrics <- normalize_frequency(childes_metrics, count, count_first, count_last, count_solo)
-  childes_metrics <- residualize_frequency(childes_metrics, frequency, first_frequency, final_frequency, solo_frequency)
-  return(childes_metrics)
+  trans_metrics |> ungroup() |>
+    rename_with(\(col) str_replace(col, "count", "freq"), starts_with("count"))
 }
 
-# residualize - do each of these get their own functions? w/ an argument
-do_residualization <- function(target_column, residualizing_column){
+residualize_col <- function(target_column, residualizing_column) {
   return(lm(target_column ~ residualizing_column)$residuals)
 }
 
-#Normalize frequency: log transform and smoothing (+1)
-normalize_frequency<- function(uni_childes, count, count_first, count_last, count_solo) {
-  uni_childes |>
-  mutate(frequency=log((count + 1)/sum(count)),
-         final_frequency=log((count_last + 1)/sum(count_last)),
-         first_frequency=log((count_first + 1)/sum(count_first)),
-         solo_frequency=log((count_solo +1)/sum(count_solo)))
+# residualize all columns that starts with "freq_" from the column "freq"
+residualize_freqs <- function(childes_metrics) {
+  childes_metrics |>
+    mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
 }
 
-residualize_frequency <- function(uni_childes,  frequency, first_frequency, final_frequency, solo_frequency){
-  uni_childes |>
-    mutate(final_frequency=do_residualization(final_frequency, frequency),
-           solo_frequency=do_residualization(solo_frequency, frequency),
-           first_frequency=do_residualization(first_frequency, frequency))
- }
+
+## Imputation
 
 fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources |> discard(\(s) pred %in% s) |> unlist()
@@ -46,7 +46,7 @@ get_missing_data <- function(lang_data, predictors) {
     pivot_longer(cols = !!predictors, names_to = "predictor",
                  values_to = "value") |>
     mutate(missing = is.na(value)) |>
-    dplyr::select(-value) |>
+    select(-value) |>
     pivot_wider(names_from = predictor, values_from = missing)
   return(missing)
 }
@@ -79,7 +79,7 @@ get_imputation_seed <- function(lang_data, predictors) {
 
 do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   prediction_list <- unlist(pred_sources)
-  #iterates through the predictor list for that language
+  # iterates through the predictor list for that language
   for (pred in prediction_list) {
     imputation_fits <- fit_predictor(pred, imputation_data, pred_sources)
     imputation_data <- missing |>
@@ -87,7 +87,7 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
       rename(missing = !!pred) |>
       right_join(imputation_data) |>
       left_join(imputation_fits) |>
-      #if the value is missing, replace it with the new value
+      # if the value is missing, replace it with the new value
       mutate_at(vars(pred), funs(if_else(is.na(missing), .fitted, .))) |>
       dplyr::select(-.fitted, -missing)
   }
@@ -113,7 +113,8 @@ do_full_imputation <- function(model_data, pred_sources, max_steps) {
   # restrict to the sources in pred_sources
   # TODO: catch cases where a predictor in the predictor set isn't in the data
   nested_data <- model_data |>
-    dplyr::select(language, uni_lemma, lexical_category, category, !!unlist(pred_sources)) |>
+    select(language, uni_lemma, lexical_category, category,
+           !!unlist(pred_sources)) |>
     distinct() |>
     group_by(language) |>
     nest()

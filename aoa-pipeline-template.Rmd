@@ -14,14 +14,14 @@ library(tidyverse)
 library(glue)
 library(wordbankr)
 library(childesr)
-library(broom)
-library(car)
-library(modelr)
-library(ggrepel)
-library(SnowballC)
-library(cowplot)
-library(Hmisc)
-library(arm)
+# library(broom)
+# library(car)
+# library(modelr)
+# library(ggrepel)
+# library(SnowballC)
+# library(cowplot)
+# library(Hmisc)
+# library(arm)
 
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
@@ -40,16 +40,27 @@ The general steps are:
 
 Loading cached Wordbank data for English:
 ```{r load_wordbank_eng}
-eng_wb_data <- readRDS("data/wordbank/english_(american).rds")
+eng_wb_data <- load_wb_data("English (American)")
 eng_wb_data
 ```
 
-Creating saved Wordbank data for uncached language, example with English
+Loading Wordbank data for multiple languages (cached or not):
+```{r load_wordbank_xling}
+target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian",
+                  "Russian", "Turkish", "Spanish (Mexican)", "Italian",
+                  "Swedish",  "French (Quebecois)")
+#"French (French)" "English (Australian)", "German","English (British)",
+#Portuguese (European) Spanish (European)" have NA in unilemmas 
+
+wb_data <- load_wb_data(target_langs)
+```
+
+Creating saved Wordbank data for a language, for example:
 ```{r create_wordbank_eng, eval=FALSE}
 create_wb_data("English (American)")
 ```
 
-Creating saved Wordbank data one step at a time (potentially making changes between steps) for uncached language, example with English :
+Creating saved Wordbank data one step at a time (potentially making changes between steps), for example:
 ```{r create_wordbank_eng_steps, eval=FALSE}
 eng_wg <- create_inst_data("English (American)", "WG")
 eng_ws <- create_inst_data("English (American)", "WS")
@@ -57,33 +68,6 @@ eng_wg_summary <- collapse_inst_data(eng_wg)
 eng_ws_summary <- collapse_inst_data(eng_ws)
 eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
-
-Loading Wordbank data for multiple languages (cached or not):
-```{r loadwordbankxling}
-target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian", "Russian", "Turkish", "Spanish (Mexican)", "Italian", "Swedish",  "French (Quebecois)") 
-#"French (French)" "English (Australian)", "German","English (British)",
-#Portuguese (European) Spanish (European)" have NA in unilemmas 
-
-wb_data <- map_df(target_langs, function(lang) {
-  print(glue("Loading data for {lang}..."))
-  norm_lang <- normalize_language(lang)
-  tryCatch( 
-    {
-      # If data for language X is already cached, it will be loaded directly into the workspace
-      readRDS(glue("data/wordbank/{norm_lang}.rds"))
-    },
-    error = function(e) {
-      # If the data for language X is not cached, it will download it for all available instruments types, cache the data for future use and then load it into the workspace
-      print(glue("No cached data for {lang}, downloading data now..."))
-      create_wb_data(lang)
-      readRDS(glue("data/wordbank/{norm_lang}.rds"))
-    }
-    )
-
-})
-wb_data
-```
-
 
 
 # Load predictors
@@ -93,12 +77,10 @@ wb_data
 Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
 ```{r merge_unilemmas}
-uni_lemmas <- get_uni_lemmas(wb_data)
-uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
+uni_lemmas <- extract_uni_lemmas(wb_data)
 ```
 
 ```{r load_predictors}
-
 babiness_map <- c(word = "word", babiness = "babyAVG")
 babiness <- uni_lemmas |> map_predictor("babiness", babiness_map)
 
@@ -118,29 +100,23 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 
 Loading cached CHILDES data for English:
 ```{r load_childes_eng}
-eng_childes <- readRDS("data/childes/uni_metrics_english_(american).rds")
-eng_childes
+eng_childes <- load_childes_metrics("English (American)")
 ```
 
 Loading cached CHILDES data for multiple languages:
 ```{r load_childes_xling}
-
-childes_metrics <- map_df(target_langs, function(lang) {
-  message(glue("Loading CHILDES data for {lang}..."))
-  norm_lang <- normalize_language(lang)
-  readRDS(glue("data/childes/uni_metrics_{norm_lang}.rds"))
-})
-
+childes_metrics <- load_childes_metrics(target_langs)
 ```
 
-Creating saved CHILDES data for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr`:
+Creating saved CHILDES data for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes, eval=FALSE}
 metric_funs <- list(compute_count, compute_mlu, compute_positions,
                     compute_length_char, compute_length_phon)
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
-
 get_childes_metrics("English (American)", metric_funs, corpus_args)
+
+uni_lemma_map <- build_uni_lemma_map(uni_lemmas)
 get_uni_lemma_metrics("English (American)", uni_lemma_map)
 ```
 
@@ -155,28 +131,20 @@ walk(target_langs, get_uni_lemma_metrics, uni_lemma_map)
 
 ## Frequency transformations
 
-Order: Frequency, weighted, log transformed and Laplace smoothed, residualized
+By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualize_freqs()` residualizes all columns that starts with "freq_" from the column "freq".
+
 ```{r prepare_frequency}
-
-#Normalize frequency: log transform and smoothing (+1)
-#Normalized smoothed frequencies
-#the output has: 
-#1. raw counts of uni_lemmas (count, count_first, count_last, count_solo)
-#2. sum count of whole CHILDES corpus (sumcount, sumcount_first, sumcount_last, sumcount_solo)
-#3. freq_raw is the raw frequency (dividing count / sumcount)
-
-#Residualize frequency out of final and solo frequencies
-childes_metrics<-map_df(target_langs, prepare_frequency, childes_metrics, uni_lemmas)
-childes_metrics
+childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs()
 ```
 
+##
+
 Combine mapped predictors and CHILDES predictors:
+
 ```{r merge_all}
-uni_joined <- uni_lemmas |>
-  left_join(babiness, by = c("language", "uni_lemma")) |>
-  left_join(valence, by = c("language", "uni_lemma")) |>
-  left_join(concreteness, by = c("language", "uni_lemma")) |>
-  left_join(childes_metrics, by = c("language", "uni_lemma"))
+predictor_data <- list(babiness, valence, concreteness, childes_metrics)
+uni_joined <- predictor_data |>
+  reduce(partial(full_join, by = c("language", "uni_lemma")))
 ```
 
 ## Imputation
@@ -185,7 +153,6 @@ uni_joined <- uni_lemmas |>
 prepped_data <- uni_joined |>
   # select out just the by lexical item data
   unnest(cols = "items") |>
-  # select(-c(age, num_true, total, form, item_id)) |>
   distinct() |>
   # pull out categories from classes
   mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
@@ -195,7 +162,7 @@ prepped_data <- uni_joined |>
            suppressWarnings(
              fct_collapse("predicates" = c("verbs", "adjectives", "adverbs"))
              )) |>
-  dplyr::select(-lexical_class)
+  select(-lexical_class)
 
 pred_sources <- list(
   c("frequency","final_frequency", "first_frequency", "solo_frequency"),
@@ -206,8 +173,7 @@ pred_sources <- list(
   c("length_char"), 
   c("n_tokens"))
 
-imputed_data <- prepped_data |> do_full_imputation(pred_sources, 20)
-imputed_data
+imputed_data <- prepped_data |> do_full_imputation(pred_sources, max_steps = 20)
 ```
 
 ## Evaluate collinearity

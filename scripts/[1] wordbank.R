@@ -1,5 +1,5 @@
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
-  print(glue("Getting administrations for {language} {form}..."))
+  message(glue("Getting administrations for {language} {form}..."))
 
   admins <- get_administration_data(language = language,
                                     form = form,
@@ -19,7 +19,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
 }
 
 get_inst_words <- function(language, form) {
-  print(glue("Getting words for {language} {form}..."))
+  message(glue("Getting words for {language} {form}..."))
   get_item_data(language = language, form = form) |>
     filter(type == "word") |>
     select(language, form, lexical_class, category, uni_lemma, definition,
@@ -27,7 +27,7 @@ get_inst_words <- function(language, form) {
 }
 
 get_inst_data <- function(language, form, admins, items) {
-  print(glue("Getting data for {language} {form}..."))
+  message(glue("Getting data for {language} {form}..."))
 
   get_instrument_data(language = language,
                       form = form,
@@ -45,7 +45,7 @@ get_inst_data <- function(language, form, admins, items) {
 }
 
 collapse_inst_data <- function(inst_data) {
-  print(glue("Collapsing data for {unique(inst_data$language)} {unique(inst_data$form)}..."))
+  message(glue("Collapsing data for {unique(inst_data$language)} {unique(inst_data$form)}..."))
 
   inst_uni_lemmas <- inst_data |>
     distinct(measure, uni_lemma, lexical_class, category, item_id, definition) |>
@@ -82,14 +82,14 @@ create_inst_data <- function(language, form) {
   get_inst_data(language, form, inst_admins, inst_words)
 }
 
-normalize_language <- function(language) {
-  language |> str_replace(" ", "_") |> str_to_lower()
-}
-
 create_wb_data <- function(language, write = TRUE) {
   lang <- language # for filter name scope issues
   insts <- get_instruments()
   forms <- insts |> filter(language == lang) |> pull(form)
+  if (length(forms) == 0) {
+    message(glue("\tNo instruments found for langauge {lang}, skipping."))
+    return()
+  }
 
   lang_datas <- map(forms, partial(create_inst_data, language = language))
   lang_summaries <- map(lang_datas, collapse_inst_data)
@@ -97,15 +97,37 @@ create_wb_data <- function(language, write = TRUE) {
 
   if (write) {
     lang_label <- normalize_language(language)
-    saveRDS(lang_summary, file = glue("data/wordbank/{lang_label}.rds"))
+    saveRDS(lang_summary, file = glue("{wb_path}/{lang_label}.rds"))
   }
+  return(lang_summary)
 }
 
-get_uni_lemmas <- function(wb_data) {
+load_wb_data <- function(languages, cache = TRUE) {
+  wb_data <- map_df(languages, function(lang) {
+    norm_lang <- normalize_language(lang)
+    lang_file <- glue("{wb_path}/{norm_lang}.rds")
+    if (file.exists(lang_file)) {
+      message(glue("Loading cached Wordbank data for {lang}..."))
+      lang_data <- readRDS(lang_file)
+    } else {
+      if (cache) {
+        message(glue("No cached Wordbank data for {lang}, getting and caching data."))
+        lang_data <- create_wb_data(lang)
+      } else {
+        message(glue("No cached Wordbank data for {lang}, skipping."))
+        lang_data <- tibble()
+      }
+    }
+    return(lang_data)
+  })
+  return(wb_data)
+}
+
+extract_uni_lemmas <- function(wb_data) {
   wb_data |>
     distinct(language, uni_lemma, items) |>
     unnest(items) |>
-    dplyr::select(-form, -item_id) |>
+    select(-form, -item_id) |>
     distinct() |>
     nest(items = -c(language, uni_lemma))
 }

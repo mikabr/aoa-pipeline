@@ -13,10 +13,10 @@ map_predictor <- function(uni_lemmas, predictor, variable_mapping) {
   # clean the predictors
   renamed_predictors <- predictor_data |>
     rename(all_of(variable_mapping)) |>
-    dplyr::select(names(variable_mapping)) |>
+    select(names(variable_mapping)) |>
     group_by(word) |>
     # in case a word appears in the list twice
-    dplyr::summarize(across({{ predictors }}, mean))
+    summarize(across({{ predictors }}, mean))
 
   # TODO: What do we do about things like "chips" and "can (auxiliary)"
   # chips doesnt match to "chip" and "can" gets the measures for "can (object)"
@@ -27,11 +27,11 @@ map_predictor <- function(uni_lemmas, predictor, variable_mapping) {
       !is.na(replacement) & replacement != "" ~ replacement,
       TRUE ~ str_replace(uni_lemma, "\\s*\\([^\\)]+\\)", ""))
     ) |>
-    dplyr::select(-replacement) |>
+    select(-replacement) |>
     left_join(renamed_predictors) |>
-    dplyr::select(-word) |>
+    select(-word) |>
     group_by(language, uni_lemma) |>
-    dplyr::summarize(across({{ predictors }}, mean)) |>
+    summarize(across({{ predictors }}, mean)) |>
     ungroup()
 
   return(uni_lemma_predictors)
