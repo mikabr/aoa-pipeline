@@ -52,7 +52,7 @@ get_cv_results <- function(loo_preds) {
     group_by(name) |>
     summarise(mean_abs_dev = mean(abs_dev),
               sd_abs_dev = sd(abs_dev),
-              rmse = sqrt(mean(se)), mse = mean(se)) |>
+              rmse = sqrt(mean(se)),v = var(aoa), mse = mean(se), r2 = 1 - (mse/v)) |>
     mutate(ci_mad = 1.96 * (sd_abs_dev / sqrt(n())),
       ci_mad_min = mean_abs_dev - ci_mad,
       ci_mad_max = mean_abs_dev + ci_mad)

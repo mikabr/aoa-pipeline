@@ -1,4 +1,4 @@
-source("scripts/stemmer.R")
+source("scripts/[2] stemmer.R")
 childes_path <- "data/childes"
 
 lang_map <- read_csv("resources/language_map.csv")

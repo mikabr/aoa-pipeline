@@ -4,6 +4,12 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
   admins <- get_administration_data(language = language,
                                     form = form,
                                     original_ids = TRUE)
+  
+   if (is.na(unique(admins$original_id[1]))==TRUE){
+    admins <- admins %>%
+      select(-(original_id)) %>%
+      rename(original_id = data_id)
+  }
 
   if (exclude_longitudinal) {
     # take earliest administration for any child with multiple administrations
@@ -14,15 +20,19 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
       ungroup()
 
   }
+ if (!("data_id" %in% colnames(admins))){
+   admins <- admins %>%
+   rename(data_id = original_id)
+ }
 
-  admins |> select(language, form, age, data_id)
+  admins |> dplyr::select(language, form, age, data_id)
 }
 
 get_inst_words <- function(language, form) {
   message(glue("Getting words for {language} {form}..."))
   get_item_data(language = language, form = form) |>
     filter(type == "word") |>
-    select(language, form, lexical_class, category, uni_lemma, definition,
+    dplyr::select(language, form, lexical_class, category, uni_lemma, definition,
            item_id, num_item_id)
 }
 

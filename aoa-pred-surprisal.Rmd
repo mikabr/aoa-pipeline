@@ -124,9 +124,8 @@ get_word_lists <- function(wb_data) {
     select(-c(form, item_id)) |>
     filter(lexical_class != "other") |>
     distinct() |>
-    mutate(word_clean = gsub(" [(].*$","", definition)) |>
     mutate(word_clean = gsub("[(].*$","", definition)) |>
-    mutate(word_clean = gsub(" $","", definition)) |>
+    mutate(word_clean = tolower(gsub(" $","", word_clean))) |>
     separate(col=word_clean, into=c("word_clean1", "word_clean2", "word_clean3"), sep="/")
   words <- split_words |>
     mutate(word_clean = word_clean1) |>
@@ -174,4 +173,3 @@ uni_lemmas <- get_uni_lemmas(wb_data)
 
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
-```

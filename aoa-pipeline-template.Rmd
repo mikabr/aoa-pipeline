@@ -174,21 +174,11 @@ pred_sources <- list(
   c("n_tokens"))
 
 imputed_data <- prepped_data |> do_full_imputation(pred_sources, max_steps = 20)
-```
-
-## Evaluate collinearity
-
-Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
-```{r vif}
-eng_joined_data <- word_values |> filter(language == "English (American)")
-preds <- c("frequency", "concreteness", "mlu")
-vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
-```
-
-Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
-```{r vif x-ling}
-preds <- c("frequency", "concreteness", "mlu")
-vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
+#unmatched_unilemmas<-prepped_data |>
+#  filter(!is.na(uni_lemma)) |>
+#  group_by(language, frequency) |>
+#  summarise(naperlang = n()) |>
+#  filter(is.na(frequency))
 ```
 
 # Fit models
@@ -208,7 +198,9 @@ aoas <- wb_data |>
   nest() |>
   mutate(aoa = map(data, get_aoas, max_steps = 400)) |>
   dplyr::select(-data) |>
-  unnest(cols = c(aoa))
+  unnest(cols = c(aoa))|>
+  filter(!slope < 0) |>
+  filter(!aoa > 72)
 
 word_values <- aoas |>
   left_join(imputed_data |>
@@ -216,6 +208,8 @@ word_values <- aoas |>
               unnest(cols = c(imputed)), 
             by = c("language", "uni_lemma")) 
 
+word_values <- word_values %>% 
+  filter(!(language=="Russian" & category=="sounds"))
 
 joined_data <- wb_data |>
   left_join(word_values, by = c("language", "measure", "uni_lemma"))
@@ -230,9 +224,26 @@ fitted_aoa_models
 
 ```
 
-## Cross-validatation
+## Evaluate collinearity
+
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a single language:
+```{r vif}
+eng_joined_data <- word_values |> filter(language == "English (American)")
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(eng_joined_data, preds)
+```
+
+Evaluate collinearity between predictors using variance inflation factor (VIF) of a set of predictors (pred). For a set of languages:
+```{r vif x-ling}
+preds <- c("frequency", "concreteness", "mlu")
+vif_scores <- get_vif_bylang_bymeasure(word_values, preds)
+```
+
+## Cross-validation
 
 ```{r cross_validate}
+
+predictors=c("frequency","mlu","final_frequency","valence", "concreteness","babiness", "first_frequency", "solo_frequency", "length_char", "n_tokens")
 
 # for simple cv result extraction
 loo_df <- word_values |>
@@ -278,24 +289,16 @@ lang_coefs <- fitted_aoa_models %>%
   mutate(signif=ifelse(p.value<0.05, TRUE, FALSE)) %>%
   filter(term %in% predictors) 
  
-lang_coefs$term = factor(lang_coefs$term, levels = c("frequency", "solo_frequency", "first_frequency", "final_frequency", "mlu", "length_char", "n_tokens",
-                            "babiness", "concreteness", "valence"))
+lang_coefs$term = factor(lang_coefs$term, levels = c("frequency", "solo_frequency", "first_frequency", "final_frequency", "mlu", "length_char", "n_tokens", "babiness", "concreteness", "valence"))
 
 lang_coefs$language = factor(lang_coefs$language, levels=c("English (American)","English (British)", "French (Quebecois)", "Spanish (Mexican)","Swedish",  "Italian", "Croatian", "Danish",  "Norwegian",  "Turkish","Russian")) #"English (Australian)",   "German", "French (French)",
 
 
-
-#pdf(file = "data/rus_coefs.pdf",  width = 6,  height = 4) 
 coefs_by_lang(lang_coefs %>% filter(language =="Russian", measure =="produces"))
-#dev.off()
 
-#pdf(file = "data/eng_coefs.pdf",   width = 5,  height = 3) 
 coefs_by_lang(lang_coefs %>% filter(language=="English (American)"))
-#dev.off()
 
-#pdf(file = "data/lang_coefs.pdf",    width = 20, height = 5) 
 coefs_by_lang(lang_coefs %>% filter(!language =="Russian"))
-#dev.off()
 
 ```
 
@@ -315,24 +318,17 @@ all_coefs <- all_coefs %>%
 
 coefs_by_pred_all(all_coefs %>% filter(language !="Russian")) 
 
-
 ```
 
 
 ```{r plots_crossval}
-#pdf(file = "data/cv_lang.pdf",    width = 8,  height = 4) 
 cv_dev_lang(cv_results %>% filter(!language=="English (British)", !language=="Russian"))
-#dev.off()
 
-#pdf(file = "data/dev_words_eng_compre.pdf", width = 7, height = 5) 
 dev_words(eng_across_lang_lex_desc)
-#dev.off()
 
-#pdf(file = "data/aoa_mad_lex_eng_understands.pdf", width = 7, height = 5) 
 u<-aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "understands", wb_data, preds)  
 p<-aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "produces", wb_data, preds)
 plot_grid(u, p)
-#dev.off()
 
 cv_results_pos$mean_abs_dev = as.numeric(cv_results_pos$mean_abs_dev) 
 ggplot(aes(x = mean_abs_dev, y =language), data = cv_results_pos %>% filter(!language=="Russian")) +
