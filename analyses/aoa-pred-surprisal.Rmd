@@ -181,6 +181,8 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 Suprisal values currently are stored separately by language and model (will combine them later) 
 ```{r load_model_surprisals}
 
+load in csv for each lang and combine them into one table called surprisals
+
 ```
 
 ```{r load_ngram_suprisals}
