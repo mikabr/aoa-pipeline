@@ -4,44 +4,35 @@
 # Also allows for hunspell as an alternative method
 
 stem <- function(words, language, method = "snowball") {
+  # lang <- convert_lang_stemmer(language, method)
 
   if (method == "snowball") {
 
     if (language %in% SnowballC::getStemLanguages()) {
       SnowballC::wordStem(words, language)
-
-    } else if (language == "croatian") {
+    } else if (language == "Croatian") {
       chunk_size <- 1000
       word_chunks <- split(words, ceiling(seq_along(words) / chunk_size))
+      cro_stemmer <- file.path(here::here(), "scripts/croatian.py")
       map(word_chunks, function(word_chunk) {
         system2("python",
-                args = c("scripts/croatian.py", sprintf('"%s"', word_chunk)),
+                args = c(cro_stemmer, glue('"{word_chunk}"')),
                 stdout = TRUE)
       }) |> unlist()
-
-    } else {
-      warning(sprintf("language %s not in list of stemmable languages",
-                      language))
-      words
     }
 
   } else if (method == "hunspell") {
 
-    Sys.setenv(DICPATH = here("resources", "dicts"))
+    Sys.setenv(DICPATH = "resources/dicts")
 
     if (language %in% hunspell::list_dictionaries()) {
       lapply(words, \(word) {
         stem <- hunspell::hunspell_stem(word, dictionary(language))[[1]]
         return(if (length(stem) == 0) word else stem[1])
       }) |> unlist()
-    } else {
-      warning(sprintf("language %s not in list of stemmable languages",
-                      language))
-      words
     }
 
   } else {
-    warning(sprintf("invalid stemming method %s", method))
-    words
+    message(glue("invalid stemming method {method}"))
   }
 }

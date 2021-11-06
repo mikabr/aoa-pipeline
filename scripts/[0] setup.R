@@ -8,7 +8,7 @@ convert_lang_childes <- function(lang) {
 }
 
 convert_lang_stemmer <- function(lang, method = "snowball") {
-  lang_map |> filter(wordbank == lang) |> pull(get(method))
+  lang_map |> filter(wordbank == lang) |> pull(!!method)
 }
 
 normalize_language <- function(language) {

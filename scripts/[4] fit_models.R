@@ -1,10 +1,6 @@
-# library(broom)
-# library(jglmm)
+# CDI -> AoA models
 
-options(JULIA_HOME = "/Applications/Julia-1.5.app/Contents/Resources/julia/bin")
-#jglmm_setup()
-
-fit_bglm <- function(data, max_steps = 200) {
+fit_bglm <- function(df, max_steps = 200) {
   model <- arm::bayesglm(cbind(num_true, num_false) ~ age,
                          family = "binomial",
                          prior.mean = .3,
@@ -12,101 +8,57 @@ fit_bglm <- function(data, max_steps = 200) {
                          prior.mean.for.intercept = 0,
                          prior.scale.for.intercept = 2.5,
                          prior.df = 1,
-                         data = data,
+                         data = df,
                          maxit = max_steps)
-  aoa <- -model$coefficients[["(Intercept)"]] / model$coefficients[["age"]]
-
-  tibble(uni_lemma = data$uni_lemma[1],
-         intercept = model$coefficients[["(Intercept)"]],
-         slope = model$coefficients[["age"]],
-         aoa = aoa)
+  intercept <- model$coefficients[["(Intercept)"]]
+  slope <- model$coefficients[["age"]]
+  tibble(intercept = intercept, slope = slope, aoa = -intercept / slope)
 }
 
-get_aoas <- function(data, max_steps = 200) {
-  data |>
-    split(~ uni_lemma) |>
-    map(fit_bglm, max_steps) |>
-    bind_rows()
+fit_aoas <- function(wb_data, max_steps = 200, min_aoa = 0, max_aoa = 72) {
+  aoas <- wb_data |>
+    mutate(num_false = total - num_true) |>
+    nest(data = -c(language, measure, uni_lemma)) |>
+    mutate(aoas = map(data, fit_bglm)) |>
+    select(-data) |>
+    unnest(aoas) |>
+    filter(aoa >= min_aoa, aoa <= max_aoa)
 }
 
-# `df` must have the following columns:
-#   language, measure,
-#   lexical_category, uni_lemma,
-#   prop, total, age
-#   !!predictors
-nest_data <- function(df, predictors, full = FALSE) {
-  keep_data <- df |>
-    mutate(group = paste(language, measure),
-           lexical_category = lexical_category |> fct_relevel("other")) |>
-    dplyr::select(language, measure, group, lexical_category, item = uni_lemma, !!predictors)
-  if (!full) { keep_data <- keep_data |> cbind(aoa = df$aoa) }
-  keep_data |>
-    group_by(language, measure) |>
-    nest()
+# Word predictor models
+
+make_predictor_formula <- function(predictors, lexcat_interactions = TRUE) {
+  if (lexcat_interactions) {
+    effs_lex <- paste(predictors, "lexical_category", sep = " * ")
+    glue("aoa ~ {paste(effs_lex, collapse = ' + ')}") |> as.formula()
+  } else {
+    glue("aoa ~ {paste(predictors, collapse = ' + ')}") |> as.formula()
+  }
 }
 
-# when `full` is FALSE, `lex_effects` is ignored (default TRUE)
-make_effs_formula <- function(predictors, full = FALSE, lex_effects = TRUE) {
-  effs_age <- paste("age", predictors, sep = " * ")
-  effs_lex <- paste("lexical_category", predictors, sep = " * ")
-  ifelse(
-    full,
-    ifelse(
-      lex_effects,
-      glue("prop ~ (age | item) + {paste(c(effs_age, effs_lex), collapse = ' + ')}"),
-      glue("prop ~ (age | item) + {paste(effs_age, collapse = ' + ')}")
-    ),
-    glue("aoa ~ {paste(c(effs_lex), collapse = ' + ')}")
-  ) |> as.formula()
+fit_group_model <- function(predictors, group_data, lexcat_interactions = TRUE,
+                            model_formula = NULL) {
+  # discard predictors that data has no values for
+  predictors <- predictors |> discard(\(p) all(is.na(group_data[[p]])))
+  if (is.null(model_formula)) {
+    model_formula <- make_predictor_formula(predictors, lexcat_interactions)
+  }
+  lm(model_formula, group_data)
 }
 
-# `group_df` is the data output of `nest_data` for one group
-fit_group_model <- function(group_df, predictors, formula,
-                                 full = FALSE, contrasts = NULL) {
-  group <- unique(group_df$group)
-  message(glue("Fitting model for {group}..."))
-  ifelse(
-    full,
-    return(jglmm(formula = formula, data = group_df, family = "binomial",
-                 weights = group_df$total, contrasts = contrasts)),
-    return(lm(formula = formula, data = group_df)) # not sure how to pass `contrasts` into `lm`
-  )
+get_vifs <- function(model) {
+  vif <- car::vif(model)
+  as.data.frame(vif) |> rownames_to_column("predictor") |> rename_with(tolower)
 }
 
-# if `formula` is not specified, constructs one from `predictors` and `lex_effects`
-fit_models <- function(predictors,df,  full = FALSE, lex_effects = TRUE, formula = NULL,
-                       contrasts = list(lexical_category = "effects")) {
-#  if (full & !lex_effects) { contrasts$lexical_category <- NULL }
-#  if (length(contrasts) == 0) { contrasts <- NULL }
-#  if (is.null(formula)) { formula <- make_effs_formula(predictors, full, lex_effects) }
-  formula <- make_effs_formula(predictors, full, lex_effects)
-  df <- df %>%
-  dplyr::select(language, measure, uni_lemma, aoa, items, final_frequency, frequency, solo_frequency, first_frequency, valence, concreteness, babiness, mlu, length_char, n_tokens, lexical_category) %>%
-  unique()
-  nest_data(df, predictors, full) |>
-  mutate(model = map(data, ~ fit_group_model(.x, predictors, formula, full, contrasts)),
-           coefficients = map(model, tidy),
-           rsquared = map(model, glance),
-           preds = list(predictors))
+fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
+                       model_formula = NULL) {
+  predictor_data |>
+    nest(group_data = -c(language, measure)) |>
+    mutate(model = group_data |>
+             map(\(gd) fit_group_model(predictors, gd, lexcat_interactions,
+                                       model_formula)),
+           coefs = map(model, broom::tidy),
+           stats = map(model, broom::glance),
+           vifs = map(model, get_vifs))
 }
-
-####### TEST CASE
-# load("data/temp_saved_data/uni_model_data.RData")
-# uni_model_data <- uni_model_data |> ungroup()
-#
-# eng_model_data <- uni_model_data |>
-#   filter(language == "English (American)") |>
-#   mutate(total = num_true + num_false)
-#
-# aoas <- get_aoas(eng_model_data)
-#
-# eng_model_data <- eng_model_data |>
-#   left_join(aoas, by = "uni_lemma")
-#
-# predictors <- list(
-#   c("frequency", "MLU", "final_frequency", "solo_frequency"),
-#   c("valence", "arousal"),
-#   "concreteness", "babiness", "num_phons"
-# ) |> unlist()
-#
-# eng_models <- fit_models(eng_model_data, predictors)

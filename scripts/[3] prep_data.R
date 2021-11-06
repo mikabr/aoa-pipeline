@@ -38,7 +38,7 @@ fit_predictor <- function(pred, d, pred_sources) {
   x_str <- xs |> paste(collapse = " + ")
   lm(as.formula(glue("{pred} ~ {x_str}")), data = d) |>
     broom::augment(newdata = d) |>
-    dplyr::select(uni_lemma, category, lexical_category, .fitted)
+    select(uni_lemma, category, lexical_category, .fitted)
 }
 
 get_missing_data <- function(lang_data, predictors) {
@@ -83,13 +83,15 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   for (pred in prediction_list) {
     imputation_fits <- fit_predictor(pred, imputation_data, pred_sources)
     imputation_data <- missing |>
-      dplyr::select(uni_lemma, lexical_category, category, !!pred) |>
+      select(uni_lemma, lexical_category, category, !!pred) |>
       rename(missing = !!pred) |>
-      right_join(imputation_data) |>
-      left_join(imputation_fits) |>
+      right_join(imputation_data,
+                 by = c("uni_lemma", "lexical_category", "category")) |>
+      left_join(imputation_fits,
+                by = c("uni_lemma", "lexical_category", "category")) |>
       # if the value is missing, replace it with the new value
       mutate_at(vars(pred), funs(if_else(is.na(missing), .fitted, .))) |>
-      dplyr::select(-.fitted, -missing)
+      select(-.fitted, -missing)
   }
   return(imputation_data)
 }
@@ -112,6 +114,9 @@ do_lang_imputation <- function(language, data, pred_sources, max_steps) {
 do_full_imputation <- function(model_data, pred_sources, max_steps) {
   # restrict to the sources in pred_sources
   # TODO: catch cases where a predictor in the predictor set isn't in the data
+  map(predictor_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
+  predictors <- predictors |> discard(\(p) all(is.na(group_data[[p]])))
+
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
            !!unlist(pred_sources)) |>
@@ -120,9 +125,38 @@ do_full_imputation <- function(model_data, pred_sources, max_steps) {
     nest()
 
   imputed_data <- nested_data |>
-    mutate(imputed = map2(language, data,
-                          \(lang, dat) do_lang_imputation(lang, dat,
-                                                          pred_sources,
-                                                          max_steps)))
-  return(imputed_data)
+    mutate(imputed = map2(language, data, function(lang, dat) {
+      do_lang_imputation(lang, dat, pred_sources, max_steps)
+    }))
+
+  imputed_data |>
+    ungroup() |>
+    select(language, imputed) |>
+    unnest(imputed)
+}
+
+
+# scaling predictors
+do_scaling <- function(model_data, predictors) {
+  model_data |>
+    group_by(language) |>
+    mutate(across(all_of(predictors), \(x) as.numeric(scale(x))))
+}
+
+
+prep_lexcat <- function(predictor_data, uni_lemmas) {
+  lexical_categories <- uni_lemmas |>
+    unnest(cols = "items") |>
+    distinct() |>
+    # uni_lemmas with item in multiple different classes treated as "other"
+    mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
+                                      lexical_class),
+           # collapse v, adj, adv into one category
+           lexical_category = lexical_category |> as_factor() |>
+             fct_collapse("predicates" = c("verbs", "adjectives", "adverbs")) |>
+             fct_relevel("nouns", "predicates", "function_words", "other")) |>
+    select(-lexical_class)
+  contrasts(lexical_categories$lexical_category) <- contr.sum
+
+  predictor_data |> left_join(lexical_categories)
 }

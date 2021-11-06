@@ -4,7 +4,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
   admins <- get_administration_data(language = language,
                                     form = form,
                                     original_ids = TRUE)
-  
+
    if (is.na(unique(admins$original_id[1]))==TRUE){
     admins <- admins %>%
       select(-(original_id)) %>%
@@ -25,14 +25,14 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
    rename(data_id = original_id)
  }
 
-  admins |> dplyr::select(language, form, age, data_id)
+  admins |> select(language, form, age, data_id)
 }
 
 get_inst_words <- function(language, form) {
   message(glue("Getting words for {language} {form}..."))
   get_item_data(language = language, form = form) |>
     filter(type == "word") |>
-    dplyr::select(language, form, lexical_class, category, uni_lemma, definition,
+    select(language, form, lexical_class, category, uni_lemma, definition,
            item_id, num_item_id)
 }
 
@@ -47,11 +47,12 @@ get_inst_data <- function(language, form, admins, items) {
     mutate(produces = !is.na(value) & value == "produces",
            understands = !is.na(value) &
              (value == "understands" | value == "produces")) |>
-    dplyr::select(-value) |>
+    select(-value) |>
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
     filter(measure == "produces" | form == "WG") |>
-    dplyr::select(-num_item_id)
+    select(-num_item_id) |>
+    filter(!is.na(uni_lemma))
 }
 
 collapse_inst_data <- function(inst_data) {
@@ -135,6 +136,7 @@ load_wb_data <- function(languages, cache = TRUE) {
 
 extract_uni_lemmas <- function(wb_data) {
   wb_data |>
+    filter(!is.na(uni_lemma)) |>
     distinct(language, uni_lemma, items) |>
     unnest(items) |>
     select(-form, -item_id) |>
