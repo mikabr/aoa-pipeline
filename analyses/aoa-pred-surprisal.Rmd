@@ -163,7 +163,7 @@ map_df(target_langs, save_lang_word_list)
 
 # Load predictors
 
-Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
+Merge in the by-concept predictors (concreteness) to the unilemmas.
 
 ```{r merge_unilemmas}
 uni_lemmas <- get_uni_lemmas(wb_data)
@@ -171,7 +171,23 @@ uni_lemmas <- get_uni_lemmas(wb_data)
 ```
 
 ```{r load_predictors}
-
+#setwd("~/Documents/LanguageLearning/aoa-pipeline")
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
+```
+
+# Load suprisal and frequency by language
+
+Suprisal values currently are stored separately by language and model (will combine them later) 
+```{r load_model_surprisals}
+
+load in csv for each lang and combine them into one table called surprisals
+
+```
+
+```{r load_ngram_suprisals}
+
+
+left_join(surprisals, concreteness)
+
 ```
