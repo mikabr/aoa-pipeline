@@ -152,10 +152,7 @@ build_options <- function(language, word, special_cases) {
   opts <- c(opts, word |> str_split("[,/]") |> unlist()) # "foo, bar", "foo/bar"
   opts <- c(opts, map(transforms, \(t) t(opts)))
   opts <- opts |> unlist() |> unique() |> str_trim()
-  for (method in c("snowball", "hunspell")) {
-    stemmer_lang <- convert_lang_stemmer(language, method)
-    if (!is.na(stemmer_lang)) opts <- c(opts, stem(opts, stemmer_lang, method))
-  }
+  opts <- c(opts, stem(opts, language))
   return(unique(opts))
 }
 
@@ -189,7 +186,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
   tokens_mapped <- token_metrics |>
     select(token, token_stem) |>
     mutate(token_self = token,
-           token_stemmed = stem(token, convert_lang_stemmer(lang))) |>
+           token_stemmed = stem(token, lang)) |>
     pivot_longer(c(token_self, token_stem, token_stemmed), names_to = "src",
                  values_to = "option") |>
     filter(!is.na(option), option != "") |>

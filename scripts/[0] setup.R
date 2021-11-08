@@ -1,3 +1,5 @@
+Sys.setenv(DICPATH = "resources/dicts")
+
 wb_path <- "data/wordbank"
 childes_path <- "data/childes"
 
