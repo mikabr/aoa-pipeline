@@ -200,29 +200,27 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
   metrics_mapped <- tokens_mapped |>
     inner_join(token_metrics) |>
     select(uni_lemma, tokens = token, where(is_numeric)) |>
-    group_by(uni_lemma)
+    group_by(uni_lemma) |>
+    distinct()
 
   uni_lemma_tokens <- tokens_mapped |>
-    unnest(options) |>
-    nest(options = c(token, options))
+    select(uni_lemma, token) |>
+    nest(options = c(token))# removed stem from realizations n_types
 
   metrics_summaries <- list(
     metrics_mapped |>
       summarise(across(where(is_character), \(col) list(unique(col)))),
     metrics_mapped |>
       summarise(across(where(is_integer), sum)),
-    # summarise(across(where(is_integer) & !starts_with("sum"), sum)),
     metrics_mapped |>
       summarise(across(where(is.double) & !starts_with("freq"),
                        \(x) weighted.mean(x, freq_raw, na.rm = TRUE)))
-    # metrics_mapped |>
-    #   summarise(across(starts_with("freq"), sum))
   )
 
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
     inner_join(uni_lemma_tokens) |>
-    mutate(n_tokens = map_int(tokens, length), language = lang)
+    mutate(n_types = map_int(tokens, length), language = lang)
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
   saveRDS(uni_metrics, uni_metrics_file)
@@ -236,6 +234,9 @@ load_childes_metrics <- function(languages, uni_lemmas, cache = TRUE) {
     if (file.exists(lang_file)) {
       message(glue("Loading cached CHILDES metrics for {lang}..."))
       lang_metrics <- readRDS(lang_file)
+      lang_metrics <- tryCatch({lang_metrics <- lang_metrics %>%
+        rename(n_types = n_tokens)
+      }, error= function(e){lang_metrics})
     } else {
       if (cache) {
         message(glue("No cached CHILDES metrics for {lang}, getting and caching data."))
