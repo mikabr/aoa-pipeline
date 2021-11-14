@@ -39,6 +39,7 @@ get_inst_words <- function(language, form) {
 get_inst_data <- function(language, form, admins, items) {
   message(glue("Getting data for {language} {form}..."))
 
+  if (language !="Portuguese (European)"){
   get_instrument_data(language = language,
                       form = form,
                       items = items$item_id,
@@ -53,6 +54,25 @@ get_inst_data <- function(language, form, admins, items) {
     filter(measure == "produces" | form == "WG") |>
     select(-num_item_id) |>
     filter(!is.na(uni_lemma))
+  }else{
+    unil <- read_csv("data/wordbank/portuguese_unilemmas.csv") %>%
+      select(uni_lemma, definition, category)
+    get_instrument_data(language = language,
+                        form = form,
+                        items = items$item_id,
+                        administrations = admins,
+                        iteminfo = items) |>
+      mutate(produces = !is.na(value) & value == "produces",
+             understands = !is.na(value) &
+               (value == "understands" | value == "produces")) |>
+      select(-value) |>
+      pivot_longer(names_to = "measure", values_to = "value",
+                   cols = c(produces, understands)) |>
+      filter(measure == "produces" | form == "WG") |>
+      select(-num_item_id, -uni_lemma) |>
+      left_join(unil) |>
+      filter(!is.na(uni_lemma))
+  }
 }
 
 collapse_inst_data <- function(inst_data) {
@@ -98,7 +118,7 @@ create_wb_data <- function(language, write = TRUE) {
   insts <- get_instruments()
   forms <- insts |> filter(language == lang) |> pull(form)
   if (length(forms) == 0) {
-    message(glue("\tNo instruments found for langauge {lang}, skipping."))
+    message(glue("\tNo instruments found for language {lang}, skipping."))
     return()
   }
 
