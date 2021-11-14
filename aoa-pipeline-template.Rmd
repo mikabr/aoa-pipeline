@@ -39,27 +39,30 @@ eng_wb_data
 
 Loading Wordbank data for multiple languages (cached or not):
 ```{r load_wordbank_xling}
-target_langs <- c("Croatian", "Danish", "English (American)", "Norwegian",
-                  "Russian", "Turkish", "Spanish (Mexican)", "Italian",
-                  "Swedish",  "French (Quebecois)")
-#"French (French)" "English (Australian)", "German","English (British)",
-#Portuguese (European) Spanish (European)" have NA in unilemmas 
+target_langs <- c("English (American)", "Norwegian",
+                  "Russian", "Turkish", "Italian",
+                  "Swedish",  "French (Quebecois)", "Danish", 
+                  "Croatian", "French (French)", "English (Australian)",
+                  "German", "English (British)", "Spanish (European)",
+                  "Spanish (Mexican)", "Portuguese (European)")
+
+#target_langs <- c("Mandarin (Beijing)")
 
 wb_data <- load_wb_data(target_langs)
 ```
 
 Creating saved Wordbank data for a language, for example:
 ```{r create_wordbank_eng, eval=FALSE}
-eng_wb_data <- create_wb_data("English (American)")
+#eng_wb_data <- create_wb_data("English (American)")
 ```
 
 Creating saved Wordbank data one step at a time (potentially making changes between steps), for example:
 ```{r create_wordbank_eng_steps, eval=FALSE}
-eng_wg <- create_inst_data("English (American)", "WG")
-eng_ws <- create_inst_data("English (American)", "WS")
-eng_wg_summary <- collapse_inst_data(eng_wg)
-eng_ws_summary <- collapse_inst_data(eng_ws)
-eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
+#eng_wg <- create_inst_data("English (American)", "WG")
+#eng_ws <- create_inst_data("English (American)", "WS")
+#eng_wg_summary <- collapse_inst_data(eng_wg)
+#eng_ws_summary <- collapse_inst_data(eng_ws)
+#eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
 
 
@@ -88,12 +91,14 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 
 Loading cached CHILDES metrics for English:
 ```{r load_childes_eng}
-eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
+#eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 ```
 
 Loading cached CHILDES data for multiple languages:
 ```{r load_childes_xling}
-childes_metrics <- load_childes_metrics(target_langs, uni_lemmas)
+childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |>
+  filter(!is.na(uni_lemma))
+  
 ```
 
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
@@ -102,15 +107,16 @@ metric_funs <- list(compute_count, compute_mlu, compute_positions,
                     compute_length_char, compute_length_phon)
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
-eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
+#eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
+#eng_unilemmas <- get_uni_lemma_metrics("English (American)", build_uni_lemma_map(uni_lemmas))
 
-childes_metrics <- load_childes_metrics("English (American)", uni_lemmas)
+#childes_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 ```
 
 Creating saved CHILDES data for many languages:
 ```{r create_childes_xling, eval=FALSE}
-walk(target_langs, get_token_metrics, metric_funs, corpus_args)
-walk(target_langs, load_childes_metrics, uni_lemmas)
+#walk(target_langs, get_token_metrics, metric_funs, corpus_args)
+#walk(target_langs, load_childes_metrics, uni_lemmas)
 ```
 
 ```{r}
@@ -128,7 +134,7 @@ walk(target_langs, load_childes_metrics, uni_lemmas)
 By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualize_freqs()` residualizes all columns that starts with "freq_" from the column "freq".
 
 ```{r prepare_frequency}
-childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs()
+childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs() 
 ```
 
 ## Combining sources
@@ -138,7 +144,7 @@ Combine mapped predictors and CHILDES predictors:
 ```{r merge_all}
 predictor_data_list <- list(babiness, valence, concreteness, childes_metrics)
 predictor_data <- predictor_data_list |>
-  reduce(partial(full_join, by = c("language", "uni_lemma")))
+  reduce(partial(full_join, by = c("language", "uni_lemma"))) 
 ```
 
 ## Set lexical category contrasts
@@ -157,7 +163,7 @@ predictor_sources <- list(
   "babiness",
   "length_char",
   # "length_phon",
-  "n_tokens"
+  "n_types"
 )
 predictors <- unlist(predictor_sources)
 
@@ -178,8 +184,9 @@ aoas <- fit_aoas(wb_data)
 aoa_predictor_data <- aoas |> left_join(predictor_data_scaled)
 
 aoa_predictor_data <- aoa_predictor_data |>
-  # russian sound data is messed up
-  filter(!(language == "Russian" & category == "sounds"))
+  filter(!(language == "Russian" & category == "sounds")) |>
+  filter(!(aoa>48)) |>
+  filter(!is.na(uni_lemma))
 
 aoa_models <- fit_models(predictors, aoa_predictor_data)
 ```
@@ -217,30 +224,32 @@ cv_results <- loo_df |>
   select(language, measure, cv_results) |>
   unnest(cv_results)
 
-############## plot by lex_category /abstract category and prediction error 
-cv_results_pos <- loo_df |>
-  select(language, measure, loo_preds) |>
+loo_preds <- loo_df |>
+  select(language, measure, loo_preds, data)
+
+cv_results_pos <- loo_preds |>
   unnest(loo_preds) |> 
   group_by(language, measure, lexical_category) |>
   summarise(mean_abs_dev = mean(abs_dev), mean_se = mean(se))
 
-cv_results_cat <- loo_df |>
-  select(language, measure, loo_preds, data) |>
+cv_results_cat <- loo_preds |>
   unnest(c(loo_preds, data), names_repair = "unique") |>
   group_by(language, measure, category) |>
   summarise(mean_abs_dev = mean(abs_dev), mean_se = mean(se))
 
-cv_results_lex <- loo_df |>
-  select(c(language, measure, loo_preds)) |>
-  unnest(cols = c(loo_preds))
+cv_results_lex <- loo_preds |>
+  unnest(cols = c(loo_preds))|>
+  group_by(language, measure, lexical_category) |>
+  summarise(mean_abs_dev = mean(abs_dev), mean_se = mean(se))
 
-# eng_across_lang_lex_desc <- cv_results_lex |>
-#   filter(language == "English (American)", measure == "produces") |>
-#   arrange(desc(abs_dev)) |>
-#   head(50)
+eng_across_lang_lex_desc <- loo_preds |>
+  unnest(cols = c(loo_preds))|>
+  filter(language == "English (American)", measure == "produces") |>
+  arrange(desc(abs_dev)) |>
+  head(50)
+
 ```
 
-## Plot model results
 
 ```{r coefs}
 lexcats <- set_names(
@@ -254,72 +263,24 @@ aoa_coefs <- aoa_models |>
   mutate(signif = if_else(p.value < 0.05, TRUE, FALSE),
          effect = if_else(str_detect(term, ":"), "interaction", "main"),
          lexical_category = if_else(effect == "interaction",
-                                    str_extract(term, "lexical_category[0-9]"),
-                                    as.character(NA)),
+                                    str_extract(term, "lexical_category.*:|:lexical_category.*"), if_else(grepl("lexical_category",term), term, as.character(NA))),
+         lexical_category = str_remove(lexical_category, "lexical_category"),
+         lexical_category = str_remove(lexical_category, ":"),
          lexical_category = fct_recode(lexical_category, !!!lexcats),
          term = if_else(effect == "interaction",
-                        str_remove(term, ":?lexical_category[0-9]:?"),
+                        str_remove(term, "lexical_category.*:|:lexical_category.*"),
                         term),
-         term = fct_recode(term, !!!lexcats),
-         term = factor(term, levels = c(predictors, names(lexcats))),
+         #term = fct_recode(term, !!!lexcats),
+         #term = factor(term, levels = c(predictors, names(lexcats))),
          language = factor(language, levels = target_langs))
 
-# lang_coefs$term <- factor(lang_coefs$term, levels = c("frequency", "solo_frequency", "first_frequency", "final_frequency", "mlu", "length_char", "n_tokens", "babiness", "concreteness", "valence"))
-# 
-# lang_coefs$language <- factor(lang_coefs$language, levels=c("English (American)","English (British)", "French (Quebecois)", "Spanish (Mexican)","Swedish",  "Italian", "Croatian", "Danish",  "Norwegian",  "Turkish","Russian")) #"English (Australian)",   "German", "French (French)",
-# coefs_by_lang(lang_coefs |> filter(language =="Russian", measure == "produces"))
-# coefs_by_lang(lang_coefs |> filter(language == "English (American)"))
-# coefs_by_lang(lang_coefs |> filter(!language == "Russian"))
-```
+saveRDS(aoa_coefs, "data/aoa_coefs.rds" )
+saveRDS(cv_results, "data/cv_results.rds" )
+saveRDS(cv_results_pos, "data/cv_results_pos.rds" )
+saveRDS(cv_results_cat, "data/cv_results_cat.rds" )
+saveRDS(cv_results_lex, "data/cv_results_lex.rds" )
+saveRDS(eng_across_lang_lex_desc, "data/eng_across_lang_lex_desc.rds" )
 
-```{r plots_langcoeff_all}
-# all_coefs <- fitted_aoa_models |>
-#   unnest(coefficients) |>
-#   mutate(signif = if_else(p.value < 0.05, TRUE, FALSE))  
-# 
-# all_coefs <- all_coefs |>
-#   mutate(interact_lexcat=ifelse(grepl("adverbs",term),'adverbs',term))|>
-#   mutate(interact_lexcat=ifelse(grepl("verbs",term),'verbs',interact_lexcat))|>
-#   mutate(interact_lexcat=ifelse(grepl("other",term),'other',interact_lexcat))|>
-#   mutate(interact_lexcat=ifelse(grepl("adject",term),'adjectives',interact_lexcat))|>
-#   mutate(interact_lexcat=ifelse(grepl("function",term),'function_words',interact_lexcat))|>
-#   mutate(interact_lexcat=ifelse(grepl("^valence|^solo_frequency|^frequency|^concreteness|^length_char|^babiness|^n_tokens|^final_frequency|^first_frequency|^mlu|Intercept",term),'single',interact_lexcat))
-# 
-# coefs_by_pred_all(all_coefs |> filter(language !="Russian"))
 ```
 
 
-```{r plots_crossval}
-# cv_results |>
-#   filter(!language == "English (British)", !language == "Russian") |>
-#   cv_dev_lang()
-# 
-# dev_words(eng_across_lang_lex_desc)
-# 
-# u <- aoa_mad_lex_cat(eng_across_lang_lex_desc,
-#                      "English (American)", "understands", wb_data, preds)  
-# p <- aoa_mad_lex_cat(eng_across_lang_lex_desc,
-#                      "English (American)", "produces", wb_data, preds)
-# plot_grid(u, p)
-# 
-# cv_results_pos$mean_abs_dev <- as.numeric(cv_results_pos$mean_abs_dev) 
-# ggplot(aes(x = mean_abs_dev, y = language),
-#        data = cv_results_pos |> filter(!language == "Russian")) +
-#   facet_wrap(~lexical_category, nrow=5) +
-#   geom_point(aes(colour = factor(lexical_category)), size = 4)+
-#   geom_errorbar(aes(xmin = mean_abs_dev - mean_se, xmax = mean_abs_dev + mean_se))+
-#   geom_smooth(method = "loess") +
-#   scale_color_brewer(palette = "Set1") +
-#   theme_bw(base_size = 14) +
-#   theme(panel.grid = element_blank())
-# 
-# cv_results_cat$mean_abs_dev <- as.numeric(cv_results_cat$mean_abs_dev) 
-# ggplot(aes(x = mean_abs_dev, y = language),
-#        data = cv_results_cat |> filter(!language=="Russian")) +
-#   facet_wrap(~category) +
-#   geom_point(aes(colour = factor(category)), size = 4)+
-#   geom_errorbar(aes(xmin = mean_abs_dev - mean_se, xmax = mean_abs_dev + mean_se))+
-#   geom_smooth(method = "loess") +
-#   theme_bw(base_size = 14) +
-#   theme(panel.grid = element_blank())
-```
