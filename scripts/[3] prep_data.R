@@ -115,13 +115,12 @@ do_lang_imputation <- function(language, data, pred_sources, max_steps) {
 
 do_full_imputation <- function(model_data, pred_sources, max_steps) {
   # restrict to the sources in pred_sources
-  # TODO: catch cases where a predictor in the predictor set isn't in the data
-  map(predictor_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
-  predictors <- predictors |> discard(\(p) all(is.na(group_data[[p]])))
+  # catch cases where a predictor in the predictor set isn't in the data
+  pred_sources <- map(pred_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
 
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
-           !!unlist(pred_sources)) |>
+           all_of(!!unlist(pred_sources))) |>
     distinct() |>
     group_by(language) |>
     nest()
