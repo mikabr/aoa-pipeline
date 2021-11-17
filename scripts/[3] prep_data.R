@@ -27,7 +27,6 @@ residualize_col <- function(target_column, residualizing_column) {
 # residualize all columns that starts with "freq_" from the column "freq"
 residualize_freqs <- function(childes_metrics) {
   childes_metrics |>
-    select(-freq_raw)|>
     mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
 }
 
