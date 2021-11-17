@@ -24,8 +24,8 @@ stop=set(['biti','jesam','budem','sam','jesi','budeš','si','jesmo','budemo','sm
 
 class CroatianStemmer(object):
     def __init__(self):
-        self.pravila=[re.compile(r'^('+osnova+')('+nastavak+r')$') for osnova, nastavak in [e.strip().split(' ') for e in open('croatian_rules.txt')]]
-        self.transformacije=[e.strip().split('\t') for e in open('croatian_transformations.txt')]
+        self.pravila=[re.compile(r'^('+osnova+')('+nastavak+r')$') for osnova, nastavak in [e.strip().split(' ') for e in open('scripts/croatian_stemmer/croatian_rules.txt')]]
+        self.transformacije=[e.strip().split('\t') for e in open('scripts/croatian_stemmer/croatian_transformations.txt')]
 
     def stem(self, token):
         if token.lower() in stop:
@@ -64,3 +64,4 @@ def main():
 
 if __name__ == "__main__":
   main()
+
