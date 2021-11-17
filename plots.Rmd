@@ -26,7 +26,7 @@ walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
 
 
 ```{r setup2, include=FALSE}
-aoa_coefs<- readRDS("/Users/lscpuser/Downloads/aoa_coefs.rds")
+aoa_coefs<- readRDS("data/aoa_coefs.rds")
 
 label_caps <- function(value) {
   if_else(toupper(value) == value, value,
@@ -158,7 +158,7 @@ ggplot(plt_lang_coefs %>% filter(effect=="main"), aes(x = estimate, y = term, co
 
 ### Cross-linguistic predictor effects
 
-```{r consistency, fig.width=14, fig.height=7, fig.cap="Correlations of coefficient estimates between languages. Each point represents the mean of one language's coefficients' correlation with each other language's coefficients, with the vertical line indicating the overall mean across languages. The shaded region and line show a bootstrapped 95\\% confidence interval for a randomized baseline where predictor coefficients are shuffled within language."}
+```{r consistency,  fig.width=14, fig.height=7, fig.cap="Correlations of coefficient estimates between languages. Each point represents the mean of one language's coefficients' correlation with each other language's coefficients, with the vertical line indicating the overall mean across languages. The shaded region and line show a bootstrapped 95\\% confidence interval for a randomized baseline where predictor coefficients are shuffled within language."}
 
 baseline_sample <- function(i) {
   aoa_coefs %>%
@@ -228,8 +228,8 @@ ggplot(plt_coef_summary, aes(x = mean_cor, y = language)) +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
   labs(x = "Mean correlation with other languages' coefficients",
        y = "") +
-  scale_colour_ptol(guide = FALSE) +
-  scale_fill_ptol(guide = FALSE)+
+  #scale_colour_ptol(guide = FALSE) +
+  #scale_fill_ptol(guide = FALSE)+
   labs(caption="Correlations of coefficient estimates between languages. Each point represents the mean of one language's coefficients' correlation with each other language's coefficients, with the vertical line indicating the overall mean across languages. The shaded region and line show a bootstrapped 95\\% confidence interval for a randomized baseline where predictor coefficients are shuffled within language.")
 
 ```
@@ -307,7 +307,7 @@ plt <- ggplot(coef_clust_segments) +
 lgnd <- typology %>% distinct(family) %>% mutate(x = scale(1:n())) %>%
   ggplot(aes(x = x, y = 0)) +
   geom_text(aes(label = family, colour = family),  size = 3) +
-  scale_colour_ptol(guide = FALSE) +
+#  scale_colour_ptol(guide = FALSE) +
   lims(x = c(-3, 3)) +
   theme_void()
 cowplot::plot_grid(plt, lgnd, ncol = 1, rel_heights = c(20, 1))
