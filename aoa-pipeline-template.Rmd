@@ -39,14 +39,15 @@ eng_wb_data
 
 Loading Wordbank data for multiple languages (cached or not):
 ```{r load_wordbank_xling}
-target_langs <- c("English (American)", "Norwegian",
-                  "Russian", "Turkish", "Italian",
-                  "Swedish",  "French (Quebecois)", "Danish", 
-                  "Croatian", "French (French)", "English (Australian)",
-                  "German", "English (British)", "Spanish (European)",
-                  "Spanish (Mexican)", "Portuguese (European)")
+target_langs <- c("English (American)", "Norwegian","Russian", 
+                  "Turkish", "Italian", "Swedish",  
+                  "French (Quebecois)", "Danish", "Croatian", 
+                  "French (French)", "English (Australian)","German", 
+                  "English (British)", "Spanish (European)", "Spanish (Mexican)",
+                  "Portuguese (European)", "Mandarin (Beijing)","Mandarin (Taiwanese)")
 
-#target_langs <- c("Mandarin (Beijing)")
+sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
+
 
 wb_data <- load_wb_data(target_langs)
 ```
@@ -167,6 +168,9 @@ predictor_sources <- list(
 )
 predictors <- unlist(predictor_sources)
 
+predictors_short<- c("freq", "freq_first", "mlu", "valence", "babiness", "babiness", "freq_last", "freq_solo", "arousal", "concreteness")
+
+
 predictor_data_imputed <- predictor_data_lexcat |>
   do_full_imputation(predictor_sources, max_steps = 20)
 ```
@@ -186,7 +190,9 @@ aoa_predictor_data <- aoas |> left_join(predictor_data_scaled)
 aoa_predictor_data <- aoa_predictor_data |>
   filter(!(language == "Russian" & category == "sounds")) |>
   filter(!(aoa>48)) |>
-  filter(!is.na(uni_lemma))
+  filter(!is.na(uni_lemma)) |>
+  mutate(length_char = ifelse (language %in% sinotibetan_languages, NA, length_char)) |>
+  mutate(n_types = ifelse (language %in% sinotibetan_languages, NA, n_types))
 
 aoa_models <- fit_models(predictors, aoa_predictor_data)
 ```
