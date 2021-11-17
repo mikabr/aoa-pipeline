@@ -110,8 +110,6 @@ corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 #eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
 #eng_unilemmas <- get_uni_lemma_metrics("English (American)", build_uni_lemma_map(uni_lemmas))
-
-#childes_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 ```
 
 Creating saved CHILDES data for many languages:
@@ -120,6 +118,7 @@ Creating saved CHILDES data for many languages:
 #walk(target_langs, load_childes_metrics, uni_lemmas)
 ```
 
+Phonology:
 ```{r}
 # TODO: get phonology for tokens that didn't get it from CHILDES
 # http://espeak.sourceforge.net
@@ -221,8 +220,7 @@ aoa_models |> select(language, measure, vifs) |> unnest(vifs)
 # for simple cv result extraction
 loo_df <- aoa_predictor_data |>
   group_nest(language, measure) |>
-  mutate(loo_models = map(data, fit_cv_models,
-                          list(make_predictor_formula(predictors))),
+  mutate(loo_models = ifelse(language %in% sinotibetan_languages, map(data, fit_cv_models, list(make_predictor_formula(predictors_short))), map(data, fit_cv_models, list(make_predictor_formula(predictors)))),
          loo_preds = map2(loo_models, data, get_cv_preds),
          cv_results = map(loo_preds, get_cv_results))
 
