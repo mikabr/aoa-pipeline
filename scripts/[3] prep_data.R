@@ -144,19 +144,31 @@ do_scaling <- function(model_data, predictors) {
 }
 
 
-prep_lexcat <- function(predictor_data, uni_lemmas) {
+prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
   lexical_categories <- uni_lemmas |>
     unnest(cols = "items") |>
+   # filter(!lexical_class=="adverbs") |>
     distinct() |>
     # uni_lemmas with item in multiple different classes treated as "other"
     mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
-                                      lexical_class),
+                                      lexical_class)) |>
+    filter(!lexical_category=="other") |>
            # collapse v, adj, adv into one category
-           lexical_category = lexical_category |> as_factor() |>
+    mutate(lexical_category = lexical_category |> as_factor() |>
              fct_collapse("predicates" = c("verbs", "adjectives", "adverbs")) |>
-             fct_relevel("nouns", "predicates", "function_words", "other")) |>
+             fct_relevel("nouns","predicates","function_words")) |>
     select(-lexical_class)
+  lexical_categories$lexical_category <- relevel(lexical_categories$lexical_category, ref=ref_value)
+
   contrasts(lexical_categories$lexical_category) <- contr.sum
 
-  predictor_data |> left_join(lexical_categories)
+  predictor_data |>
+    left_join(lexical_categories) |>
+    filter(!is.na(uni_lemma))  |>
+    filter(!is.na(lexical_category)) |>
+    filter(!(language == "Russian" & category == "sounds"))
 }
+
+
+
+
