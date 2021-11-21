@@ -15,18 +15,119 @@ library(tidyverse)
 library(widyr)
 library(ggthemes)
 library(devtools)
+#install_github("langcog/langcog")
+library(ggstance)
 library(langcog)
 library(ggdendro)
 library(ggplot2)
 library(glue)
 
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
+```
+
+
+
+```{r basic_plots, fig.width=14, fig.height=10, fig.cap="Plotting each predictor with AOA for all languages, within each lexical category. N_types is unexpected, maybe because it relies on matching of definitions to CHILDES words which is not precise enough."}
+aoa_predictor_data <- readRDS("data/aoa_predictor_data.rds" )
+
+ggplot(aoa_predictor_data, aes(x = freq, y = aoa)) + 
+  geom_point(aes(x = freq, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+ # facet_grid(language ~ lexical_class, scales = "free_x") + 
+ # langcog::theme_mikabr() + 
+ # langcog::scale_color_solarized() + 
+  theme(legend.position = "bottom") + 
+  xlab("Frequency") + 
+  #scale_x_reverse(limits = c(3.5, -5.0))+
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("Frequency~AOA")
+
+
+ggplot(aoa_predictor_data, aes(x = concreteness, y = aoa)) + 
+  geom_point(aes(x = concreteness, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+ # facet_grid(language ~ lexical_class, scales = "free_x") + 
+  langcog::theme_mikabr() + 
+  langcog::scale_color_solarized() + 
+  theme(legend.position = "bottom") + 
+  xlab("Concreteness") + 
+  #scale_x_reverse(limits = c(1, -3.0))+
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("Concreteness~AOA")
+
+ggplot(aoa_predictor_data, aes(x = mlu, y = aoa)) + 
+  geom_point(aes(x = mlu, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+ # facet_grid(language ~ lexical_class, scales = "free_x") + 
+  langcog::theme_mikabr() + 
+  langcog::scale_color_solarized() + 
+  theme(legend.position = "bottom") + 
+  xlab("Mlu") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("MLU~AOA")
+
+
+ggplot(aoa_predictor_data, aes(x = freq_solo, y = aoa)) +  #not precise enough
+  geom_point(aes(x = freq_solo, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+ # facet_grid(language ~ lexical_class, scales = "free_x") + 
+  langcog::theme_mikabr() + 
+  langcog::scale_color_solarized() + 
+  theme(legend.position = "bottom") + 
+  xlab("Freq_solo") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("Freq_solo~AOA")
+
+
+ggplot(aoa_predictor_data, aes(x = length_char, y = aoa)) +  #not precise enough
+  geom_point(aes(x = length_char, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+ # facet_grid(language ~ lexical_class, scales = "free_x") + 
+  langcog::theme_mikabr() + 
+  langcog::scale_color_solarized() + 
+  theme(legend.position = "bottom") + 
+  xlab("Length_char") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("Length_char~AOA")
+
+```
+
+```{r basic_plots_head_data, fig.width=14, fig.height=10, fig.cap="Sample of n_types values in df before regression."}
 
 ```
 
 
+
+
+```{r basic_plots2, fig.width=14, fig.height=10, fig.cap="Sample of n_types values in df before regression."}
+
+predictor_data_lexcat <- readRDS("data/predictor_data_lexcat.rds")
+head(predictor_data_lexcat %>% 
+       filter(language=="English (American)") %>%
+       select(language, uni_lemma, tokens,  freq_solo), n=50L)
+```
+
+
 ```{r setup2, include=FALSE}
-aoa_coefs<- readRDS("data/aoa_coefs.rds")
+aoa_coefs<- readRDS("data/aoa_coefs.rds") 
+aoa_coefs_fw<- readRDS("data/aoa_coefs_fw.rds") 
+
+
 
 label_caps <- function(value) {
   if_else(toupper(value) == value, value,
@@ -36,36 +137,23 @@ label_caps <- function(value) {
 }
 target_langs <- unique(aoa_coefs$language)
 num_langs <- n_distinct(aoa_coefs$language)
-main_aoa_coefs <- aoa_coefs %>% filter(is.na(lexical_category))
-predictors <- unique(main_aoa_coefs$term)
+predictors <- unique(aoa_coefs$term)
 preds_=list(predictors)
 num_coefs <- length(predictors)
 display_predictors <- function(predictors) {
   predictors %>%
     str_replace("num", "number") %>% str_replace("phons", "phonemes") %>%
-    map_chr(label_caps) %>% str_replace("MLU", "MLU-w")
+    map_chr(label_caps) %>% str_replace("Mlu", "MLU-w")
 }
 
 
 ```
 
 
-```{r refcoefs, fig.width=14, fig.height=7, fig.cap="Estimates of coefficients in predicting words' developmental trajectories for English comprehension and production data. Larger coefficient values indicate a greater effect of the predictor on acquisition: positive main effects indicate that words with higher values of the predictor tend to be understood/produced by more children, while negative main effects indicate that words with lower values of the predictor tend to be understood/produced by more children; positive age interactions indicate that the predictor's effect increases with age, while negative age interactions indicate the predictor's effect decreases with age. Line ranges indicates 95\\% confidence intervals; filled in points indicate coefficients for which $p < 0.05$."}
-
-ggplot(aoa_coefs |> filter((effect=="main"& term %in% predictors)), aes(x = estimate, y = term)) +
-  facet_grid(rows = vars(measure), cols=vars(language), scales = "free") +
-  geom_pointrange(aes(colour = term, shape = signif,
-                      xmin = estimate - 1.96 * std.error,
-                      xmax = estimate + 1.96 * std.error))+
-  scale_shape_manual(values = c(19, 21)) +
-  labs(y = "", x = "Coefficient estimate")+
-  theme(legend.position="none")+
-  xlim(-5,5) +
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 30))
+```{r refcoefs,  fig.width=14, fig.height=7, fig.cap="To illustrate the structure of our analysis, we first describe the results for English data, as the main effect coefficients in predicting words' developmental trajectories for English comprehension and production data. Larger coefficient values indicate a greater effect of the predictor on acquisition: positive main effects indicate that words with higher values of the predictor tend to be understood/produced by more children, while negative main effects indicate that words with lower values of the predictor tend to be understood/produced by more children. Line ranges indicates 95\\% confidence intervals; filled in points indicate coefficients for which $p < 0.05$."}
 
 mean_term_coefs <- aoa_coefs %>%
-  filter(effect == "main" & is.na(lexical_category)) %>%
+  filter(effect=="main") %>%
   group_by(term) %>%
   summarise(mean_estimate = mean(estimate),
             n_sig = sum(signif),
@@ -73,13 +161,14 @@ mean_term_coefs <- aoa_coefs %>%
             n_neg = sum(estimate < 0)) %>%
   arrange(desc(abs(mean_estimate)))
 mean_term_measure_coefs <- aoa_coefs %>%
-  filter(effect == "main"& is.na(lexical_category)) %>%
+  filter(effect=="main") %>%
   group_by(measure, term) %>%
   summarise(mean_estimate = mean(estimate),
             n_sig = sum(signif),
             n_pos = sum(estimate > 0),
             n_neg = sum(estimate < 0)) %>%
   arrange(desc(abs(mean_estimate)))
+
 mean_term_coef <- function(t, r = 2) {
   coef <- mean_term_coefs %>%
     filter(term == t) %>%
@@ -98,78 +187,102 @@ mean_term_measure_coef <- function(meas, t) {
 coef_order <- mean_term_coefs %>% pull(term)
 
 plt_lang_coefs <- aoa_coefs %>%
-  mutate(term = term %>% factor(levels = rev(coef_order)) %>%
+  mutate(term = term %>% #factor(levels = rev(coef_order)) %>%
            fct_relabel(display_predictors),
          signif = if_else(signif, "significant", "non-significant") %>%
            fct_rev(),
-         language = language %>% str_remove(" \\(.*\\)") %>% as_factor(),
+         language1 = language %>% str_remove(" \\(.*\\)") %>% as_factor(),
          measure = fct_recode(measure, "comprehension" = "understands",
                               "production" = "produces")) %>%
-  filter(!is.na(term))
+  filter(!is.na(term)) %>%
+  filter(effect=="main")
 
-ref_coefs <- plt_lang_coefs %>% filter(language == "English")
+ref_coefs <- plt_lang_coefs %>% filter(language1 == "English")
 
+ref_coefs$term <- factor(ref_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness",  "Freq solo", "Length char", "Function words", "Predicates", "Nouns"))
 
-ggplot(ref_coefs %>% filter(effect=="main"), aes(x = estimate, y = term)) +
+ggplot(ref_coefs %>% filter(effect=="main", signif=="significant"), aes(x = estimate, y = term)) +
   facet_grid(language ~ measure, scales = "free",
              labeller = as_labeller(label_caps)) +
-  geom_pointrange(aes(colour = term, shape = signif,
+  geom_pointrangeh(aes(colour = term, shape = signif,
                        xmin = estimate - 1.96 * std.error,
                        xmax = estimate + 1.96 * std.error)) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
-  scale_colour_ptol(guide = FALSE) +
+  #scale_colour_ptol(guide = FALSE) +
   scale_shape_manual(values = c(19, 21), guide = FALSE) +
   theme_bw()+
-  labs(y = "", x = "Coefficient estimate")+
-  labs(caption="To illustrate the structure of our analysis, we first describe the results for English data, as the main effect and age interaction coefficient estimates and 95% confidence intervals, for comprehension and production. Estimates of coefficients in predicting words' developmental trajectories for English comprehension and production data. Larger coefficient values indicate a greater effect of the predictor on acquisition: positive main effects indicate that words with higher values of the predictor tend to be understood/produced by more children, while negative main effects indicate that words with lower values of the predictor tend to be understood/produced by more children. Line ranges indicates 95\\% confidence intervals; filled in points indicate coefficients for which $p < 0.05$.")
-```
-
-```{r langcoefs, fig.width=14, fig.height=7, fig.cap="Estimates of coefficients in predicting words' developmental trajectories for all languages and measures. Each point represents a predictor's coefficient in one language, with the bar showing the mean across languages. Filled in points indicate coefficients for which $p < 0.05$."}
+  labs(y = "", x = "Coefficient estimate")
 
 
-lang_coefs_1 <- aoa_coefs%>% filter(effect=="main") %>%
-  group_by(measure, term) %>%
-  summarize(mean=mean(estimate))
-lang_coefs <- aoa_coefs %>% left_join(lang_coefs_1)
-
-ggplot(aoa_coefs%>% filter(effect=="main"), aes(x = estimate, y = term, colour = language)) +
-  facet_grid(~measure, scales = "free")+
-  geom_point(aes(shape = signif), size = 3, alpha = 0.8) +
-  geom_point(data=lang_coefs_1,  mapping=aes(x = mean, y = term), col="black",size = 3, shape = 3, fill="black")+
-  labs(x = "Coefficient estimate", y = "Predictors") +
-  xlim(-4,4) +
-  theme_bw()
-
-ggplot(plt_lang_coefs %>% filter(effect=="main"), aes(x = estimate, y = term, colour = term)) +
+ggplot(ref_coefs %>% filter(signif=="significant"), aes(x = estimate, y = term, colour = term)) +
   facet_grid(measure ~ effect, scales = "free",
              labeller = as_labeller(label_caps)) +
-  geom_point(aes(shape = signif), size = 1, alpha = 0.4) +
-  stat_summary(geom = "crossbar", fun.x = mean, fun.xmin = mean,
+  geom_point(aes(shape=language), size = 1.8, alpha = 0.7) +
+  stat_summaryh(geom = "crossbarh", fun.x = mean, fun.xmin = mean,
                 fun.xmax = mean, fatten = 3) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
-  scale_colour_ptol(guide = FALSE) +
-  theme_bw()+
-  scale_shape_manual(values = c(19, 21), guide = FALSE) +
+ # scale_colour_ptol(guide = FALSE) +
   labs(x = "Coefficient estimate", y = "")+
-  labs(caption="Figure\ \ref{fig:langcoefs} shows the coefficient estimate for each predictor in each language and measure. Estimates of coefficients in predicting words' developmental trajectories for all languages and measures. Each point represents a predictor's coefficient in one language, with the bar showing the mean across languages. Filled in points indicate coefficients for which $p < 0.05$.")
+  theme(legend.position="none") +
+#  langcog::theme_mikabr() + 
+  theme_bw()+
+  ggtitle("Main significant predictor coefficients across languages ")
+
+```
+
+
+
+
+```{r langcoefs,  fig.width=14, fig.height=7, fig.cap="Estimates of coefficients in predicting words' developmental trajectories for all languages and measures. Each point represents a predictor's coefficient in one language, with the bar showing the mean across languages. Only coefficients for which $p < 0.05$ are presented."}
+
+plt_lang_coefs$term <- factor(plt_lang_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness", "Freq solo", "Length char", "Function words", "Predicates", "Nouns"))
+
+ggplot(plt_lang_coefs %>% filter(signif=="significant"), aes(x = estimate, y = term)) +
+  facet_grid(measure ~ effect, scales = "free",
+             labeller = as_labeller(label_caps)) +
+  geom_point(aes(color = language), size = 1.8, alpha = 0.7) +
+  scale_color_manual(values=c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "palegreen2", "#FDBF6F", "gray70", "maroon", "orchid1", "darkturquoise", "darkorange4", "yellow2", "brown"))+
+  stat_summaryh(geom = "crossbarh", fun.x = mean, fun.xmin = mean,
+                fun.xmax = mean, fatten = 3) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+ # scale_colour_ptol(guide = FALSE) +
+  labs(x = "Coefficient estimate", y = "")+
+  theme(legend.position="none") +
+#  langcog::theme_mikabr() + 
+  theme_bw()+
+  ggtitle("Main significant predictor coefficients across languages ")
+
 ```
 
 ### English predictor effects
 
 ### Cross-linguistic predictor effects
 
-```{r consistency,  fig.width=14, fig.height=7, fig.cap="Correlations of coefficient estimates between languages. Each point represents the mean of one language's coefficients' correlation with each other language's coefficients, with the vertical line indicating the overall mean across languages. The shaded region and line show a bootstrapped 95\\% confidence interval for a randomized baseline where predictor coefficients are shuffled within language."}
+```{r consistency, fig.width=14, fig.height=7, fig.cap="Correlations of coefficient estimates between languages. Each point represents the mean of one language's coefficients' correlation with each other language's coefficients, with the vertical line indicating the overall mean across languages. The shaded region and line show a bootstrapped 95\\% confidence interval for a randomized baseline where predictor coefficients are shuffled within language."}
 
 baseline_sample <- function(i) {
   aoa_coefs %>%
     group_by(measure, language) %>%
     mutate(estimate = sample(estimate)) %>%
+    filter(!is.na(term)) %>%
+    filter(!is.na(language)) %>%
     coef_cors() %>%
     mutate(sample = i)
 }
+
+
 coef_cors <- function(coefs) {
+  coefs$language <- factor(coefs$language, levels=c("English (American)", "Norwegian","Russian", 
+                  "Turkish", "Italian", "Swedish",  
+                  "French (Quebecois)", "Danish", "Croatian", 
+                  "French (French)","German", 
+                  "English (British)", "Spanish (European)", "Spanish (Mexican)",
+                  "Portuguese (European)", "Mandarin (Beijing)"))
+  coefs$term <- factor(coefs$term, levels=c("freq", "freq_solo", "mlu", "concreteness", "babiness", "length_char"))
   suppressWarnings(
     coefs %>%
+      filter(!is.na(term)) %>%
+     filter(!is.na(language)) %>%
       group_by(measure) %>%
       nest() %>%
       mutate(cors = map(data, ~pairwise_cor(.x, language, term, estimate))) %>%
@@ -177,7 +290,14 @@ coef_cors <- function(coefs) {
       unnest() %>%
       rename(language1 = item1, language2 = item2))
 }
+
+
+
+
 coef_summary <- aoa_coefs %>%
+  filter(!language=="English (Australian)") %>%
+  filter(!term=="nouns")%>%
+  filter(!term=="predicates") %>%
   coef_cors() %>%
   group_by(measure, language1) %>%
   summarise(mean_cor = mean(correlation)) %>%
@@ -185,7 +305,7 @@ coef_summary <- aoa_coefs %>%
 
 plt_coef_summary <- coef_summary %>%
   ungroup() %>%
-  mutate(language = language %>% str_remove(" \\(.*\\)") %>% fct_rev(),
+  mutate(#language = language %>% str_remove(" \\(.*\\)") %>% fct_rev(),
          measure = fct_recode(measure, "comprehension" = "understands",
                               "production" = "produces"))
 
@@ -203,7 +323,7 @@ baseline_coef_summary <- baseline_samples %>%
 
 plt_baseline_coef_summary <- baseline_coef_summary %>%
   ungroup() %>%
-  mutate(language = language %>% str_remove(" \\(.*\\)") %>% fct_rev(),
+  mutate(#language = language %>% str_remove(" \\(.*\\)") %>% fct_rev(),
          measure = fct_recode(measure, "comprehension" = "understands",
                               "production" = "produces"))
 
@@ -227,14 +347,11 @@ ggplot(plt_coef_summary, aes(x = mean_cor, y = language)) +
   theme_bw()+
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
   labs(x = "Mean correlation with other languages' coefficients",
-       y = "") +
-  #scale_colour_ptol(guide = FALSE) +
-  #scale_fill_ptol(guide = FALSE)+
-  labs(caption="Correlations of coefficient estimates between languages. Each point represents the mean of one language's coefficients' correlation with each other language's coefficients, with the vertical line indicating the overall mean across languages. The shaded region and line show a bootstrapped 95\\% confidence interval for a randomized baseline where predictor coefficients are shuffled within language.")
+       y = "")
 
 ```
 
-```{r clustering, fig.width=10, fig.height=7, out.width="70%", fig.cap="Dendrograms of the similarity structure among languages' coefficients."}
+```{r clustering, eval=FALSE,fig.width=10, fig.height=7, out.width="70%", fig.cap="Dendrograms of the similarity structure among languages' coefficients."}
 coef_cors <- function(coefs) {
   suppressWarnings(
     coefs %>%
@@ -307,24 +424,31 @@ plt <- ggplot(coef_clust_segments) +
 lgnd <- typology %>% distinct(family) %>% mutate(x = scale(1:n())) %>%
   ggplot(aes(x = x, y = 0)) +
   geom_text(aes(label = family, colour = family),  size = 3) +
-#  scale_colour_ptol(guide = FALSE) +
+  scale_colour_ptol(guide = FALSE) +
   lims(x = c(-3, 3)) +
   theme_void()
 cowplot::plot_grid(plt, lgnd, ncol = 1, rel_heights = c(20, 1))
 ```
 
-```{r lexcatcoefs, fig.width=14, fig.height=10, fig.cap="Estimates of effects in predicting words' developmental trajectories for each language, measure, and lexical category (main effect of predictor + main effect of lexical category + interaction between predictor and lexical category). Each point represents a predictor's effect in one language, with the bar showing the mean across languages."}
+```{r lexcatcoefs, fig.width=14, fig.height=10, fig.cap="LEXICAL CATEGORY : Estimates of effects in predicting words' developmental trajectories for each language, measure, and lexical category (main effect of predictor + main effect of lexical category + interaction between predictor and lexical category). Each point represents a predictor's effect in one language, with the bar showing the mean across languages."}
+lex_cat<- c("nouns", "predicates", "function_words")
+aoa_coefs<- readRDS("data/aoa_coefs.rds") 
+aoa_coefs_fw<- readRDS("data/aoa_coefs_fw.rds") 
+
+aoa_coefs_fw_ <- aoa_coefs_fw %>% filter(term == "function_words"| lexical_category=="function_words")
+
+aoa_coefs<- aoa_coefs %>% rbind(aoa_coefs_fw_)
 
 predictor_effects <- aoa_coefs %>%
-  filter(effect == "main", term %in% predictors) %>%
+  filter(effect == "main" & !(term %in% lex_cat)) %>%
   rename(predictor_effect_estimate = estimate) %>%
   select(c(language, measure, term, predictor_effect_estimate))
 lexcat_effects <- aoa_coefs %>%
-  filter(effect == "main",
-         str_detect(term, "lexical_category")) %>%
-  # mutate(lexical_category = str_match(term, ": (.*)$")[,2]) %>%
+  filter(effect == "main" & term %in% lex_cat ) %>%
+ #  mutate(lexical_category = str_match(term, ": (.*)$")[,2]) %>%
   rename(lexcat_effect_estimate = estimate) %>%
-  select(c(language, measure, lexical_category,lexcat_effect_estimate ))
+  select(-lexical_category) %>%
+  rename(lexical_category = term)
 
 
 lexcat_coefs <- aoa_coefs %>%
@@ -336,15 +460,19 @@ lexcat_coefs <- aoa_coefs %>%
   left_join(predictor_effects) %>%
   left_join(lexcat_effects) %>%
   mutate(estimate = predictor_effect_estimate +
-           lexcat_effect_estimate + interaction_estimate)
+           lexcat_effect_estimate + interaction_estimate) %>%
+  distinct()
+
+
+coef_order <- mean_term_coefs %>% pull(term)
 
 plt_lexcat_coefs <- lexcat_coefs %>%
-  mutate(term = term %>% factor(levels = rev(coef_order)) %>%
+  mutate(term = term %>% #%>% factor(levels = rev(coef_order)) %>%
            fct_relabel(display_predictors),
          # signif = if_else(signif, "significant", "non-significant"),
          lexical_category = lexical_category %>%
-           fct_relevel("nouns", "predicates"),
-         language = language %>% str_remove(" \\(.*\\)") %>% as_factor(),
+           fct_relevel("nouns", "predicates", "function_words"),
+         language = language  %>% as_factor(),#%>% str_remove(" \\(.*\\)")
          measure = fct_recode(measure, "comprehension" = "understands",
                               "production" = "produces")) %>%
   mutate_at(vars(contains("signif")),
@@ -356,18 +484,17 @@ ggplot(plt_lexcat_coefs, aes(x = estimate, y = term, colour = term)) +
   facet_grid(measure ~ lexical_category,
              labeller = as_labeller(label_caps)) +
   geom_point(size = 1, alpha = 0.4) +
-  stat_summary(geom = "crossbar", fun.x = mean, fun.xmin = mean,
+  stat_summaryh(geom = "crossbarh", fun.x = mean, fun.xmin = mean,
                 fun.xmax = mean, fatten = 3) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
   scale_colour_ptol(guide = FALSE) +
   theme_bw()+
-  labs(x = "Coefficient estimate", y = "")+
-  labs(caption = "Estimates of effects in predicting words' developmental trajectories for each language, measure, and lexical category (main effect of predictor + main effect of lexical category + interaction between predictor and lexical category). Each point represents a predictor's effect in one language, with the bar showing the mean across languages.")
+  labs(x = "Coefficient estimate", y = "")
 
 ```
 
 
-```{r crossvalidation, fig.width=14, fig.height=10 }
+```{r crossvalidation, fig.width=14, fig.height=10, fig.cap="Cross validation for American English" }
 wb_data <- load_wb_data(target_langs)
 
 cv_results <- readRDS("data/cv_results.rds" )
@@ -376,8 +503,6 @@ cv_results_cat<- readRDS("data/cv_results_cat.rds" )
 cv_results_lex <- readRDS("data/cv_results_lex.rds" )
 eng_across_lang_lex_desc<- readRDS("data/eng_across_lang_lex_desc.rds" )
 
-
-####### cross-validation across languages
 cv_dev_lang<- function(cv_across_lang){
   ggplot(cv_across_lang, aes(x = mean_abs_dev, y = language)) +
     facet_grid(~measure, scales = "free") +
@@ -392,7 +517,7 @@ cv_dev_lang<- function(cv_across_lang){
     theme_bw()
 }
 
- cv_results |>
+cv_results |>
    cv_dev_lang()
 
 aoa_mad_lex_cat<- function(cv_across_lex, lang, meas, wb_data, preds ){
@@ -423,7 +548,7 @@ dev_words <- function(cv_across_lex){
   eng_across_lang_lex2 <- cv_across_lex %>% filter(language =="English (American)")
   ggplot(eng_across_lang_lex2, aes(y=aoa_pred , x=aoa, fill=lexical_category, color=lexical_category)) +
     geom_point(alpha = .5)+
-    geom_smooth() +
+    geom_smooth(method="lm") +
     ggrepel::geom_text_repel(aes(label=test_word), max.overlaps = 20)+
     xlim(c(0,40))+ ylim(c(0,40))+
     geom_point(alpha = .1)+
@@ -437,28 +562,111 @@ dev_words(eng_across_lang_lex_desc)
  u <- aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "understands", wb_data, preds)  
  p <- aoa_mad_lex_cat(eng_across_lang_lex_desc, "English (American)", "produces", wb_data, preds)
  cowplot::plot_grid(u, p)
+ 
+ 
+ 
+ ggplot(eng_across_lang_lex_desc %>% filter(abs_dev>5), aes(x=abs_dev, y=reorder(test_word, -abs_dev), fill=lexical_category)) + 
+  geom_bar(stat = "identity") +
+   theme_bw()+
+   scale_fill_manual(values = c("red", "blue", "forestgreen", "orange", "grey"))
+
+``` 
+
+# Cross validation across languages: English and Mandarin
+```{r crossvalidation1, fig.width=14, fig.height=10, fig.cap="Cross validation for American English and Mandarin Taiwanese"  }
 
  cv_results_pos$mean_abs_dev <- as.numeric(cv_results_pos$mean_abs_dev) 
  ggplot(aes(x = mean_abs_dev, y = language),
         data = cv_results_pos) +
-   facet_wrap(~lexical_category, nrow=5) +
+   facet_wrap(~lexical_category+measure, nrow=5) +
    geom_point(aes(colour = factor(lexical_category)), size = 4)+
-   geom_errorbar(aes(xmin = mean_abs_dev - mean_se, xmax = mean_abs_dev + mean_se))+
-   geom_smooth(method = "loess") +
+   geom_errorbar(aes(xmin = mean_abs_dev - sd_abs_dev, xmax = mean_abs_dev + mean_abs_dev))+
+   geom_smooth(method = "lm") +
    scale_color_brewer(palette = "Set1") +
    theme_bw(base_size = 14) +
    theme(panel.grid = element_blank())
-``` 
  
-```{r crossvalidation1, fig.width=13, fig.height=10 }
+man_t_across_lang_lex_desc<- readRDS("data/man_t_across_lang_lex_desc.rds" )
+
+ ggplot(man_t_across_lang_lex_desc %>% filter(abs_dev>5), aes(x=abs_dev, y=reorder(test_word, -abs_dev), fill=lexical_category)) + 
+  geom_bar(stat = "identity") +
+   theme_bw()+
+   scale_fill_manual(values = c("red", "blue", "forestgreen", "orange", "grey"))
+ 
+
+``` 
+
+
+# Cross-validation across all languages
+```{r crossvalidation2, fig.width=13, fig.height=10 }
+####### cross-validation across languages
+
+cv_results <- readRDS("data/cv_results.rds" )
+cv_results_pos <- readRDS("data/cv_results_pos.rds" )
+cv_results_cat<- readRDS("data/cv_results_cat.rds" )
+cv_results_lex <- readRDS("data/cv_results_lex.rds" )
+eng_across_lang_lex_desc<- readRDS("data/eng_across_lang_lex_desc.rds" )
+
  cv_results_cat$mean_abs_dev <- as.numeric(cv_results_cat$mean_abs_dev) 
  ggplot(aes(x = mean_abs_dev, y = language),
         data = cv_results_cat) +
    facet_wrap(~category) +
    geom_point(aes(colour = factor(category)), size = 4)+
-   geom_errorbar(aes(xmin = mean_abs_dev - mean_se, xmax = mean_abs_dev + mean_se))+
-   geom_smooth(method = "loess") +
+   geom_errorbar(aes(xmin = mean_abs_dev - sd_abs_dev, xmax = mean_abs_dev + sd_abs_dev))+
+   geom_smooth(method = "lm") +
    theme_bw(base_size = 14) +
-   theme(panel.grid = element_blank())
+   theme(panel.grid = element_blank())+
+       theme(legend.position="none")
 
+   
+
+ 
+worst_produce <- readRDS("data/worst_uni_produce.rds" )
+worst_understand <- readRDS("data/worst_uni_understand.rds" )
+
+
+ggplot(aes(x = aoa_mean, y = aoa_pred_mean),data = worst_produce %>% filter(count_lang >1)) +
+   geom_smooth(method = "lm") +
+   geom_point(aes(size = count_lang), alpha=0.5)+
+   ggrepel::geom_text_repel(data = . %>% 
+                    mutate(label = ifelse(count_lang > 3,
+                                          test_word, "")),
+                  aes(label = label), 
+                  max.overlaps = 150,
+                  box.padding = 1,
+                  show.legend = FALSE)+
+  ylim(0,40)+
+  xlim(0,40)+
+  ggtitle("Uni_lemmas which are in the top 50 worst predicted for production for at least two languages")+
+  theme_bw()
+  
+ggplot(aes(x = aoa_mean, y = aoa_pred_mean),data = worst_understand %>% filter(count_lang >1)) +
+   geom_smooth(method = "lm") +
+   geom_point(aes(size = count_lang), alpha=0.5)+
+   ggrepel::geom_text_repel(data = . %>% 
+                    mutate(label = ifelse(count_lang > 3,
+                                          test_word, "")),
+                  aes(label = label), 
+                  max.overlaps = 150,
+                  box.padding = 1,
+                  show.legend = FALSE)+
+  ylim(0,40)+
+  xlim(0,40)+
+  ggtitle("Uni_lemmas which are in the top 50 worst predicted for comprehension for at least two languages")+
+  theme_bw()#+
+ # geom_abline(intercept =0 , slope = 1)
+
+
+#worst_produce1 <- readRDS("data/worst_uni_produce1.rds" )
+#worst_understand1 <- readRDS("data/worst_uni_understand1.rds" )
+
+# ggplot(worst_produce1, aes(x=abs_dev, y=reorder(test_word, -abs_dev), fill=language)) + 
+ # geom_bar(stat = "identity") +
+  # theme_bw()
+ 
+
+
+#plot aoa and aoa predicted labeling words with above 5 months
+#plot predictor coefficients for each language and r squared, 
+#overall predictor aoa without languages (or languages in color)
 ```
