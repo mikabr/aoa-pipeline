@@ -1,0 +1,113 @@
+---
+title: "surprisal_frequency_data_wrangling"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tools)
+library(corrplot)
+library(tidyverse)
+library(glue)
+```
+
+Get combined unique clean word lists for frequency count script per language (no need to run this again)
+```{r unique_words, eval=FALSE}
+combine_clean_word_lists <- function(lang){
+  lang_path <- glue("./surprisals/word-lists/{lang}/")
+  name <- glue("./surprisals/word-lists/{lang}/unique_clean_words.csv")
+  files = list.files(path=lang_path, pattern="*.csv", full.names=TRUE, recursive=FALSE)
+  lang_data <- files |> map(read_csv) |> reduce(rbind)
+  clean_words <- lang_data |> select(word_clean) |> unique()
+  write.csv(clean_words, file=name)
+  return(clean_words)
+}
+combine_clean_word_lists_by_lang("eng")
+```
+
+
+load in surprisal results for all runs to verify correlations
+```{r surprisals}
+
+my_get_run <- function(file){
+  file_name = strsplit(file_path_sans_ext(file), "/")[[1]]
+  file_name = file_name[(length(file_name))]
+  run_num = str_sub(file_name, -1, -1)
+  surprisal_name = paste("avg_surprisal", run_num, sep="_")
+  perplexity_name = paste("avg_perplexity", run_num, sep="_")
+  data <- read_csv(file)
+  names(data)[names(data) == "avg_surprisal"] <- surprisal_name
+  names(data)[names(data) == "avg_perplexity"] <- perplexity_name
+  return(data)
+}
+
+get_all_runs_surprisal <- function(lang){
+  lang_path <- glue("./surprisals/lstm-surprisals/{lang}/")
+  files = list.files(path=lang_path, pattern="*.csv", full.names=TRUE, recursive=FALSE)
+  lang_data <- files |> map(my_get_run) |> reduce(left_join)
+  return(lang_data)
+}
+
+langs = c("eng", "deu", "zho", "spa", "fra")
+
+all_surprisals <- map(langs, get_all_runs_surprisal)
+
+```
+
+get the correlation across models for each language surprisal set 
+
+```{r cor}
+
+my_get_cor_plot <- function(data){
+  selected_data <- data |> select(-c(word_clean, n_tokens, n_instances, language))
+  M = cor(selected_data, method = "pearson", use = "complete.obs")
+  print(M)
+  corrplot(M, method = 'number')
+}
+
+map(all_surprisals, my_get_cor_plot)
+
+
+
+
+```
+
+
+Load in surprisal results from run0 for all lang and combine them with the corresponding word lists to have all variables
+```{r combine}
+
+surprisal_path <- "./surprisals/lstm-surprisals/first_runs/"
+files = list.files(path=surprisal_path, pattern="*.csv", full.names=TRUE, recursive=FALSE)
+surprisal_data <- files |> map(read_csv) |> reduce(rbind)
+
+get_all_word_list <- function(lang){
+  lang_path <- glue("./surprisals/word-lists/{lang}/")
+  files = list.files(path=lang_path, pattern="*_clean.csv", full.names=TRUE, recursive=FALSE)
+  lang_data <- files |> map(read_csv) |> reduce(rbind)
+  return(lang_data)
+}
+word_list_data <- map(langs, get_all_word_list) |> reduce(rbind)
+
+
+lstm_surprisals <- left_join(surprisal_data, word_list_data)
+saveRDS(surprisals, file ="./surprisals/lstm_surprisals.rds")
+
+```
+
+```{r wrangle_freq}
+
+get_frequencies <- function(lang){
+  lang_path <- glue("./surprisals/word-lists/{lang}/")
+  files = list.files(path=lang_path, pattern="*_clean.csv", full.names=TRUE, recursive=FALSE)
+  lang_data <- files |> map(read_csv) |> reduce(rbind)
+  frequency_path <- glue("./surprisals/frequencies/{lang}_frequency_counts.csv")
+  freq_data <- read_csv(frequency_path)
+  combined_freq_data <- left_join(lang_data, freq_data)
+  return(combined_freq_data)
+}
+
+
+frequencies <- map(langs, get_frequencies) |> reduce(rbind)
+saveRDS(frequencies, file ="./surprisals/frequencies.rds")
+
+```
