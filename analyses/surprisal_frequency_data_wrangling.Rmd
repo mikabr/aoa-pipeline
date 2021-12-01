@@ -48,15 +48,17 @@ get_all_runs_surprisal <- function(lang){
   return(lang_data)
 }
 
-langs = c("eng", "deu", "zho", "spa", "fra")
+target_langs = c("English (American)", "English (British)", "Spanish (Mexican)", "Spanish (European)", "German", "Mandarin (Beijing)", "Mandarin (Taiwanese)", "French (Quebecois)")
 
-all_surprisals <- map(langs, get_all_runs_surprisal)
+all_surprisals <- map(target_langs, get_all_runs_surprisal) |> reduce(rbind)
+all_surprisals$language |> unique()
+
 
 ```
 
 get the correlation across models for each language surprisal set 
 
-```{r cor}
+```{r cor, eval=FALSE}
 
 my_get_cor_plot <- function(data){
   selected_data <- data |> select(-c(word_clean, n_tokens, n_instances, language))
@@ -65,21 +67,30 @@ my_get_cor_plot <- function(data){
   corrplot(M, method = 'number')
 }
 
-map(all_surprisals, my_get_cor_plot)
-
-
-
+all_surprisals |> group_by(language) |> 
+  group_split() |>
+  map(my_get_cor_plot)
 
 ```
 
+Get averaged surprisals and perplexity values across all 5 random runs for each lstm model or just use first runs
+```{r average}
+avg_surprisals <- all_surprisals |> 
+  mutate(avg_surprisal = (avg_surprisal_0+ avg_surprisal_1+ avg_surprisal_2+ avg_surprisal_3+ avg_surprisal_4)/5,
+         avg_perplexity = (avg_perplexity_0+ avg_perplexity_1+ avg_perplexity_2+ avg_perplexity_3+ avg_perplexity_4)/5) |>
+  select(word_clean, n_tokens, n_instances, language, avg_surprisal, avg_perplexity)
+
+```
+
+```{r firsts, eval=FALSE}
+surprisal_path <- "./surprisals/lstm-surprisals/first_runs/"
+files = list.files(path=surprisal_path, pattern="*.csv", full.names=TRUE, recursive=FALSE)
+avg_surprisals <- files |> map(read_csv) |> reduce(rbind)
+```
 
 Load in surprisal results from run0 for all lang and combine them with the corresponding word lists to have all variables
 ```{r combine}
-
-surprisal_path <- "./surprisals/lstm-surprisals/first_runs/"
-files = list.files(path=surprisal_path, pattern="*.csv", full.names=TRUE, recursive=FALSE)
-surprisal_data <- files |> map(read_csv) |> reduce(rbind)
-
+langs <- c("eng", "fra", "deu", "spa", "zho")
 get_all_word_list <- function(lang){
   lang_path <- glue("./surprisals/word-lists/{lang}/")
   files = list.files(path=lang_path, pattern="*_clean.csv", full.names=TRUE, recursive=FALSE)
@@ -89,8 +100,8 @@ get_all_word_list <- function(lang){
 word_list_data <- map(langs, get_all_word_list) |> reduce(rbind)
 
 
-lstm_surprisals <- left_join(surprisal_data, word_list_data)
-saveRDS(surprisals, file ="./surprisals/lstm_surprisals.rds")
+lstm_surprisals <- left_join(avg_surprisals, word_list_data)
+saveRDS(lstm_surprisals, file ="./surprisals/lstm_surprisals.rds")
 
 ```
 
