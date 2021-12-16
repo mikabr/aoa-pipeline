@@ -159,7 +159,7 @@ extract_uni_lemmas <- function(wb_data) {
     filter(!is.na(uni_lemma)) |>
     distinct(language, uni_lemma, items) |>
     unnest(items) |>
-    select(-form, -item_id) |>
+    select(-c(form,item_id)) |>
     distinct() |>
     nest(items = -c(language, uni_lemma))
 }

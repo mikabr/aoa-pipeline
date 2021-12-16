@@ -165,49 +165,22 @@ ggplot(plt_main_coefs, aes(x = estimate, y = term)) +
 
 Predictors with lexical category interactions
 ```{r lexcatcoefs, fig.width=14, fig.height=10, fig.cap="LEXICAL CATEGORY : Estimates of effects in predicting words' developmental trajectories for each language, measure, and lexical category (main effect of predictor + main effect of lexical category + interaction between predictor and lexical category). Each point represents a predictor's effect in one language, with the bar showing the mean across languages."}
-lex_cat<- c("nouns", "predicates", "function_words")
 
-predictor_effects <- aoa_coefs %>%
-  filter(effect == "main" & !(term %in% lex_cat)) %>%
-  rename(predictor_effect_estimate = estimate) %>%
-  select(c(language, measure, term, predictor_effect_estimate))
-nouns_coefs <- predictor_effects %>% 
-  mutate(lexical_category = "nouns") %>% 
-  rename(estimate = predictor_effect_estimate)
+#lexcat_coefs <- readRDS("./surprisals/lstm_surprisal_lexcat_coefs.rds")
 
-lexcat_effects <- aoa_coefs %>%
-  filter(effect == "main" & term %in% lex_cat ) %>%
- #  mutate(lexical_category = str_match(term, ": (.*)$")[,2]) %>%
-  rename(lexcat_effect_estimate = estimate) %>%
-  select(language, measure, term, lexcat_effect_estimate) %>%
-  rename(lexical_category = term)
+lexcat_coefs_plot <- lexcat_coefs |> filter(measure=="produces" & signif == TRUE)
 
-
-lexcat_coefs <- aoa_coefs %>%
-  filter(str_detect(effect, "interaction")) %>%
-  # mutate(lexical_category = str_match(effect, ": (.*)$")[,2]) %>%
-  rename(interaction_estimate = estimate) %>%
-  select(c(language, measure, lexical_category, term, interaction_estimate)) %>%
-  # select(-effect) %>%
-  left_join(predictor_effects) %>%
-  left_join(lexcat_effects) %>%
-  mutate(estimate = predictor_effect_estimate +
-           lexcat_effect_estimate + interaction_estimate) %>%
-  distinct()  %>% 
-  select(-c(interaction_estimate, lexcat_effect_estimate, predictor_effect_estimate)) %>% 
-  full_join(nouns_coefs)
-
-
-
-ggplot(lexcat_coefs, aes(x = estimate, y = term, colour = language)) +
-  facet_grid(measure ~ lexical_category) +
-  geom_point(size = 3, alpha = 0.4) +
+ggplot(lexcat_coefs_plot, aes(x = estimate, y = term, colour = term)) +
+  facet_grid(lexical_category ~ language)+
+  geom_point(size = 3) +
   stat_summaryh(geom = "crossbarh", fun.x = mean, fun.xmin = mean,
                 fun.xmax = mean, fatten = 3) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
-  scale_colour_ptol(guide = FALSE) +
+  scale_colour_ptol(guide = "none") +
   theme_bw()+
-  labs(x = "Coefficient estimate", y = "")
+  labs(x = "Coefficient estimate", y = "")+
+  theme_bw()+
+  theme(text = element_text(size = 30))    
 
 ```
 

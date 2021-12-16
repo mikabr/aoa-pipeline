@@ -39,7 +39,7 @@ make_predictor_formula <- function(predictors, lexcat_interactions = TRUE) {
 fit_group_model <- function(predictors, group_data, lexcat_interactions = TRUE,
                             model_formula = NULL) {
   # discard predictors that data has no values for
-  predictors <- predictors |> discard(\(p) all(is.na(group_data[[p]])))
+  #predictors <- predictors |> discard(\(p) all(is.na(group_data[[p]])))
   if (is.null(model_formula)) {
     model_formula <- make_predictor_formula(predictors, lexcat_interactions)
   }

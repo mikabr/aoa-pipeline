@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 options(dplyr.summarise.inform = FALSE)
 
 # load libraries
+library(arm)
 library(tidyverse)
 library(glue)
 library(wordbankr)
@@ -21,6 +22,9 @@ library(modelr)
 library(ggrepel)
 library(SnowballC)
 library(stringr)
+library(ggplot2)
+library(tm)
+
 #library(Hmisc)
 #library(arm)
 
@@ -57,108 +61,6 @@ wb_data <- map_df(target_langs, function(lang) {
 
 ```
 
-# Get word lists and uni_lemmas for "Mandarin (Taiwanese)" and "Spanish (European)"
-These languages have now been cashed so there is no more need to run this. It is included in the event that we need to do this again for other language.
-
-There are currently (September 2021) no uni-lemmas in Wordbankr for "Mandarin (Taiwanese)" and "Spanish (European)", however we do have them in development. Here we combine the data from wordbankr and the uni-lemmas in development for them.
-
-```{r new_uni_lemmas, eval=FALSE}
-
-no_uni_lemma_langs <- c("Mandarin (Taiwanese)", "Spanish (European)")
-# No unilemmas for "Mandarin (Taiwanese)" and "Spanish (European)" 
-
-get_uni_lemmas_from_csv <- function(lang){
-  lang_norm <- normalize_language(lang)
-  name <- glue("../word_lists/Wordbank_{lang_norm}.csv")
-  new_uni_lemmas <- read_csv(name)
-  
-  new_uni_lemmas <- new_uni_lemmas |>
-    select(-c(gloss, new_gloss, new_uni_lemma, notes)) |>
-    filter(!is.na(uni_lemma))
-  
-  ws_new_uni_lemmas <- new_uni_lemmas |>
-    mutate(item_id = WS) |>
-    select(-c(WG, WS)) |>
-    filter(!is.na(item_id)) |>
-    mutate(form = "WS")
-  
-  wg_new_uni_lemmas <- new_uni_lemmas |>
-    mutate(item_id = WG) |>
-    select(-c(WG, WS)) |>
-    filter(!is.na(item_id)) |>
-    mutate(form = "WG")
-  
-  new_uni_lemmas <- rbind(ws_new_uni_lemmas, wg_new_uni_lemmas) |>
-    mutate(language = lang)
-  
-  lang_wg <- create_inst_data(lang, "WG") |>
-    select(-c(uni_lemma)) |>
-    left_join(new_uni_lemmas)
-
-  lang_ws <- create_inst_data(lang, "WS") |>
-    select(-c(uni_lemma)) |>
-    left_join(new_uni_lemmas)
-  
-  wg_summary <- collapse_inst_data(lang_wg)
-  ws_summary <- collapse_inst_data(lang_ws)
-  comb_summary <- combine_form_data(list(wg_summary, ws_summary))
-  
-  saveRDS(comb_summary, file = glue("data/wordbank/{lang_norm}.rds"))
-  
-  return(comb_summary)
-}
-
-wb_data_new_unilemmas <- map_df(no_uni_lemma_langs, get_uni_lemmas_from_csv)
-
-```
-
-# Make word lists for each language
-
-Get match unilemmas for each item
-```{r get_word_lists, eval=FALSE}
-
-get_word_lists <- function(wb_data) {
-  split_words <- wb_data |>
-    distinct(language, uni_lemma, items) |>
-    unnest(items) |>
-    select(-c(form, item_id)) |>
-    filter(lexical_class != "other") |>
-    distinct() |>
-    mutate(word_clean = gsub(" [(].*$","", definition)) |>
-    mutate(word_clean = gsub("[(].*$","", definition)) |>
-    mutate(word_clean = gsub(" $","", definition)) |>
-    separate(col=word_clean, into=c("word_clean1", "word_clean2", "word_clean3"), sep="/")
-  words <- split_words |>
-    mutate(word_clean = word_clean1) |>
-    select(-c( word_clean1, word_clean2, word_clean3))
-  words2 <- split_words |>
-    mutate(word_clean = word_clean2) |>
-    select(-c( word_clean1, word_clean2, word_clean3)) |>
-    filter(! is.na(word_clean))
-  words3 <- split_words |>
-    mutate(word_clean = word_clean3) |>
-    select(-c( word_clean1, word_clean2, word_clean3)) |>
-    filter(! is.na(word_clean))  
-  word_lists <- rbind(words, words2, words3)
-}
-
-word_lists <- get_word_lists(wb_data)
-
-
-save_lang_word_list <- function(lang){
-  lang_word_list <- word_lists |>
-    filter(language == lang)
-  norm_lang <- normalize_language(lang)
-  name <- glue("../word_lists/word_list_{norm_lang}.csv")
-  write.csv(lang_word_list, file=name, sep=",")
-  return(lang_word_list)
-}
-
-map_df(target_langs, save_lang_word_list)
-
-```
-
-
 # Load predictors
 
 Merge in the by-concept predictors (concreteness) to the unilemmas.
@@ -179,13 +81,14 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 
 ```{r load_freq}
 frequencies <- readRDS("./surprisals/frequencies.rds")
-frequencies <- frequencies |> select(-c(n_train_instances, n_val_instances, n_total, train_frequency))
+frequencies <- frequencies |> select(-c(n_train_instances, n_val_instances, n_total, train_frequency)) 
+#|> mutate(all_frequency = log(all_frequency))
 ```
 
 Load surprisal and perplexity values
 ```{r load_model_surprisals}
 lstm_surprisals <- readRDS("./surprisals/lstm_surprisals.rds")
-surprisals <- lstm_surprisals |> select(-c(n_instances))
+surprisals <- lstm_surprisals |> mutate(lstm_surprisal = avg_surprisal) |> select(-c(n_instances, avg_surprisal))
 ```
 
 ```{r load_ngram_suprisals}
@@ -199,9 +102,7 @@ surprisals <- lstm_surprisals |> select(-c(n_instances))
 
 Combine all predictors by unilemma
 ```{r combine_all}
-
 predictor_data <- surprisals |> left_join(frequencies) |> left_join(concreteness)
-
 ```
 
 
@@ -211,15 +112,13 @@ predictor_data <- surprisals |> left_join(frequencies) |> left_join(concreteness
 data_lexcat <- prep_lexcat(predictor_data, uni_lemmas, "nouns")
 
 predictor_sources <- list(
-  "all_frequency",
-  c("avg_surprisal", "avg_perplexity"),
-  "concreteness"
-)
+  c("lstm_surprisal", "all_frequency"),
+  "concreteness")
 predictors <- unlist(predictor_sources)
 ```
 
 # Impute data or remove NAs
-```{r impute}
+```{r impute, eval=FALSE}
 data_imputed <- data_lexcat |> 
   do_full_imputation(predictor_sources, max_steps = 20)
 
@@ -229,38 +128,419 @@ data_scaled <- do_scaling(data_imputed, predictors)
 If not imputing, remove NA data points
 
 ```{r remove_NA}
-
 remove_NA_predictors <- function(data, predictors){
   for (pred in predictors){
     data <- data |> filter(!is.na(data[[pred]]))
   }
   return(data)
 }
-
-data_no_na <- remove_NA_predictors(data_lexcat, predictors)
-
-data_scaled <- do_scaling(data_no_na, predictors)
 ```
 
 
-# Fit models by language
 Get fitted AoAs
 ```{r aoa-lm}
 aoas <- fit_aoas(wb_data)
 # All items or only items that are single word expressions
 aoa_predictor_data <- aoas |> left_join(data_lexcat) |> remove_NA_predictors(predictors)
-#aoa_predictor_data <- aoas |> left_join(data_lexcat) |> remove_NA_predictors(predictors) |> filter(n_tokens == 1)
 
-#saveRDS(aoa_predictor_data, "./surprisals/lstm_aoa_predictor_data.rds" )
+
+saveRDS(aoa_predictor_data, "./surprisals/lstm_aoa_predictor_data.rds" )
 ```
 
-fit models 
+# Experiments
+
+
+## Experiment 1
+Compare different surprisal values using cross validation for each language
+
+Define models to compare 
+```{r formulae1}
+
+lstm_surp = ~ lexical_category * lstm_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+four_surp = ~ lexical_category * fourgram_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+tri_surp = ~ lexical_category * trigram_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+bi_surp = ~ lexical_category * bigram_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+null_model = ~ 1
+formulae <- formulas(~aoa, null_model, bi_surp, tri_surp, four_surp, lstm_surp)
+```
+
+When I try to run cross validation on all languages and measures simultaneously using map, R crashes, so you have to run each language manually one at a time and then combine them. Here we prep and scale the data for one language
+```{r prep_data1}
+lang = "English (American)"
+ms = "produces"
+
+predictors <- c("lstm_surprisal", "fourgram_surprisal", "trigram_surprisal", "bigram_surprisal", "all_frequency", "concreteness")
+
+scaled_lang_data <- aoa_predictor_data |>
+  filter(language==lang & measure==ms) |>
+  select(language, uni_lemma, category, definition, word_clean, aoa, lexical_category, lstm_surprisal, fourgram_surprisal, trigram_surprisal, bigra_surprisal, all_frequency, concreteness) |>
+  unique() |> mutate_at(vars(predictors), ~as.numeric(base::scale(.))) 
+
+```
+
+Check correlation between predictors and VIF scores
+```{r cor_vif1}
+#Get correlation plot
+cor_data <- scaled_lang_data %>% ungroup() %>% select(lstm_surprisal, all_frequency, concreteness)
+cor(cor_data, method = "pearson")
+
+#Do colinearity analysis
+model = lm(aoa ~ lstm_surprisal + all_frequency + concreteness + lexical_category, data=scaled_lang_data)
+car::vif(model)
+```
+
+
+
+Run cross-validation for a single language.
+```{r cross_validate1}
+loo_df <- crossv_loo(scaled_lang_data)
+
+fit_cv_models_single <- function(id) {
+  models <- "no model"
+  train_idx <- loo_df[id,1][[1]][[1]]$idx
+  test_idx <- loo_df[id,2][[1]][[1]]$idx
+  train_df <- scaled_lang_data[train_idx,]
+
+  try(models <- fit_with(train_df, lm, formulae))
+
+  result <- enframe(models) |>
+    mutate(model = value,
+           train = list(train_idx),
+           test = list(test_idx)) |>
+    select(-c(value))
+
+  return(result)
+}
+
+# dont try to view
+loo_models <- loo_df$.id |>
+    map(fit_cv_models_single) |>
+    reduce(rbind)
+
+# dont try to view
+loo_preds <- get_cv_preds(loo_models, scaled_lang_data) |> 
+  mutate(language = lang,
+         measure = ms)
+# View
+cv_results <- get_cv_results(loo_preds) |>
+    mutate(language = lang,
+         measure = ms)
+
+cv_results_pos <- loo_preds |>
+  group_by(language, measure, name, lexical_category) |>
+  summarise(mean_abs_dev = mean(abs_dev), sd_ads_dev = sd(abs_dev))
+
+
+#first language
+exp1_all_cv_results <- cv_results
+exp1_all_cv_results_pos <- cv_results_pos
+
+#all subsequent languages
+#exp1_all_cv_results <- exp1_all_cv_results |> rbind(cv_results)
+#exp1_all_cv_results_pos <- exp1_all_cv_results_pos |> rbind(cv_results_pos)
+
+
+```
+
+```{r save_data1}
+saveRDS(exp1_all_cv_results, "./surprisals/exp1_all_cv_results.rds" )
+saveRDS(exp1_all_cv_results_pos, "./surprisals/exp1_all_cv_results_pos.rds" )
+
+```
+
+
+## Experiment 2
+Compare different predictor combination, especially surprisal and frequency, using cross validation for each language
+
+When I try to run cross validation on all languages and measures simultaneously using map, R crashes, so you have to run each language manually one at a time and then combine them. Here we prep and scale the data for one language
+```{r prep_data2}
+lang = "English (American)"
+ms = "produces"
+
+predictors <- c("lstm_surprisal", "all_frequency", "concreteness")
+
+scaled_lang_data <- aoa_predictor_data |>
+  filter(language==lang & measure==ms) |>
+  select(language, uni_lemma, category, definition, word_clean, aoa, lexical_category, lstm_surprisal, all_frequency, concreteness) |>
+  unique() |> mutate_at(vars(predictors), ~as.numeric(base::scale(.)))
+
+n = nrow(scaled_lang_data)
+
+```
+
+
+Define models to compare (currently assumes lstm surprisal is the best)
+```{r formulae2}
+
+all_full = ~ lexical_category * lstm_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+freq_full = ~ lexical_category * all_frequency + lexical_category * concreteness
+freq_only = ~ lexical_category * all_frequency
+surp_full = ~ lexical_category * lstm_surprisal + lexical_category * concreteness
+surp_only = ~ lexical_category * lstm_surprisal
+null_model = ~ 1
+formulae <- formulas(~aoa, null_model, all_full, freq_only, freq_full, surp_only, surp_full)
+```
+
+Run cross-validation for a single language.
+```{r cross_validate2}
+loo_df <- crossv_loo(scaled_lang_data)
+
+# dont try to view
+loo_models <- loo_df$.id |>
+    map(fit_cv_models_single) |>
+    reduce(rbind)
+
+# dont try to view
+loo_preds <- get_cv_preds(loo_models, scaled_lang_data) |> 
+  mutate(language = lang,
+         measure = ms,
+         n = n)
+# View
+cv_results <- get_cv_results(loo_preds) |>
+    mutate(language = lang,
+         measure = ms,
+         n = n)
+
+cv_results_pos <- loo_preds |>
+  group_by(language, measure, n, name, lexical_category) |>
+  summarise(mean_abs_dev = mean(abs_dev), sd_ads_dev = sd(abs_dev))
+
+
+#first language
+exp2_all_cv_results <- cv_results
+exp2_all_cv_results_pos <- cv_results_pos
+
+#all subsequent languages
+#exp2_all_cv_results <- exp2_all_cv_results |> rbind(cv_results)
+#exp2_all_cv_results_pos <- exp2_all_cv_results_pos |> rbind(cv_results_pos)
+
+```
+
+Check if difference between all_full, freq_full, and null models are significant using ANOVA
+```{r anova}
+null_model <- lm(formula= aoa ~ 1, data = scaled_lang_data)
+model_base <- lm(formula= aoa ~ lexical_category * all_frequency + lexical_category * concreteness, data = scaled_lang_data)
+model_augmented <- lm(formula = aoa ~ lexical_category * lstm_surprisal + lexical_category * all_frequency + lexical_category * concreteness, data = scaled_lang_data)
+
+anova(null_model, model_base)
+anova(model_base, model_augmented)
+```
+
+```{r save_data2}
+saveRDS(exp2_all_cv_results, "./surprisals/exp2_all_cv_results.rds" )
+saveRDS(exp2_all_cv_results_pos, "./surprisals/exp2_all_cv_results_pos.rds" )
+```
+
+
+## Experiment 3
+Look at the relation between surprisal and aoa. First part is to look at coefficient estimate, second is to look at the effect of surprisal beyond frequency.
+
+```{r prep_data3}
+lang = "English (American)"
+ms = "produces"
+
+predictors <- c("lstm_surprisal", "all_frequency", "concreteness")
+
+scaled_lang_data <- aoa_predictor_data |>
+  filter(language==lang & measure==ms) |>
+  select(language, uni_lemma, category, definition, word_clean, aoa, lexical_category, lstm_surprisal, all_frequency, concreteness) |>
+  unique() |> mutate_at(vars(predictors), ~as.numeric(base::scale(.))) |>
+  mutate(lexical_category = factor(lexical_category, levels = c("nouns", "predicates" , "function_words"),
+                 labels = c("nouns", "predicates" , "function_words")))
+
+n = nrow(scaled_lang_data)
+```
+
+Define models to compare (currently assumes lstm surprisal is the best)
+```{r formulae3}
+all_full = ~ lexical_category * lstm_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+freq_full = ~ lexical_category * all_frequency + lexical_category * concreteness
+formulae <- formulas(~aoa, all_full, freq_full)
+```
+
+Run cross-validation for a single language.
+```{r cross_validate3}
+loo_df <- crossv_loo(scaled_lang_data)
+
+# dont try to view
+loo_models <- loo_df$.id |>
+    map(fit_cv_models_single) |>
+    reduce(rbind)
+
+# dont try to view
+loo_preds <- get_cv_preds(loo_models, scaled_lang_data) |> 
+  mutate(language = lang,
+         measure = ms)
+
+```
+
+Get coefficient estimates for frequency and surprisal in the best model
+```{r betas}
+get_betas <- function(n){
+  model = models$model[n]
+  result <- tidy(model[[1]]) |> 
+      mutate(fold = n)
+  return(result)
+}
+
+models= loo_models |> filter(name=="all_full")  
+
+models_betas = map(c(1:nrow(models)), get_betas) |> bind_rows()
+
+lexcat_betas <- models_betas |> select(term, estimate, fold) |> spread(key=term, value=estimate) |>
+  rename_with(removePunctuation) |>
+  mutate(fctwd_surprisal = lstmsurprisal + lexicalcategoryfunctionwords + lexicalcategoryfunctionwordslstmsurprisal,
+         pred_surprisal = lstmsurprisal + lexicalcategorypredicates + lexicalcategorypredicateslstmsurprisal,
+         noun_surprisal = lstmsurprisal,
+         noun_frequency = allfrequency,
+         fctwd_frequency = allfrequency + lexicalcategoryfunctionwords + lexicalcategoryfunctionwordsallfrequency,
+         pred_frequency = allfrequency + lexicalcategorypredicates + lexicalcategorypredicatesallfrequency,
+         noun_concreteness = concreteness,
+         fctwd_concreteness = concreteness + lexicalcategoryfunctionwords + lexicalcategoryfunctionwordsconcreteness,
+         pred_concreteness = concreteness + lexicalcategorypredicates + lexicalcategorypredicatesconcreteness
+         ) |> 
+  select(noun_surprisal,fctwd_surprisal,pred_surprisal,noun_frequency, fctwd_frequency, pred_frequency, noun_concreteness, fctwd_concreteness, pred_concreteness) |> 
+  gather(key="term", value="estimate") |> 
+  separate(col=term, into=c("lexical_category", "term"), sep="_") |>
+  mutate(language = lang,
+         measure = ms)
+
+
+lex.labs <- c("function words", "nouns", "predicates")
+names(lex.labs) <- c("fctwd", "noun", "pred")
+p = ggplot(lexcat_betas, aes(x = estimate, y = term, colour = term, fill=term)) +
+  facet_grid(~ lexical_category, labeller = labeller(lexical_category = lex.labs)) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+  geom_point(alpha=0.2, position = position_jitter(w = 0, h = 0.1), show.legend = FALSE)+
+  labs(x = "Coefficient estimate", y = "") +
+  theme_bw() +
+  theme(text=element_text(size=18,  family="Times New Roman"), axis.text.x = element_text(size = 16), axis.text.y = element_text(size = 16))
+#ggsave("estimates.png",plot=p, width = 6, height = 3, units="in", limitsize = FALSE)
+p
+```
+
+Comparing a model with and without surprisal 
+```{r beyond_freq}
+word_mad_diff <- loo_preds |> filter(name %in% c("freq_full", "all_full")) |> 
+  group_by(name, test_word, lexical_category) |> summarise(mean(abs_dev)) |> 
+  spread(key=name, value="mean(abs_dev)" ) |> 
+  mutate(diff = freq_full-all_full) |> 
+  arrange(desc(diff)) |>
+  mutate(language = lang,
+         measure = ms)
+
+p = ggplot(data = word_mad_diff |> arrange(desc(diff)) %>% head(50) , 
+            aes(x = reorder(test_word,diff), y = diff, fill=lexical_category)) +
+  geom_bar(stat='identity') +
+  coord_flip()+
+  labs(x="", y="difference in absolute deviation") +
+  theme_bw() +
+  theme(text=element_text(size=18,  family="Times New Roman"), legend.title = element_text( size = 16), legend.text = element_text( size = 16), legend.position = c(0.7, 0.6), axis.text.x = element_text(size = 16), axis.text.y = element_text(size = 16))
+#ggsave("megachild_absolutedeviation_diff_byword_top50.png",plot=p, width = 6, height = 10, units="in", limitsize = FALSE)
+p
+```
+
+Get counts of each lexical category in top 50 words with best decrease in mad
+```{r lexcat_counts}
+lexcat_mad_diff <- word_mad_diff |> group_by(lexical_category) |>
+  summarise(mean_diff=mean(diff), n_lex =n(), n_tot = n) |>
+  mutate(language = lang,
+         measure = ms)
+```
+
+```{r combine_data3}
+#first language
+#exp3_all_lexcat_betas <- lexcat_betas
+#exp3_all_word_mad_diffs <- word_mad_diff
+#exp3_all_lexcat_mad_diffs <- lexcat_mad_diff
+
+#all subsequent languages
+exp3_all_lexcat_betas <- exp3_all_lexcat_betas |> rbind(lexcat_betas)
+exp3_all_word_mad_diffs <- exp3_all_word_mad_diffs |> rbind(word_mad_diff)
+exp3_all_lexcat_mad_diffs <- exp3_all_lexcat_mad_diffs |> rbind(lexcat_mad_diff)
+```
+
+```{r save_data3}
+saveRDS(exp3_all_lexcat_betas, "./surprisals/exp3_all_lexcat_betas.rds" )
+saveRDS(exp3_all_word_mad_diffs, "./surprisals/exp3_all_word_mad_diffs.rds" )
+saveRDS(exp3_all_lexcat_mad_diffs, "./surprisals/exp3_all_lexcat_mad_diffs.rds" )
+```
+
+
+
+
+
+# SCRATCH SPACE
+
+
+
+For Australian English where there are no function word items:  Get coefficient estimates for frequency and surprisal in the best model
+```{r betas}
+get_betas <- function(n){
+  model = models$model[n]
+  result <- tidy(model[[1]]) |> 
+      mutate(fold = n)
+  return(result)
+}
+
+models= loo_models |> filter(name=="all_full")  
+
+models_betas = map(c(1:nrow(models)), get_betas) |> bind_rows()
+
+lexcat_betas <- models_betas |> select(term, estimate, fold) |> spread(key=term, value=estimate) |>
+  rename_with(removePunctuation) |>
+  mutate(pred_surprisal = lstmsurprisal + lexicalcategorypredicates + lexicalcategorypredicateslstmsurprisal,
+         noun_surprisal = lstmsurprisal,
+         noun_frequency = allfrequency,
+         pred_frequency = allfrequency + lexicalcategorypredicates + lexicalcategorypredicatesallfrequency,
+         noun_concreteness = concreteness,
+         pred_concreteness = concreteness + lexicalcategorypredicates + lexicalcategorypredicatesconcreteness
+         ) |> 
+  select(noun_surprisal,pred_surprisal,noun_frequency, pred_frequency, noun_concreteness, pred_concreteness) |> 
+  gather(key="term", value="estimate") |> 
+  separate(col=term, into=c("lexical_category", "term"), sep="_") |>
+  mutate(language = lang,
+         measure = ms)
+
+
+lex.labs <- c("nouns", "predicates")
+names(lex.labs) <- c("noun", "pred")
+p = ggplot(lexcat_betas, aes(x = estimate, y = term, colour = term, fill=term)) +
+  facet_grid(~ lexical_category, labeller = labeller(lexical_category = lex.labs)) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+  geom_point(alpha=0.2, position = position_jitter(w = 0, h = 0.1), show.legend = FALSE)+
+  labs(x = "Coefficient estimate", y = "") +
+  theme_bw() +
+  theme(text=element_text(size=18,  family="Times New Roman"), axis.text.x = element_text(size = 16), axis.text.y = element_text(size = 16))
+#ggsave("estimates.png",plot=p, width = 6, height = 3, units="in", limitsize = FALSE)
+p
+```
+
+
+```{r cross_validate}
+get_top_50_words <- function(data){
+  data <- data |>
+    arrange(abs_dev) |>
+    head(50)
+  return(data)
+}
+
+cv_top_lex <- loo_preds |>
+  select(-c(test, train, model)) |>
+  group_by(language, measure, name) |>
+  group_modify(~get_top_50_words(.x)) 
+```
+
+
+##fit models using regular lm()
+
 ```{r fit_model}
 #Choose between avg_surprisal and avg_perplexity. can't use both since in some languages they are highly correlated (English, German)
 predictors <- c("avg_surprisal", "all_frequency", "concreteness")
 #predictors <- c("avg_perplexity", "all_frequency", "concreteness")
 
 aoa_models <- fit_models(predictors, aoa_predictor_data)
+#aoa_models <- aoa_models |> filter(language != "English (Australian)")
 ```
 Results 
 
@@ -299,88 +579,43 @@ aoa_coefs <- aoa_models |>
 
 ```
 
+Get coefficients by lexical category
+```{r lex_coefs}
+
+lex_cat<- c("nouns", "predicates", "function_words")
+
+nouns_coefs <- aoa_coefs %>%
+  filter(effect == "main" & !(term %in% lex_cat)) %>%
+  mutate(lexical_category = "nouns") %>% 
+  select(c(language, measure, term, estimate, signif, lexical_category))
+
+predictor_effects <- aoa_coefs %>%
+  filter(effect == "main" & !(term %in% lex_cat)) %>%
+  rename(predictor_effect_estimate = estimate) %>%
+  select(c(language, measure, term, predictor_effect_estimate))
+
+lexcat_effects <- aoa_coefs %>%
+  filter(effect == "main" & term %in% lex_cat ) %>%
+ #  mutate(lexical_category = str_match(term, ": (.*)$")[,2]) %>%
+  rename(lexcat_effect_estimate = estimate) %>%
+  select(language, measure, term, lexcat_effect_estimate) %>%
+  rename(lexical_category = term)
 
 
-# Cross-validation
+lexcat_coefs <- aoa_coefs %>%
+  filter(str_detect(effect, "interaction")) %>%
+  # mutate(lexical_category = str_match(effect, ": (.*)$")[,2]) %>%
+  rename(interaction_estimate = estimate) %>%
+  select(c(language, measure, lexical_category, term, interaction_estimate, signif)) %>%
+  # select(-effect) %>%
+  left_join(predictor_effects) %>%
+  left_join(lexcat_effects) %>%
+  mutate(estimate = predictor_effect_estimate +
+           lexcat_effect_estimate + interaction_estimate) %>%
+  distinct()  %>% 
+  select(-c(interaction_estimate, lexcat_effect_estimate, predictor_effect_estimate)) %>% 
+  full_join(nouns_coefs)
 
-```{r cross_validate}
+#saveRDS(lexcat_coefs, "./surprisals/lstm_surprisal_lexcat_coefs.rds" )
 
-all_full = ~ lexical_category * avg_surprisal + lexical_category * all_frequency + lexical_category * concreteness
-freq_full = ~ lexical_category * all_frequency + lexical_category * concreteness
-freq_only = ~ lexical_category * all_frequency
-surp_full = ~ lexical_category * avg_surprisal + lexical_category * concreteness
-surp_only = ~ lexical_category * avg_surprisal
-null_model = ~ 1
-formulae <- formulas(~aoa, null_model, all_full, freq_only, freq_full, surp_only, surp_full)
-
-
-lang_data1 <- aoa_predictor_data |>
-  filter(language=="English (American)" & measure=="produces") |>
-  select(language, uni_lemma, definition, word_clean, aoa, lexical_category, avg_surprisal, all_frequency, concreteness)
-
-loo_df <- crossv_loo(lang_data1)
-
-fit_cv_models_single <- function(id) {
-  models <- "no model"
-  train_idx <- loo_df[id,1][[1]][[1]]$idx
-  test_idx <- loo_df[id,2][[1]][[1]]$idx
-  train_df <- lang_data[train_idx,]
-
-  try(models <- fit_with(train_df, lm, formulae))
-
-  result <- enframe(models) |>
-    mutate(model = value,
-           train = list(train_idx),
-           test = list(test_idx)) |>
-    select(-c(value))
-
-  return(result)
-}
-
-loo_models <- loo_df$.id |>
-    map(fit_cv_models_single) |>
-    reduce(rbind)
-
-
-
-
-
-loo_models <- fit_cv_models(lang_data, formulae)
-
-
-# for simple cv result extraction
-loo_df <- aoa_predictor_data |>
-  group_nest(language, measure) |>
-  mutate(loo_models =  map(data, fit_cv_models, formulae)),
-         loo_preds = map2(loo_models, data, get_cv_preds),
-         cv_results = map(loo_preds, get_cv_results))
-
-
-cv_results <- loo_df |>
-  select(language, measure, cv_results) |>
-  unnest(cv_results)
-
-loo_preds <- loo_df |>
-  select(language, measure, loo_preds, data)
-
-cv_results_pos <- loo_preds |>
-  unnest(loo_preds) |> 
-  group_by(language, measure, lexical_category) |>
-  summarise(mean_abs_dev = mean(abs_dev), mean_se = mean(se))
-
-cv_results_cat <- loo_preds |>
-  unnest(c(loo_preds, data), names_repair = "unique") |>
-  group_by(language, measure, category) |>
-  summarise(mean_abs_dev = mean(abs_dev), mean_se = mean(se))
-
-cv_results_lex <- loo_preds |>
-  unnest(cols = c(loo_preds))|>
-  group_by(language, measure, lexical_category) |>
-  summarise(mean_abs_dev = mean(abs_dev), mean_se = mean(se))
-
-eng_across_lang_lex_desc <- loo_preds |>
-  unnest(cols = c(loo_preds))|>
-  filter(language == "English (American)", measure == "produces") |>
-  arrange(desc(abs_dev)) |>
-  head(50)
 ```
