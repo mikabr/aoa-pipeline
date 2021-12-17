@@ -450,14 +450,14 @@ lexcat_mad_diff <- word_mad_diff |> group_by(lexical_category) |>
 
 ```{r combine_data3}
 #first language
-#exp3_all_lexcat_betas <- lexcat_betas
-#exp3_all_word_mad_diffs <- word_mad_diff
-#exp3_all_lexcat_mad_diffs <- lexcat_mad_diff
+exp3_all_lexcat_betas <- lexcat_betas
+exp3_all_word_mad_diffs <- word_mad_diff
+exp3_all_lexcat_mad_diffs <- lexcat_mad_diff
 
 #all subsequent languages
-exp3_all_lexcat_betas <- exp3_all_lexcat_betas |> rbind(lexcat_betas)
-exp3_all_word_mad_diffs <- exp3_all_word_mad_diffs |> rbind(word_mad_diff)
-exp3_all_lexcat_mad_diffs <- exp3_all_lexcat_mad_diffs |> rbind(lexcat_mad_diff)
+#exp3_all_lexcat_betas <- exp3_all_lexcat_betas |> rbind(lexcat_betas)
+#exp3_all_word_mad_diffs <- exp3_all_word_mad_diffs |> rbind(word_mad_diff)
+#exp3_all_lexcat_mad_diffs <- exp3_all_lexcat_mad_diffs |> rbind(lexcat_mad_diff)
 ```
 
 ```{r save_data3}

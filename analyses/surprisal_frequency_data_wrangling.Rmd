@@ -148,6 +148,8 @@ save_lang_word_list <- function(lang){
 }
 
 map_df(target_langs, save_lang_word_list)
+```
+
 
 Get combined unique clean word lists for frequency count script per language (no need to run this again)
 ```{r unique_words, eval=FALSE}
@@ -160,7 +162,7 @@ combine_clean_word_lists <- function(lang){
   write.csv(clean_words, file=name)
   return(clean_words)
 }
-combine_clean_word_lists_by_lang("eng")
+combine_clean_word_lists("deu")
 ```
 
 
