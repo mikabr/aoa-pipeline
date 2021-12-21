@@ -1,0 +1,405 @@
+"word_clean","language","uni_lemma","lexical_class","category","definition","cnt","frequency","surprisal_2gm","surprisal_3gm","surprisal_4gm","surprisal_5gm","surprisal_6gm"
+"Affe","German","monkey","nouns","animals","Affe",NA,NA,NA,NA,NA,NA,NA
+"alt","German","old","adjectives","descriptive_words","alt",181,9.206268557468,7.64548410233357,4.59394775654788,2.48686762567185,1.56134325656437,1.37835974011962
+"Ameise","German","ant","nouns","animals","Ameise",NA,NA,NA,NA,NA,NA,NA
+"an","German","to","function_words","locations","an",3375,6.2806149854272,6.91954330532973,4.05245963306496,2.08391288326651,1.54883544263679,1.44988472312233
+"andere","German","another","function_words","quantifiers","andere",1036,7.4616431659144,7.75341040111251,5.73720042653072,3.66942131698277,2.90959331160403,2.69829409741017
+"anderer","German","another","function_words","quantifiers","anderer",55,10.3974324035014,9.70742711385005,6.74432192547577,4.41083779699159,3.34993439168079,3.19137848507828
+"anfassen","German","touch","verbs","action_words","anfassen",31,10.9707783842487,10.4382302181375,5.91403596911312,3.11109002508319,2.39491162223107,2.36265355771494
+"Apfel","German","apple","nouns","food_drink","Apfel",NA,NA,NA,NA,NA,NA,NA
+"Apfelsine","German","orange (food)","nouns","food_drink","Orange/Apfelsine",NA,NA,NA,NA,NA,NA,NA
+"arbeiten","German","work (action)","verbs","action_words","arbeiten",94,9.86147080646382,10.9179020585614,5.79974220031648,2.58164325261888,1.98528338674624,1.94092248247558
+"Arm","German","arm","nouns","body_parts","Arm",NA,NA,NA,NA,NA,NA,NA
+"auch","German","also","function_words","quantifiers","auch",14201,4.84369792508881,5.51785884258062,3.82241208135174,2.40968050507959,1.8987323706549,1.82504675066847
+"auf","German","on","function_words","locations","auf",8063,5.4097246140488,5.89030765019698,3.70242432125524,2.15431885420212,1.67193463728896,1.58686913904456
+"aufheben","German","lift","verbs","action_words","aufheben",52,10.4535218701524,10.9366918777336,6.75611296290073,3.88877576864192,3.32796604920252,3.16489335181735
+"aufhören","German","stop","verbs","action_words","aufhören",26,11.1466690507123,12.7301643125597,9.84937008768164,8.0737814164057,7.35132717155205,7.31286563309051
+"aufräumen","German","clean (action)","verbs","action_words","aufräumen",71,10.1420857116925,9.81520432344268,5.9118990327704,3.30279575776714,2.36500982765762,2.07577546296758
+"Auge","German","eye","nouns","body_parts","Auge",NA,NA,NA,NA,NA,NA,NA
+"aus","German","off","function_words","locations","aus",4042,6.10027069077026,6.19937745217863,3.451206643773,1.67129005654011,1.27422198711518,1.20933600384512
+"Auto","German","car","nouns","vehicles","Auto",NA,NA,NA,NA,NA,NA,NA
+"Badewanne","German","bathtub","nouns","furniture_rooms","Badewanne",NA,NA,NA,NA,NA,NA,NA
+"Badezimmer","German","bathroom","nouns","furniture_rooms","Badezimmer",NA,NA,NA,NA,NA,NA,NA
+"Bahn","German","train","nouns","vehicles","Bahn",NA,NA,NA,NA,NA,NA,NA
+"Ball","German","ball","nouns","toys","Ball",NA,NA,NA,NA,NA,NA,NA
+"Banane","German","banana","nouns","food_drink","Banane",NA,NA,NA,NA,NA,NA,NA
+"Bär","German","bear","nouns","animals","Bär",NA,NA,NA,NA,NA,NA,NA
+"Bauch","German","tummy","nouns","body_parts","Bauch",NA,NA,NA,NA,NA,NA,NA
+"Bauchnabel","German","belly button","nouns","body_parts","Bauchnabel",NA,NA,NA,NA,NA,NA,NA
+"Baum","German","tree","nouns","outside","Baum",NA,NA,NA,NA,NA,NA,NA
+"Becher","German","cup","nouns","household","Becher",NA,NA,NA,NA,NA,NA,NA
+"beeilen","German","hurry","verbs","action_words","beeilen",9,12.2075410113976,9.59405650495121,4.90777958265764,1.60253924399381,0.401634427123912,0.129991666826924
+"bei","German","for","function_words","locations","bei",1768,6.92716134553624,8.32804932178999,5.3678058049072,3.56315248183973,3.02898277583038,2.90939528210036
+"Bein","German","leg","nouns","body_parts","Bein",NA,NA,NA,NA,NA,NA,NA
+"beißen","German","bite","verbs","action_words","beißen",44,10.6205759548156,9.45428681809003,4.48904510237018,3.03938128429455,2.52886179123993,2.43409076847988
+"Besen","German","broom","nouns","household","Besen",NA,NA,NA,NA,NA,NA,NA
+"Bett","German","bed","nouns","furniture_rooms","Bett",NA,NA,NA,NA,NA,NA,NA
+"Biene","German","bee","nouns","animals","Biene",NA,NA,NA,NA,NA,NA,NA
+"Bild","German","picture","nouns","household","Bild",NA,NA,NA,NA,NA,NA,NA
+"Birne","German","pear","nouns","food_drink","Birne",NA,NA,NA,NA,NA,NA,NA
+"blau","German","blue","adjectives","descriptive_words","blau",496,8.1981896620089,9.9637129155476,7.2218113209124,5.61648629897837,5.13417599338757,5.03755365818302
+"Blume","German","flower","nouns","outside","Blume",NA,NA,NA,NA,NA,NA,NA
+"Bohnen","German","beans","nouns","food_drink","Bohnen",NA,NA,NA,NA,NA,NA,NA
+"böse","German","bad","adjectives","descriptive_words","böse",19,11.4603266095674,13.0079743260993,7.44490063290793,3.94801015077117,3.10107510137555,3.10107510137555
+"bringen","German","bring","verbs","action_words","bringen",157,9.34851978338552,7.93465563009288,4.21164866797992,2.21632970038438,1.60274178742379,1.46825879260822
+"Brot","German","bread","nouns","food_drink","Brot",NA,NA,NA,NA,NA,NA,NA
+"Brötchen","German","bun","nouns","food_drink","Brötchen",NA,NA,NA,NA,NA,NA,NA
+"Buch","German","book","nouns","toys","Buch",NA,NA,NA,NA,NA,NA,NA
+"Bürste","German","brush (object)","nouns","household","Bürste",NA,NA,NA,NA,NA,NA,NA
+"Bus","German","bus","nouns","vehicles","Bus",NA,NA,NA,NA,NA,NA,NA
+"Butter","German","butter","nouns","food_drink","Butter",NA,NA,NA,NA,NA,NA,NA
+"Butterbrot","German","sandwich","nouns","food_drink","Butterbrot",NA,NA,NA,NA,NA,NA,NA
+"da","German","there","function_words","locations","da",22559,4.3808762103454,5.48066547142419,4.29715852835482,3.43908059448633,3.15732873132855,3.08513228958719
+"Dach","German","roof","nouns","outside","Dach",NA,NA,NA,NA,NA,NA,NA
+"dasselbe","German","same","function_words","quantifiers","dasselbe",14,11.7657082591186,10.0535513814485,5.59098163596459,3.63711773555641,3.22692764985425,3.22692764985425
+"Decke","German","blanket","nouns","household","Decke",NA,NA,NA,NA,NA,NA,NA
+"Deckel","German","cover (object)","nouns","household","Deckel",NA,NA,NA,NA,NA,NA,NA
+"dein","German","your","function_words","pronouns","dein",993,7.50403492468865,9.02695171946324,6.25913856697747,4.23851579300605,3.58475817431237,3.46881773720807
+"der","German","the","function_words","quantifiers","der",23106,4.35691798569086,4.75400142718979,3.50190065399204,2.76876664894145,2.55026721650296,2.50609796830178
+"die","German","the","function_words","quantifiers","die",33296,3.99157304010041,4.78106825984253,3.53170347078176,2.67743519171061,2.41014010891079,2.35578511803559
+"dies","German","this","function_words","pronouns","dies",133,9.51441646051207,11.9551997796303,9.16254815346697,7.86522186715822,7.49685092578283,7.44398093435631
+"diese","German","this","function_words","pronouns","diese",572,8.05562659735403,9.62584114993099,6.12515793030467,4.24606626577534,3.68463682445129,3.57122916081035
+"Dose","German","box","nouns","household","Dose",NA,NA,NA,NA,NA,NA,NA
+"drücken","German","push","verbs","action_words","drücken",167,9.28677177631707,7.49995146567527,4.56762625774798,3.22776734394332,2.88720039682004,2.84178145968997
+"du","German","you","function_words","pronouns","du",31184,4.05710516698649,2.85033041460592,2.00204974251097,1.70999895932431,1.62842374862051,1.60261766588613
+"dunkel","German","dark","adjectives","descriptive_words","dunkel",145,9.42803184631325,9.72564617123702,6.33874221831585,3.68977313820662,2.77302720016959,2.71588649521192
+"Dusche","German","shower","nouns","furniture_rooms","Dusche",NA,NA,NA,NA,NA,NA,NA
+"Eichhörnchen","German","squirrel","nouns","animals","Eichhörnchen",NA,NA,NA,NA,NA,NA,NA
+"Eimer","German","bucket","nouns","household","Eimer",NA,NA,NA,NA,NA,NA,NA
+"ein","German","a","function_words","quantifiers","ein",21344,4.43623964001848,5.13753866847244,3.92408144172237,2.95689109303347,2.55938712257047,2.46865858804286
+"ein bisschen","German","a little","function_words","quantifiers","ein bisschen",NA,NA,NA,NA,NA,NA,NA
+"eine","German","a","function_words","quantifiers","eine",9507,5.2449819403748,6.25891250933696,4.782659209238,3.57921417290344,3.04909607877564,2.92493471038363
+"einer","German","a","function_words","quantifiers","einer",955,7.5430542482531,7.62686273807661,4.4667712823944,2.76179433282706,2.28187098011593,2.18845972295396
+"Eis","German","ice cream","nouns","food_drink","Eis",NA,NA,NA,NA,NA,NA,NA
+"Elefant","German","elephant","nouns","animals","Elefant",NA,NA,NA,NA,NA,NA,NA
+"Ente","German","duck","nouns","animals","Ente",NA,NA,NA,NA,NA,NA,NA
+"er","German","he","function_words","pronouns","er",2970,6.40844835693708,5.68679292094692,3.52620497802977,2.64199166353034,2.45982393874981,2.43370214943296
+"es","German","it","function_words","pronouns","es",11435,5.06033148227695,4.76574772934984,3.33367803637891,2.51746494668847,2.30836797440716,2.27236480443906
+"Esel","German","donkey","nouns","animals","Esel",NA,NA,NA,NA,NA,NA,NA
+"essen","German","eat","verbs","action_words","essen",1650,6.9962350218392,7.17345430181049,4.35753984470499,2.64541507230618,2.14862581215719,2.06602294121459
+"Essen","German","food","nouns","food_drink","Essen",NA,NA,NA,NA,NA,NA,NA
+"euch","German","you","function_words","pronouns","euch",196,9.12665092950331,7.73722784103894,3.67737608092396,1.52944196111752,1.13768551676143,1.09188264021267
+"Eule","German","owl","nouns","animals","Eule",NA,NA,NA,NA,NA,NA,NA
+"fahren","German","drive","verbs","action_words","fahren",1774,6.9237734258643,6.75867952407941,4.06669807453684,2.56909670583388,1.99388972930342,1.90334096976042
+"Fahrrad","German","bicycle","nouns","vehicles","Fahrrad",NA,NA,NA,NA,NA,NA,NA
+"fallen","German","fall","verbs","action_words","fallen",97,9.83005461023044,9.60082586504663,5.14028689697034,3.65048478749058,3.48412843280505,3.45747933485948
+"fangen","German","catch","verbs","action_words","fangen",112,9.68626671743873,9.5409248707278,5.07454716184682,3.63514847196473,3.27966562657626,3.21888567191503
+"fein","German","fine","adjectives","descriptive_words","fein",286,8.74877377791397,10.2155221283492,7.63559779879509,6.55613642897066,6.30039638408986,6.27346037462056
+"Fenster","German","window","nouns","furniture_rooms","Fenster",NA,NA,NA,NA,NA,NA,NA
+"Fernseher","German","tv","nouns","furniture_rooms","Fernseher",NA,NA,NA,NA,NA,NA,NA
+"fertig machen","German","finish","verbs","action_words","fertig machen",NA,NA,NA,NA,NA,NA,NA
+"finden","German","find","verbs","action_words","finden",302,8.69433857135896,8.23110734235271,4.34317478393235,2.15972380953774,1.5805166950919,1.44122946739405
+"Finger","German","finger","nouns","body_parts","Finger",NA,NA,NA,NA,NA,NA,NA
+"Flasche","German","bottle","nouns","household","Flasche",NA,NA,NA,NA,NA,NA,NA
+"Fleisch","German","meat","nouns","food_drink","Fleisch",NA,NA,NA,NA,NA,NA,NA
+"Fliege","German","fly (animal)","nouns","animals","Fliege",NA,NA,NA,NA,NA,NA,NA
+"Flugzeug","German","airplane","nouns","vehicles","Flugzeug",NA,NA,NA,NA,NA,NA,NA
+"Frosch","German","frog","nouns","animals","Frosch",NA,NA,NA,NA,NA,NA,NA
+"Fuchs","German","fox","nouns","animals","Fuchs",NA,NA,NA,NA,NA,NA,NA
+"für","German","for","function_words","locations","für",3495,6.24567693406592,7.01334216257906,4.31237766005757,2.72498815591237,2.19762510920998,2.03866513358896
+"Füße","German","feet","nouns","body_parts","Füße",NA,NA,NA,NA,NA,NA,NA
+"füttern","German","feed","verbs","action_words","füttern",16,11.632176866494,8.79894904913506,3.05201854777201,1.29363533919335,0.874281698682698,0.676161386092554
+"Gabel","German","fork","nouns","household","Gabel",NA,NA,NA,NA,NA,NA,NA
+"Gans","German","goose","nouns","animals","Gans",NA,NA,NA,NA,NA,NA,NA
+"Garage","German","garage","nouns","furniture_rooms","Garage",NA,NA,NA,NA,NA,NA,NA
+"Garten","German","garden","nouns","outside","Garten",NA,NA,NA,NA,NA,NA,NA
+"geben","German","give","verbs","action_words","geben",242,8.91582786257714,7.13445018760859,3.22877925747274,1.42107182250438,0.900938908957132,0.829428023471402
+"gehen","German","walk","verbs","action_words","gehen",945,7.55358066124008,7.14271057923103,4.12327921122677,2.70248427065495,2.21880348621476,2.09187151886787
+"gelb","German","yellow","adjectives","descriptive_words","gelb",498,8.19416551170917,10.1603722392308,7.19119376004525,5.64979554667991,5.20646250897645,5.13525227197461
+"Geschenk","German","present","nouns","toys","Geschenk",NA,NA,NA,NA,NA,NA,NA
+"Gesicht","German","face","nouns","body_parts","Gesicht",NA,NA,NA,NA,NA,NA,NA
+"Giraffe","German","giraffe","nouns","animals","Giraffe",NA,NA,NA,NA,NA,NA,NA
+"Glas","German","glass","nouns","household","Glas",NA,NA,NA,NA,NA,NA,NA
+"Gras","German","grass","nouns","outside","Gras",NA,NA,NA,NA,NA,NA,NA
+"groß","German","big","adjectives","descriptive_words","groß",504,8.18218932066246,7.64972734746126,4.91138138765282,3.0339384759393,2.30522324833735,2.13758117752998
+"grün","German","green","adjectives","descriptive_words","grün",570,8.05912922790523,9.88181279449284,7.03427592813809,5.55767980477666,5.09278366512757,5.03882199472522
+"gucken","German","watch (action)","verbs","action_words","gucken",2183,6.71631023218388,5.94788504418793,3.62792056678608,2.5595918918504,2.14113418487211,2.00158766733742
+"gut","German","good","adjectives","descriptive_words","gut",3931,6.12811646331197,6.82012925089932,5.00684569847718,3.74652867615157,3.26311744171571,3.17201353238286
+"Haare","German","hair","nouns","body_parts","Haare",NA,NA,NA,NA,NA,NA,NA
+"haben","German","have","verbs","action_words","haben",5911,5.72019528790946,5.91882859520979,3.92014186974877,3.05192861289698,2.84096469425423,2.80302099788394
+"halten","German","hold","verbs","action_words","halten",230,8.96668627981063,9.16672620270514,5.39228567149951,3.14964296397132,2.41972862190575,2.31032783278634
+"Hammer","German","hammer","nouns","household","Hammer",NA,NA,NA,NA,NA,NA,NA
+"Hand","German","hand","nouns","body_parts","Hand",NA,NA,NA,NA,NA,NA,NA
+"Handschuhe","German","gloves","nouns","clothing","Handschuhe",NA,NA,NA,NA,NA,NA,NA
+"Handtuch","German","towel","nouns","household","Handtuch",NA,NA,NA,NA,NA,NA,NA
+"hart","German","hard","adjectives","descriptive_words","hart",46,10.5761241922447,11.0280677257338,6.52115500943331,3.27223651955464,2.54652494313357,2.503046682264
+"Hase","German","bunny","nouns","animals","Hase",NA,NA,NA,NA,NA,NA,NA
+"hauen","German","hit","verbs","action_words","hauen",50,10.4927425833057,9.86616903124557,6.37890909467625,4.72401287776913,4.15092047808181,4.09477337964066
+"heiß","German","hot","adjectives","descriptive_words","heiß",261,8.84024518141113,9.5202180056006,6.4671240788746,4.19323346043434,3.41407363815882,3.2820704227853
+"helfen","German","help","verbs","action_words","helfen",216,9.02948718104966,9.61918061399049,5.23400148956346,2.90210272602719,2.19240672715981,2.02616815180434
+"Hemd","German","shirt","nouns","clothing","Hemd",NA,NA,NA,NA,NA,NA,NA
+"Herd","German","stove","nouns","furniture_rooms","Herd",NA,NA,NA,NA,NA,NA,NA
+"hier","German","here","function_words","locations","hier",13150,4.92058855112792,5.97719081890387,4.34080580108884,3.12111139673025,2.65386682187171,2.53382772977351
+"Himmel","German","sky","nouns","outside","Himmel",NA,NA,NA,NA,NA,NA,NA
+"hoch","German","high","adjectives","descriptive_words","hoch",683,7.87827072916304,8.31262771475205,5.05194799897907,3.03693836639757,2.4204740372712,2.31159917837847
+"Hof","German","yard","nouns","outside","Hof",NA,NA,NA,NA,NA,NA,NA
+"Honig","German","honey","nouns","food_drink","Honig",NA,NA,NA,NA,NA,NA,NA
+"hören","German","hear","verbs","action_words","hören",145,9.42803184631325,9.20337278159094,5.00625714716005,2.88470784793105,2.18384995218924,2.08958647379661
+"Hose","German","pants","nouns","clothing","Hose",NA,NA,NA,NA,NA,NA,NA
+"Huhn","German","chicken (animal)","nouns","animals","Huhn",NA,NA,NA,NA,NA,NA,NA
+"Hund","German","dog","nouns","animals","Hund",NA,NA,NA,NA,NA,NA,NA
+"Igel","German","hedgehog","nouns","animals","Igel",NA,NA,NA,NA,NA,NA,NA
+"ihm","German","him","function_words","pronouns","ihm",385,8.45152225444604,8.58428823707295,4.96454828285101,2.75009985483591,2.21268712472463,2.16252057794663
+"ihnen","German","them","function_words","pronouns","ihnen",135,9.4994908102954,9.33451158837764,4.90983274817602,2.54470977798164,1.94586436389972,1.87186515065033
+"ihr","German","her","function_words","pronouns","ihr",1457,7.12063078253862,5.16462199946255,3.13065262483302,2.24475156523323,2.06999410502105,2.03960525734903
+"in","German","in","function_words","locations","in",7841,5.4376439325029,6.56222977436672,4.34431596136833,2.60595368409639,2.0359814574015,1.9264632366985
+"Jacke","German","jacket","nouns","clothing","Jacke",NA,NA,NA,NA,NA,NA,NA
+"Jeans","German","jeans","nouns","clothing","Jeans",NA,NA,NA,NA,NA,NA,NA
+"jeder","German","beach","function_words","quantifiers","jeder",94,9.86147080646382,11.3943512044533,6.975524603454,5.51065838306236,5.37043689750337,5.31587005689757
+"Joghurt","German","yogurt","nouns","food_drink","Joghurt",NA,NA,NA,NA,NA,NA,NA
+"Käfer","German","bug","nouns","animals","Käfer",NA,NA,NA,NA,NA,NA,NA
+"Kaffee","German","coffee","nouns","food_drink","Kaffee",NA,NA,NA,NA,NA,NA,NA
+"Kakao","German","cacao","nouns","food_drink","Kakao",NA,NA,NA,NA,NA,NA,NA
+"kalt","German","cold","adjectives","descriptive_words","kalt",349,8.5496936665314,8.7355191427344,5.26565520507713,2.80140534334573,2.0402843058813,1.93040563259822
+"Kamera","German","camera","nouns","household","Kamera",NA,NA,NA,NA,NA,NA,NA
+"Kamm","German","comb (object)","nouns","household","Kamm",NA,NA,NA,NA,NA,NA,NA
+"kann","German","can (auxiliary)","function_words","helping_verbs","kann",4611,5.96856555652712,6.65890927246569,4.64917606914111,3.7799022048143,3.60841528089486,3.58792160161486
+"kaputt","German","broken","adjectives","descriptive_words","kaputt",549,8.0966671472243,9.03353667526447,5.27104681651107,3.11745491652431,2.39356428949213,2.2794961465835
+"kaputt machen","German","break","verbs","action_words","kaputt machen",NA,NA,NA,NA,NA,NA,NA
+"Käse","German","cheese","nouns","food_drink","Käse",NA,NA,NA,NA,NA,NA,NA
+"Katze","German","cat","nouns","animals","Katze",NA,NA,NA,NA,NA,NA,NA
+"kaufen","German","buy","verbs","action_words","kaufen",232,8.95802821706752,7.57539454423391,3.6197418913118,1.67851258813004,1.11780650380955,1.03135026391554
+"kein","German","no","function_words","quantifiers","kein",969,7.52850097684306,8.56432884204567,6.29210120572535,4.58206158405774,3.96380751909274,3.90761323071399
+"keine","German","no","function_words","quantifiers","keine",1338,7.20583434804565,8.41071716550504,5.91743586550901,4.00922101928511,3.41028572972006,3.31906567084651
+"keiner","German","no","function_words","quantifiers","keiner",99,9.80964573859924,10.6815101420768,6.41338230218175,4.17130262719878,3.84093200538171,3.79461925284918
+"Keks","German","cookie","nouns","food_drink","Keks",NA,NA,NA,NA,NA,NA,NA
+"Kinn","German","chin","nouns","body_parts","Kinn",NA,NA,NA,NA,NA,NA,NA
+"Kissen","German","pillow","nouns","household","Kissen",NA,NA,NA,NA,NA,NA,NA
+"kitzeln","German","tickle","verbs","action_words","kitzeln",26,11.1466690507123,11.2463764731845,5.62859212387411,4.39295627713747,3.98942346574018,3.98942346574018
+"klatschen","German","clap","verbs","action_words","klatschen",6,12.6130061195058,13.6324142923459,10.7289137260963,9.51012808060512,9.24296201001321,9.24296201001321
+"kleckern","German","spill","verbs","action_words","kleckern",11,12.0068703159355,13.3699843348941,9.72074173277336,8.05012863628522,7.65650147210377,7.63258925339161
+"Kleid","German","dress (object)","nouns","clothing","Kleid",NA,NA,NA,NA,NA,NA,NA
+"klein","German","little (description)","adjectives","descriptive_words","klein",277,8.78074808254649,8.11038969941452,4.95250667036524,2.58577808976677,1.64485016437107,1.48992754487998
+"klettern","German","climb","verbs","action_words","klettern",65,10.2303783188382,10.6509392916445,6.17307058285303,3.89734123215837,3.02000569489369,2.94946781026721
+"Klo","German","bathroom","nouns","furniture_rooms","Klo/Toilette",NA,NA,NA,NA,NA,NA,NA
+"Knie","German","knee","nouns","body_parts","Knie",NA,NA,NA,NA,NA,NA,NA
+"können","German","can (auxiliary)","function_words","helping_verbs","können",2422,6.61241666462079,6.91150010030906,4.55040024210192,3.66957096481181,3.49365519984944,3.46427470797046
+"Kopf","German","head","nouns","body_parts","Kopf",NA,NA,NA,NA,NA,NA,NA
+"krank","German","sick","adjectives","descriptive_words","krank",154,9.3678129863202,10.2587449368579,5.91127942197187,2.49420074471625,1.59598524317973,1.47776382360833
+"kriegen","German","get","verbs","action_words","kriegen",414,8.37889961490851,8.55967108676997,5.02800216710912,3.4029203216976,2.94119972542776,2.87678703066907
+"Krokodil","German","crocodile","nouns","animals","Krokodil",NA,NA,NA,NA,NA,NA,NA
+"Küche","German","kitchen","nouns","furniture_rooms","Küche",NA,NA,NA,NA,NA,NA,NA
+"Kuchen","German","cake","nouns","food_drink","Kuchen",NA,NA,NA,NA,NA,NA,NA
+"Kuh","German","cow","nouns","animals","Kuh",NA,NA,NA,NA,NA,NA,NA
+"Kühlschrank","German","refrigerator","nouns","furniture_rooms","Kühlschrank",NA,NA,NA,NA,NA,NA,NA
+"Küken","German","chick","nouns","animals","Küken",NA,NA,NA,NA,NA,NA,NA
+"küssen","German","kiss","verbs","action_words","küssen",8,12.325324047054,12.5348363395131,5.02526779294323,2.8104384746809,2.62111682807718,2.39519746281998
+"lachen","German","laugh","verbs","action_words","lachen",38,10.7671794290074,10.7550306613209,6.62301979954575,4.54330168044541,4.08054216132748,4.01251683236113
+"Lampe","German","lamp","nouns","household","Lampe",NA,NA,NA,NA,NA,NA,NA
+"langsam","German","slow","adjectives","descriptive_words","langsam",252,8.8753365012224,9.97791611381284,6.2319143541633,3.69487924857498,3.0239610931432,2.8893310518701
+"Lastwagen","German","truck","nouns","vehicles","Lastwagen",NA,NA,NA,NA,NA,NA,NA
+"Lätzchen","German","bib","nouns","clothing","Lätzchen",NA,NA,NA,NA,NA,NA,NA
+"laufen","German","walk","verbs","action_words","laufen",220,9.01113804238146,8.28932518657171,4.57100208539708,2.45400507244512,1.62008988495822,1.54201406192567
+"laut","German","loud","adjectives","descriptive_words","laut",184,9.18982983112484,9.0910164212206,5.52537045931944,2.74138164530381,1.89246902022061,1.77137878081649
+"lecken","German","lick","verbs","action_words","lecken",2,13.7116184081739,11.3885448659826,6.89155027656114,6.09906902620056,6.09906902620056,6.09906902620056
+"leer","German","empty","adjectives","descriptive_words","leer",125,9.57645185143152,10.019731627208,5.30642601689555,3.08428643586553,2.35552959053683,2.26927871282863
+"Leiter","German","ladder","nouns","outside","Leiter",NA,NA,NA,NA,NA,NA,NA
+"lesen","German","read","verbs","action_words","lesen",103,9.77003660050419,10.1601529346873,5.10475445862094,2.54076638255404,1.83985884404909,1.69782625550463
+"Licht","German","light (object)","nouns","household","Licht",NA,NA,NA,NA,NA,NA,NA
+"Löffel","German","spoon","nouns","household","Löffel",NA,NA,NA,NA,NA,NA,NA
+"Löwe","German","lion","nouns","animals","Löwe",NA,NA,NA,NA,NA,NA,NA
+"Luftballon","German","balloon","nouns","toys","Luftballon",NA,NA,NA,NA,NA,NA,NA
+"machen","German","make","verbs","action_words","machen",5892,5.72341481115131,5.97399020738866,3.95604722144093,2.69838972068129,2.27142168978853,2.19890177746721
+"malen","German","draw","verbs","action_words","malen",917,7.58365811647736,7.88047666498433,4.50490732790322,2.4681248619462,1.76891893214328,1.65517552865801
+"Mantel","German","coat","nouns","clothing","Mantel",NA,NA,NA,NA,NA,NA,NA
+"Marmelade","German","jam","nouns","food_drink","Marmelade",NA,NA,NA,NA,NA,NA,NA
+"Maus","German","mouse","nouns","animals","Maus",NA,NA,NA,NA,NA,NA,NA
+"Medizin","German","medicine","nouns","household","Medizin",NA,NA,NA,NA,NA,NA,NA
+"mehr","German","more","function_words","quantifiers","mehr",2270,6.67723047825838,5.26126249229043,3.51107066183935,2.11067040774688,1.38176463575458,1.22522522688628
+"mein","German","my","function_words","pronouns","mein",680,7.88267279056367,8.96084385275283,6.1702739054452,4.70311758323081,4.22825235606218,4.11104026320272
+"meiner","German","mine","function_words","pronouns","meiner",114,9.66856714033933,9.89314372774896,5.94159093278708,3.74154126648319,3.37659541391737,3.31405784359329
+"Messer","German","knife","nouns","household","Messer",NA,NA,NA,NA,NA,NA,NA
+"mich","German","me","function_words","pronouns","mich",1264,7.26272901402702,5.90474166385162,3.2933716216446,1.94551762389227,1.61531102492652,1.57671584687578
+"Milch","German","milk","nouns","food_drink","Milch",NA,NA,NA,NA,NA,NA,NA
+"mir","German","me","function_words","pronouns","mir",2780,6.47455938204914,5.79307135719511,3.4958368869578,2.20107489177813,1.84740350092962,1.80389424824461
+"mit","German","with","function_words","locations","mit",9332,5.26356095559251,6.41809656393633,4.35475503190907,2.87727612638871,2.38609065292515,2.2748491587383
+"Mond","German","moon","nouns","outside","Mond",NA,NA,NA,NA,NA,NA,NA
+"Motorrad","German","motorcycle","nouns","vehicles","Motorrad",NA,NA,NA,NA,NA,NA,NA
+"müde","German","tired","adjectives","descriptive_words","müde",354,8.53546867560005,9.39608039552808,5.65446102398183,3.07757385562341,2.38833035438941,2.31043623639766
+"Müll","German","trash","nouns","household","Müll",NA,NA,NA,NA,NA,NA,NA
+"Mund","German","mouth","nouns","body_parts","Mund",NA,NA,NA,NA,NA,NA,NA
+"Müsli","German","cereal","nouns","food_drink","Müsli",NA,NA,NA,NA,NA,NA,NA
+"Mütze","German","hat","nouns","clothing","Mütze",NA,NA,NA,NA,NA,NA,NA
+"Nagel","German","nail (object)","nouns","household","Nagel",NA,NA,NA,NA,NA,NA,NA
+"Nase","German","nose","nouns","body_parts","Nase",NA,NA,NA,NA,NA,NA,NA
+"nass","German","wet (description)","adjectives","descriptive_words","nass",244,8.90759736344062,9.41268732563747,5.60582523270938,3.17106365898075,2.25901697231309,2.13821850264667
+"nehmen","German","take","verbs","action_words","nehmen",908,7.59352121013253,7.95172972498229,4.83545982185318,3.08022532565738,2.51807740276567,2.40000277407851
+"nett","German","nice","adjectives","descriptive_words","nett",208,9.06722750903251,9.1845651680333,5.9321621192409,3.60953975085269,2.68897424349514,2.51262028367684
+"neu","German","new","adjectives","descriptive_words","neu",138,9.47751190357662,9.90134680177951,5.69928177336146,2.9896386204643,2.14605078482187,2.01412253399581
+"nicht","German","not","function_words","quantifiers","nicht",18490,4.57978026435266,4.85027155688622,3.3354508529896,2.08347445956751,1.65227255228802,1.59097017015403
+"nichts","German","nothing","function_words","quantifiers","nichts",953,7.54515068507962,8.39114669300592,5.16724214394914,2.87377424178756,2.29666850404619,2.23297056902368
+"niedlich","German","cute","adjectives","descriptive_words","niedlich",10,12.1021804957398,11.2812856332334,6.58370672220912,3.21266782684794,2.17683410382169,2.15459486168804
+"Nilpferd","German","hippopotamus","nouns","animals","Nilpferd",NA,NA,NA,NA,NA,NA,NA
+"Nudeln","German","pasta","nouns","food_drink","Nudeln",NA,NA,NA,NA,NA,NA,NA
+"öffnen","German","open (action)","verbs","action_words","öffnen",23,11.2692713728047,9.37683627495823,5.89201814741903,3.15435971974077,2.36794829186032,2.16860209617679
+"Ohr","German","ear","nouns","body_parts","Ohr",NA,NA,NA,NA,NA,NA,NA
+"orange","German","orange (description)","adjectives","descriptive_words","orange",192,9.14727021670605,10.7489161986212,7.61334880054149,5.42952258143882,4.86899382254347,4.70449873158331
+"Orange","German","orange (food)","nouns","food_drink","Orange/Apfelsine",NA,NA,NA,NA,NA,NA,NA
+"Papier","German","paper","nouns","toys","Papier",NA,NA,NA,NA,NA,NA,NA
+"Penis","German","penis","nouns","body_parts","Penis",NA,NA,NA,NA,NA,NA,NA
+"Pfannkuchen","German","pancake","nouns","food_drink","Pfannkuchen",NA,NA,NA,NA,NA,NA,NA
+"Pferd","German","horse","nouns","animals","Pferd",NA,NA,NA,NA,NA,NA,NA
+"Pflanze","German","plant","nouns","household","Pflanze",NA,NA,NA,NA,NA,NA,NA
+"Pinguin","German","penguin","nouns","animals","Pinguin",NA,NA,NA,NA,NA,NA,NA
+"Pizza","German","pizza","nouns","food_drink","Pizza",NA,NA,NA,NA,NA,NA,NA
+"Pony","German","pony","nouns","animals","Pony",NA,NA,NA,NA,NA,NA,NA
+"Popo","German","butt","nouns","body_parts","Popo",NA,NA,NA,NA,NA,NA,NA
+"Pudding","German","pudding","nouns","food_drink","Pudding",NA,NA,NA,NA,NA,NA,NA
+"Pullover","German","sweater","nouns","clothing","Pullover",NA,NA,NA,NA,NA,NA,NA
+"Puppe","German","doll","nouns","toys","Puppe",NA,NA,NA,NA,NA,NA,NA
+"pusten","German","blow","verbs","action_words","pusten",142,9.44893853113257,10.6639868676759,6.8736083414556,4.74680011571681,4.37921744360942,4.31307436316732
+"Radio","German","radio","nouns","household","Radio",NA,NA,NA,NA,NA,NA,NA
+"reden","German","talk","verbs","action_words","reden",29,11.0374697587474,9.17492254363708,4.08568594086879,1.58491532272587,1.11539500156787,0.977463967085108
+"Regen","German","rain","nouns","outside","Regen",NA,NA,NA,NA,NA,NA,NA
+"Reh","German","deer","nouns","animals","Reh",NA,NA,NA,NA,NA,NA,NA
+"rein","German","inside","function_words","locations","rein",1595,7.03013657351488,7.19117586459675,4.19540781125958,1.86526380057196,0.976151185484947,0.858214141248263
+"reißen","German","tear","verbs","action_words","reißen",14,11.7657082591186,12.2785345959631,6.48312733694075,5.64473776264279,5.40745718443655,5.40745718443655
+"reiten","German","ride","verbs","action_words","reiten",24,11.2267117583859,9.88094997498961,4.50487496962175,3.53554986802492,3.24980065989461,3.24980065989461
+"rot","German","red","adjectives","descriptive_words","rot",722,7.822740449841,9.56969110121064,6.70463053068328,4.97984185985246,4.50517573869657,4.42981263739764
+"ruhig","German","quietly","adjectives","descriptive_words","ruhig",106,9.74132649462176,10.1394654975685,5.76375831286907,3.07170652501607,2.25808335614582,2.15750054390269
+"Rutsche","German","slide (object)","nouns","outside","Rutsche",NA,NA,NA,NA,NA,NA,NA
+"Saft","German","juice","nouns","food_drink","Saft",NA,NA,NA,NA,NA,NA,NA
+"sagen","German","say","verbs","action_words","sagen",764,7.76619779956731,8.48947379223917,4.5105417614685,2.11443916881307,1.42116102571211,1.26774105207232
+"sauber","German","clean (description)","adjectives","descriptive_words","sauber",103,9.77003660050419,9.70792183642429,5.43052224591502,2.28421953954751,1.58965871344647,1.45996840560724
+"sauber machen","German","clean (action)","verbs","action_words","sauber machen",NA,NA,NA,NA,NA,NA,NA
+"Schaf","German","sheep","nouns","animals","Schaf",NA,NA,NA,NA,NA,NA,NA
+"Schal","German","scarf","nouns","clothing","Schal",NA,NA,NA,NA,NA,NA,NA
+"Schaufel","German","shovel","nouns","outside","Schaufel",NA,NA,NA,NA,NA,NA,NA
+"Schaukel","German","swing (object)","nouns","outside","Schaukel",NA,NA,NA,NA,NA,NA,NA
+"schaukeln","German","swing (action)","verbs","action_words","schaukeln",18,11.5143938308377,12.4498049808542,7.30138032384324,4.96255015390088,4.14171523181401,4.05366175955172
+"Scheide","German","vagina","nouns","body_parts","Scheide",NA,NA,NA,NA,NA,NA,NA
+"Schere","German","scissors","nouns","household","Schere",NA,NA,NA,NA,NA,NA,NA
+"Schiff","German","boat","nouns","vehicles","Schiff",NA,NA,NA,NA,NA,NA,NA
+"Schildkröte","German","turtle","nouns","animals","Schildkröte",NA,NA,NA,NA,NA,NA,NA
+"Schlafanzug","German","pajamas","nouns","clothing","Schlafanzug",NA,NA,NA,NA,NA,NA,NA
+"schlafen","German","sleep","verbs","action_words","schlafen",277,8.78074808254649,9.41681922623031,5.25457118617126,3.44539027200639,2.92364798135253,2.84261399960766
+"Schlafzimmer","German","bedroom","nouns","furniture_rooms","Schlafzimmer",NA,NA,NA,NA,NA,NA,NA
+"schlagen","German","hit","verbs","action_words","schlagen",18,11.5143938308377,11.3060192112466,7.23217385301415,6.1548033913259,5.66200535134904,5.66200535134904
+"Schlange","German","snake","nouns","animals","Schlange",NA,NA,NA,NA,NA,NA,NA
+"schlecht","German","bad","adjectives","descriptive_words","schlecht",431,8.33865749863008,8.20054202340136,4.91433204703886,2.65950156307851,1.7271277562061,1.54978685589621
+"Schlüssel","German","keys","nouns","household","Schlüssel",NA,NA,NA,NA,NA,NA,NA
+"schmeißen","German","throw","verbs","action_words","schmeißen",33,10.9082580272673,9.67444047007789,5.5584482584224,4.1667445536968,3.3253642891153,3.06644548559337
+"Schmetterling","German","butterfly","nouns","animals","Schmetterling",NA,NA,NA,NA,NA,NA,NA
+"schmutzig","German","dirty","adjectives","descriptive_words","schmutzig",15,11.6967153876316,11.4599451594063,7.26664190713486,5.57783463101345,4.99178587646958,4.89745004318433
+"Schnee","German","snow","nouns","outside","Schnee",NA,NA,NA,NA,NA,NA,NA
+"Schneeanzug","German","snowsuit","nouns","clothing","Schneeanzug",NA,NA,NA,NA,NA,NA,NA
+"schnell","German","fast","adjectives","descriptive_words","schnell",1182,7.32980239076778,7.99773379443607,5.44646334596701,3.60599303550798,2.93897906724175,2.83169693349905
+"Schokolade","German","chocolate","nouns","food_drink","Schokolade",NA,NA,NA,NA,NA,NA,NA
+"schön","German","pretty","adjectives","descriptive_words","schön",1673,6.982391887747,6.21840973648105,4.44788476734515,2.94506759565631,2.33920977487504,2.18617956961812
+"schreiben","German","write","verbs","action_words","schreiben",95,9.85088869713329,9.31126961746616,5.26002249155403,3.21271320953024,2.65999092236665,2.58451802761462
+"Schublade","German","drawer","nouns","furniture_rooms","Schublade",NA,NA,NA,NA,NA,NA,NA
+"Schuh","German","shoe","nouns","clothing","Schuh",NA,NA,NA,NA,NA,NA,NA
+"Schüssel","German","keys","nouns","household","Schüssel",NA,NA,NA,NA,NA,NA,NA
+"schütteln","German","shake","verbs","action_words","schütteln",18,11.5143938308377,10.1169093580345,5.55394343859223,3.44801042525955,2.91903262305268,2.83097915079039
+"schwarz","German","black","adjectives","descriptive_words","schwarz",264,8.82881648558751,10.6786232620934,7.41718162245953,5.84577715469804,5.42125201744877,5.35874505841504
+"Schwein","German","pig","nouns","animals","Schwein",NA,NA,NA,NA,NA,NA,NA
+"schwer","German","heavy","adjectives","descriptive_words","schwer",195,9.13176603017008,9.31288098529454,5.78747337869268,3.55056289778222,2.57679190506829,2.27639405112497
+"schwimmen","German","swim","verbs","action_words","schwimmen",133,9.51441646051207,9.25359972858149,5.43959344175565,3.14054282992394,2.49323486556304,2.44715003084916
+"sehen","German","see","verbs","action_words","sehen",1493,7.09622279119464,6.77654479002536,3.63850177430209,2.23466187900656,1.76412776872743,1.65978795352745
+"Seife","German","soap","nouns","household","Seife",NA,NA,NA,NA,NA,NA,NA
+"sein","German","his","function_words","pronouns","sein",1370,7.18219956991166,6.73981085582184,2.66932655804075,0.931820037370919,0.571326109079229,0.50271862146536
+"Sessel","German","armchair","nouns","furniture_rooms","Sessel",NA,NA,NA,NA,NA,NA,NA
+"singen","German","sing","verbs","action_words","singen",56,10.3794138979987,10.2546723417313,5.29011005037241,3.51749979928707,3.21859634045095,3.11886486722379
+"sitzen","German","sit","verbs","action_words","sitzen",299,8.70432201534314,9.23778535094772,5.45520346148635,3.46840597882834,2.83218824197571,2.76427642161602
+"so","German","like this","function_words","connecting_words","so",16552,4.69050336930845,5.62985094775578,4.55317414738929,3.66370600791649,3.30293869583211,3.22068202556981
+"Socken","German","sock","nouns","clothing","Socken",NA,NA,NA,NA,NA,NA,NA
+"Sofa","German","couch","nouns","furniture_rooms","Sofa",NA,NA,NA,NA,NA,NA,NA
+"soll","German","should","function_words","helping_verbs","soll",3019,6.39208465902699,7.4841076942948,6.2255109623701,5.76353124401255,5.69720007233326,5.68460384213478
+"sollst","German","should","function_words","helping_verbs","sollst",99,9.80964573859924,9.91360509790296,6.44356122775473,5.53341097778442,5.47513818042815,5.46503717032715
+"Sonne","German","sun","nouns","outside","Sonne",NA,NA,NA,NA,NA,NA,NA
+"Soße","German","sauce","nouns","food_drink","Soße",NA,NA,NA,NA,NA,NA,NA
+"Spaghetti","German","spaghetti","nouns","food_drink","Spaghetti",NA,NA,NA,NA,NA,NA,NA
+"spazieren gehen","German","go for a walk","verbs","action_words","spazieren gehen",NA,NA,NA,NA,NA,NA,NA
+"spielen","German","play","verbs","action_words","spielen",669,7.8989815286056,7.42789892151581,3.91498918492775,2.25152016407096,1.684244594566,1.57045625540609
+"Spielzeug","German","toy (object)","nouns","toys","Spielzeug",NA,NA,NA,NA,NA,NA,NA
+"Spinat","German","spinach","nouns","food_drink","Spinat",NA,NA,NA,NA,NA,NA,NA
+"Spinne","German","spider","nouns","animals","Spinne",NA,NA,NA,NA,NA,NA,NA
+"springen","German","jump","verbs","action_words","springen",66,10.2151108467074,10.378971309813,5.5106813554917,3.31000497400002,2.78639631651522,2.63141421514407
+"spritzen","German","splash","verbs","action_words","spritzen",24,11.2267117583859,11.2660431933655,7.34541702972917,5.40900800933169,5.16091649639891,5.07758316306557
+"Spüle","German","sink","nouns","furniture_rooms","Spüle",NA,NA,NA,NA,NA,NA,NA
+"Staubsauger","German","vacuum","nouns","household","Staubsauger",NA,NA,NA,NA,NA,NA,NA
+"stehen","German","stand","verbs","action_words","stehen",453,8.28887346325079,9.22758182405547,5.45157587255444,3.14392815640106,2.4340035671575,2.3574156191293
+"Stein","German","stone","nouns","outside","Stein",NA,NA,NA,NA,NA,NA,NA
+"stellen","German","put","verbs","action_words","stellen",193,9.14207539982894,8.34089343906982,5.16684245348374,4.03929046315075,3.41958947044744,3.37156117679463
+"Stiefel","German","boots","nouns","clothing","Stiefel",NA,NA,NA,NA,NA,NA,NA
+"Stift","German","pen","nouns","toys","Stift",NA,NA,NA,NA,NA,NA,NA
+"Stock","German","stick","nouns","outside","Stock",NA,NA,NA,NA,NA,NA,NA
+"stoßen","German","hit","verbs","action_words","stoßen",11,12.0068703159355,10.3740585983339,4.84549763275167,4.12961276754579,4.12961276754579,4.12961276754579
+"Straße","German","street","nouns","outside","Straße",NA,NA,NA,NA,NA,NA,NA
+"Strumpfhose","German","tights","nouns","clothing","Strumpfhose",NA,NA,NA,NA,NA,NA,NA
+"Suppe","German","soup","nouns","food_drink","Suppe",NA,NA,NA,NA,NA,NA,NA
+"tanzen","German","dance","verbs","action_words","tanzen",52,10.4535218701524,9.63760495116277,4.57488642641369,2.93646639393503,2.27150434631381,2.21751675165885
+"Tasse","German","cup","nouns","household","Tasse",NA,NA,NA,NA,NA,NA,NA
+"Teddy","German","teddybear","nouns","animals","Teddy",NA,NA,NA,NA,NA,NA,NA
+"Tee","German","tea","nouns","food_drink","Tee",NA,NA,NA,NA,NA,NA,NA
+"Telefon","German","telephone","nouns","household","Telefon",NA,NA,NA,NA,NA,NA,NA
+"Teller","German","plate","nouns","household","Teller",NA,NA,NA,NA,NA,NA,NA
+"Tier","German","animal","nouns","animals","Tier",NA,NA,NA,NA,NA,NA,NA
+"Tiger","German","tiger","nouns","animals","Tiger",NA,NA,NA,NA,NA,NA,NA
+"Tisch","German","table","nouns","furniture_rooms","Tisch",NA,NA,NA,NA,NA,NA,NA
+"Toast","German","toast","nouns","food_drink","Toast",NA,NA,NA,NA,NA,NA,NA
+"Toilette","German","bathroom","nouns","furniture_rooms","Klo/Toilette",NA,NA,NA,NA,NA,NA,NA
+"Tomate","German","tomato","nouns","food_drink","Tomate",NA,NA,NA,NA,NA,NA,NA
+"tragen","German","carry","verbs","action_words","tragen",77,10.0609601668801,8.6372720041147,4.62719342734983,2.46890258595342,1.81853427927318,1.73080846755677
+"traurig","German","sad","adjectives","descriptive_words","traurig",147,9.41433300195509,9.8346896920782,5.34196921383548,2.71266690773896,1.85391460830824,1.79250028180096
+"Trecker","German","tractor","nouns","vehicles","Trecker",NA,NA,NA,NA,NA,NA,NA
+"Treppe","German","stairs","nouns","furniture_rooms","Treppe",NA,NA,NA,NA,NA,NA,NA
+"treten","German","kick","verbs","action_words","treten",35,10.8494175272444,8.96272194738161,4.62378197341407,2.35276659273743,1.82161949500054,1.63347770926565
+"trinken","German","drink (action)","verbs","action_words","trinken",562,8.07326373884013,7.27768232764041,4.06024105172033,2.53358335979817,1.90422698117266,1.80390478534633
+"trocken","German","dry (description)","adjectives","descriptive_words","trocken",77,10.0609601668801,10.5307252585889,5.66964930819851,3.1319715964555,2.16325158134779,2.10081840054185
+"trocknen","German","dry (action)","verbs","action_words","trocknen",38,10.7671794290074,11.1216676892287,5.82691547877671,3.32644519332522,2.96930752997131,2.87496641153128
+"Tshirt","German","shirt","nouns","clothing","Tshirt",NA,NA,NA,NA,NA,NA,NA
+"Tür","German","door","nouns","furniture_rooms","Tür",NA,NA,NA,NA,NA,NA,NA
+"über","German","above","function_words","locations","über",683,7.87827072916304,8.61543946992528,4.90739971400978,2.87601959036287,2.33875211737525,2.25148686075862
+"Uhr","German","clock","nouns","household","Uhr",NA,NA,NA,NA,NA,NA,NA
+"um","German","to","function_words","locations","um",1076,7.4237598480121,7.74760221662195,3.86175738850502,2.09490339132037,1.67556674983829,1.62208745207617
+"uns","German","us","function_words","pronouns","uns",1146,7.36073269145914,6.6297665971659,3.89816496163312,2.20884129256755,1.68483983060775,1.62381865924205
+"unser","German","our","function_words","pronouns","unser",423,8.35739340968755,9.72683271692127,6.84106461962048,5.32737166432679,4.61670344724416,4.46062262901093
+"unter","German","under","function_words","locations","unter",525,8.1413673261422,9.26004539108905,5.68127395854352,3.50080838980152,2.94330591882853,2.85511163660322
+"Unterhose","German","pants","nouns","clothing","Unterhose",NA,NA,NA,NA,NA,NA,NA
+"verletzt","German","hurt (description)","adjectives","descriptive_words","verletzt",12,11.9198589389458,8.73106309945143,3.31159955771311,1.56101395213862,1.24034754325904,1.24034754325904
+"verstecken","German","hide","verbs","action_words","verstecken",52,10.4535218701524,11.3550921272461,7.08372856189196,4.76475688831373,4.18839345530911,4.0972979631136
+"viel","German","many","function_words","quantifiers","viel",1274,7.25484875260172,7.03222300436897,4.54249721717246,2.485235344034,1.67557760303473,1.56122723091144
+"Vogel","German","bird","nouns","animals","Vogel",NA,NA,NA,NA,NA,NA,NA
+"voll","German","full","adjectives","descriptive_words","voll",256,8.85958814425426,9.64962896883404,5.92661109346322,3.73775262451798,3.06545447461074,2.89180617040002
+"von","German","of","function_words","locations","von",2544,6.56327266427381,6.84290852062829,4.09934083393288,2.50630981926307,2.03376469884178,1.94103240496452
+"vorsichtig","German","careful","adjectives","descriptive_words","vorsichtig",438,8.32254667835738,8.95574126085273,6.65148447621443,5.85847998290102,5.6619032368497,5.6224994459104
+"Wange","German","cheek","nouns","body_parts","Wange",NA,NA,NA,NA,NA,NA,NA
+"wann","German","when (question)","function_words","question_words","wann",280,8.76997598556458,10.2936118606649,8.53663653038024,8.03796889130839,7.8915260934955,7.84851245436528
+"warum","German","why","function_words","question_words","warum",1486,7.10092236345612,8.31888357526754,7.63187630513402,7.40959554546215,7.35218588225815,7.3282005429156
+"was","German","what","function_words","question_words","was",23673,4.33267515154468,5.0876112546861,4.24689446123183,3.70748990970034,3.51297490548068,3.46479476746772
+"waschen","German","wash","verbs","action_words","waschen",82,9.99804634146957,8.04630491909441,4.71287194206956,2.63702394593768,2.33572138946299,2.33572138946299
+"Waschmaschine","German","washing machine","nouns","furniture_rooms","Waschmaschine",NA,NA,NA,NA,NA,NA,NA
+"Wasser","German","water (beverage)","nouns","food_drink","Wasser",NA,NA,NA,NA,NA,NA,NA
+"weg","German","away","function_words","locations","weg",1213,7.30391367978978,7.37783206247148,4.38610715152571,2.2821501626106,1.6846204262977,1.59889860487903
+"wegwerfen","German","trash","verbs","action_words","wegwerfen",4,13.0184712276139,7.55838713083138,2.93809516163822,1.04248125036058,0.792481250360578,0.792481250360578
+"weich","German","soft","adjectives","descriptive_words","weich",30,11.0035682070717,9.94162956824831,5.30366374731895,2.84095973481091,1.86836755644498,1.78220213975428
+"weinen","German","cry","verbs","action_words","weinen",48,10.5335645778259,9.68387654722848,4.94765782835048,2.99659559684571,2.29420069229774,2.12337418511364
+"Weintrauben","German","grapes","nouns","food_drink","Weintrauben",NA,NA,NA,NA,NA,NA,NA
+"weiß","German","white","adjectives","descriptive_words","weiß",2216,6.70130654086665,6.53247616139158,4.87664727590322,4.16741388473396,4.06768310491412,4.05087073156376
+"welche","German","which (question)","function_words","question_words","welche",570,8.05912922790523,9.81337465095859,7.46018741963344,5.96172039332818,5.43833518341847,5.28473765311327
+"wer","German","who","function_words","question_words","wer",3461,6.25545274509848,6.82861901316959,5.62067858524319,5.11938287770961,5.00867422938501,4.98160665735277
+"werfen","German","throw","verbs","action_words","werfen",24,11.2267117583859,9.13726115808471,4.70666695161319,3.42126031157136,2.73247573544996,2.6908090687833
+"wie","German","how","function_words","question_words","wie",4727,5.94371955794059,6.84906858697955,5.0167204946509,4.19873356901162,3.94690944558252,3.87873468807644
+"Wind","German","wind","nouns","outside","Wind",NA,NA,NA,NA,NA,NA,NA
+"Windel","German","diaper","nouns","clothing","Windel",NA,NA,NA,NA,NA,NA,NA
+"wir","German","we","function_words","pronouns","wir",18045,4.60414167165694,3.23804834397636,2.10196855202712,1.75338373083509,1.67842116904691,1.66084256993202
+"wischen","German","wipe","verbs","action_words","wischen",51,10.4729399560095,11.0781284614414,7.46392481862217,5.47968367139072,5.02529748239661,4.88550761931926
+"wo","German","where (question)","function_words","question_words","wo",5744,5.74885447800577,6.72241371120667,5.73252352334179,5.27418572663753,5.13693599401594,5.08807260400651
+"Wohnzimmer","German","living room","nouns","furniture_rooms","Wohnzimmer",NA,NA,NA,NA,NA,NA,NA
+"Wolf","German","wolf","nouns","animals","Wolf",NA,NA,NA,NA,NA,NA,NA
+"Wolke","German","cloud","nouns","outside","Wolke",NA,NA,NA,NA,NA,NA,NA
+"wollen","German","wanna","function_words","helping_verbs","wollen",1851,6.88128427616033,8.21110492285335,6.64217178428433,6.09770091254277,5.99679753013424,5.97538720151222
+"Zahn","German","tooth","nouns","body_parts","Zahn",NA,NA,NA,NA,NA,NA,NA
+"Zahnbürste","German","toothbrush","nouns","household","Zahnbürste",NA,NA,NA,NA,NA,NA,NA
+"Zeh","German","toe","nouns","body_parts","Zeh",NA,NA,NA,NA,NA,NA,NA
+"zeichnen","German","draw","verbs","action_words","zeichnen",28,11.0725610785586,6.79503543578783,2.54532179089896,0.719352193470076,0.190708928674451,0.154354574817406
+"zeigen","German","show","verbs","action_words","zeigen",136,9.49211070299777,9.3522892773491,4.89675697059928,1.97948335869966,1.07710458642647,0.943140403218086
+"ziehen","German","pull","verbs","action_words","ziehen",398,8.41831358344939,8.65599251919538,4.99553528118015,3.09046144468304,2.58170931191049,2.44172620329013
+"Zimmer","German","room","nouns","furniture_rooms","Zimmer",NA,NA,NA,NA,NA,NA,NA
+"Zucker","German","sugar","nouns","food_drink","Zucker",NA,NA,NA,NA,NA,NA,NA
+"zudecken","German","cover (action)","verbs","action_words","zudecken",4,13.0184712276139,10.1257126307909,2.73782117874174,0,0,0
+"zugucken","German","watch (action)","verbs","action_words","zugucken",33,10.9082580272673,10.1885055101461,4.20142220780458,1.40601620284249,1.01950446035269,0.904130068775184
+"zumachen","German","close","verbs","action_words","zumachen",96,9.84041739726599,9.98249129296139,6.56396559634887,4.68821681615173,4.17896486638176,4.12456494532617
+"Zunge","German","tongue","nouns","body_parts","Zunge",NA,NA,NA,NA,NA,NA,NA
+"zurück","German","back","function_words","locations","zurück",302,8.69433857135896,7.81911861176898,4.53428883077372,2.17151657579288,1.32014866670041,1.19603414168093
