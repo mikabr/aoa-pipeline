@@ -88,11 +88,12 @@ frequencies <- frequencies |> select(-c(n_train_instances, n_val_instances, n_to
 Load surprisal and perplexity values
 ```{r load_model_surprisals}
 lstm_surprisals <- readRDS("./surprisals/lstm_surprisals.rds")
-surprisals <- lstm_surprisals |> mutate(lstm_surprisal = avg_surprisal) |> select(-c(n_instances, avg_surprisal))
+lstm_surprisals <- lstm_surprisals |> mutate(lstm_surprisal = avg_surprisal) |> select(-c(n_instances, avg_surprisal)) |> unique()
 ```
 
 ```{r load_ngram_suprisals}
-
+ngram_surprisals <- readRDS("./surprisals/ngram_childes_surprisal.rds")
+ngram_surprisals <- ngram_surprisals |> select(-c(cnt, frequency, avg_surprisal, all_frequency, avg_perplexity))
 ```
 
 ```{r load_finetuned_suprisals}
@@ -102,7 +103,7 @@ surprisals <- lstm_surprisals |> mutate(lstm_surprisal = avg_surprisal) |> selec
 
 Combine all predictors by unilemma
 ```{r combine_all}
-predictor_data <- surprisals |> left_join(frequencies) |> left_join(concreteness)
+predictor_data <- ngram_surprisals |> left_join(lstm_surprisals) |> left_join(frequencies) |> left_join(concreteness)
 ```
 
 
@@ -112,7 +113,7 @@ predictor_data <- surprisals |> left_join(frequencies) |> left_join(concreteness
 data_lexcat <- prep_lexcat(predictor_data, uni_lemmas, "nouns")
 
 predictor_sources <- list(
-  c("lstm_surprisal", "all_frequency"),
+  c("lstm_surprisal", "all_frequency", "surprisal_2gm", "surprisal_3gm", "surprisal_4gm"),
   "concreteness")
 predictors <- unlist(predictor_sources)
 ```
@@ -143,7 +144,6 @@ aoas <- fit_aoas(wb_data)
 # All items or only items that are single word expressions
 aoa_predictor_data <- aoas |> left_join(data_lexcat) |> remove_NA_predictors(predictors)
 
-
 saveRDS(aoa_predictor_data, "./surprisals/lstm_aoa_predictor_data.rds" )
 ```
 
@@ -157,35 +157,37 @@ Define models to compare
 ```{r formulae1}
 
 lstm_surp = ~ lexical_category * lstm_surprisal + lexical_category * all_frequency + lexical_category * concreteness
-four_surp = ~ lexical_category * fourgram_surprisal + lexical_category * all_frequency + lexical_category * concreteness
-tri_surp = ~ lexical_category * trigram_surprisal + lexical_category * all_frequency + lexical_category * concreteness
-bi_surp = ~ lexical_category * bigram_surprisal + lexical_category * all_frequency + lexical_category * concreteness
+four_surp = ~ lexical_category * surprisal_4gm + lexical_category * all_frequency + lexical_category * concreteness
+tri_surp = ~ lexical_category * surprisal_3gm + lexical_category * all_frequency + lexical_category * concreteness
+bi_surp = ~ lexical_category * surprisal_2gm + lexical_category * all_frequency + lexical_category * concreteness
 null_model = ~ 1
 formulae <- formulas(~aoa, null_model, bi_surp, tri_surp, four_surp, lstm_surp)
 ```
 
 When I try to run cross validation on all languages and measures simultaneously using map, R crashes, so you have to run each language manually one at a time and then combine them. Here we prep and scale the data for one language
 ```{r prep_data1}
-lang = "English (American)"
+lang = "German"
 ms = "produces"
 
-predictors <- c("lstm_surprisal", "fourgram_surprisal", "trigram_surprisal", "bigram_surprisal", "all_frequency", "concreteness")
+predictors <- c("lstm_surprisal", "surprisal_2gm", "surprisal_3gm", "surprisal_4gm", "all_frequency", "concreteness")
 
 scaled_lang_data <- aoa_predictor_data |>
   filter(language==lang & measure==ms) |>
-  select(language, uni_lemma, category, definition, word_clean, aoa, lexical_category, lstm_surprisal, fourgram_surprisal, trigram_surprisal, bigra_surprisal, all_frequency, concreteness) |>
+  select(language, uni_lemma, category, definition, word_clean, aoa, lexical_category, lstm_surprisal, surprisal_4gm, surprisal_3gm, surprisal_2gm, all_frequency, concreteness) |>
   unique() |> mutate_at(vars(predictors), ~as.numeric(base::scale(.))) 
+
+n = nrow(scaled_lang_data)
 
 ```
 
 Check correlation between predictors and VIF scores
 ```{r cor_vif1}
 #Get correlation plot
-cor_data <- scaled_lang_data %>% ungroup() %>% select(lstm_surprisal, all_frequency, concreteness)
+cor_data <- scaled_lang_data %>% ungroup() %>% select(lstm_surprisal, surprisal_4gm, surprisal_3gm, surprisal_2gm, all_frequency, concreteness)
 cor(cor_data, method = "pearson")
 
 #Do colinearity analysis
-model = lm(aoa ~ lstm_surprisal + all_frequency + concreteness + lexical_category, data=scaled_lang_data)
+model = lm(aoa ~ surprisal_2gm + all_frequency + concreteness + lexical_category, data=scaled_lang_data)
 car::vif(model)
 ```
 
@@ -220,26 +222,38 @@ loo_models <- loo_df$.id |>
 # dont try to view
 loo_preds <- get_cv_preds(loo_models, scaled_lang_data) |> 
   mutate(language = lang,
-         measure = ms)
+         measure = ms,
+         n = n)
 # View
 cv_results <- get_cv_results(loo_preds) |>
     mutate(language = lang,
-         measure = ms)
+         measure = ms,
+         n = n)
 
 cv_results_pos <- loo_preds |>
-  group_by(language, measure, name, lexical_category) |>
+  group_by(language, measure, n, name, lexical_category) |>
   summarise(mean_abs_dev = mean(abs_dev), sd_ads_dev = sd(abs_dev))
 
 
 #first language
-exp1_all_cv_results <- cv_results
-exp1_all_cv_results_pos <- cv_results_pos
+#exp1_all_cv_results <- cv_results
+#exp1_all_cv_results_pos <- cv_results_pos
 
 #all subsequent languages
-#exp1_all_cv_results <- exp1_all_cv_results |> rbind(cv_results)
-#exp1_all_cv_results_pos <- exp1_all_cv_results_pos |> rbind(cv_results_pos)
+exp1_all_cv_results <- exp1_all_cv_results |> rbind(cv_results)
+exp1_all_cv_results_pos <- exp1_all_cv_results_pos |> rbind(cv_results_pos)
 
 
+```
+
+Check if difference between all_full, freq_full, and null models are significant using ANOVA
+```{r anova}
+null_model <- lm(formula= aoa ~ 1, data = scaled_lang_data)
+model_bigram <- lm(formula= aoa ~ lexical_category * surprisal_2gm + lexical_category * all_frequency + lexical_category * concreteness, data = scaled_lang_data)
+model_lstm <- lm(formula = aoa ~ lexical_category * lstm_surprisal + lexical_category * all_frequency + lexical_category * concreteness, data = scaled_lang_data)
+
+anova(null_model, model_bigram)
+anova(model_lstm, model_bigram)
 ```
 
 ```{r save_data1}
