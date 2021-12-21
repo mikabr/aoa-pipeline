@@ -113,6 +113,11 @@ ngram_wiki_surprisal <- do.call(rbind , tables) %>% mutate(avg_surprisal = (surp
 Combine all predictors by unilemma
 ```{r combine_all}
 predictor_data <- surprisals |> left_join(frequencies) |> left_join(concreteness)
+
+# ngram_wiki
+predictor_data_ngram_wiki <- ngram_wiki_surprisal |> left_join(concreteness)
+# ngram_childes
+predictor_data_ngram_childes <- ngram_childes_surprisal |> left_join(concreteness)
 ```
 
 
