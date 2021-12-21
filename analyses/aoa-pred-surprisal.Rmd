@@ -93,7 +93,7 @@ lstm_surprisals <- lstm_surprisals |> mutate(lstm_surprisal = avg_surprisal) |> 
 
 ```{r load_ngram_suprisals}
 ngram_surprisals <- readRDS("./surprisals/ngram_childes_surprisal.rds")
-ngram_surprisals <- ngram_surprisals |> select(-c(cnt, frequency, avg_surprisal, all_frequency, avg_perplexity))
+ngram_surprisals <- ngram_surprisals |> select(-c(cnt, frequency, avg_surprisal))
 ```
 
 ```{r load_finetuned_suprisals}
@@ -144,7 +144,7 @@ aoas <- fit_aoas(wb_data)
 # All items or only items that are single word expressions
 aoa_predictor_data <- aoas |> left_join(data_lexcat) |> remove_NA_predictors(predictors)
 
-saveRDS(aoa_predictor_data, "./surprisals/lstm_aoa_predictor_data.rds" )
+saveRDS(aoa_predictor_data, "./surprisals/aoa_predictor_data.rds" )
 ```
 
 # Experiments
@@ -166,7 +166,7 @@ formulae <- formulas(~aoa, null_model, bi_surp, tri_surp, four_surp, lstm_surp)
 
 When I try to run cross validation on all languages and measures simultaneously using map, R crashes, so you have to run each language manually one at a time and then combine them. Here we prep and scale the data for one language
 ```{r prep_data1}
-lang = "German"
+lang = "English (American)"
 ms = "produces"
 
 predictors <- c("lstm_surprisal", "surprisal_2gm", "surprisal_3gm", "surprisal_4gm", "all_frequency", "concreteness")
@@ -236,12 +236,12 @@ cv_results_pos <- loo_preds |>
 
 
 #first language
-#exp1_all_cv_results <- cv_results
-#exp1_all_cv_results_pos <- cv_results_pos
+exp1_all_cv_results <- cv_results
+exp1_all_cv_results_pos <- cv_results_pos
 
 #all subsequent languages
-exp1_all_cv_results <- exp1_all_cv_results |> rbind(cv_results)
-exp1_all_cv_results_pos <- exp1_all_cv_results_pos |> rbind(cv_results_pos)
+#exp1_all_cv_results <- exp1_all_cv_results |> rbind(cv_results)
+#exp1_all_cv_results_pos <- exp1_all_cv_results_pos |> rbind(cv_results_pos)
 
 
 ```

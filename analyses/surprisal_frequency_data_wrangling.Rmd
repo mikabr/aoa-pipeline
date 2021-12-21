@@ -264,3 +264,19 @@ frequencies <- map(langs, get_frequencies) |> reduce(rbind)
 saveRDS(frequencies, file ="./surprisals/frequencies.rds")
 
 ```
+
+
+
+```{r load_ngram_childes_suprisals}
+files  <- list.files(path = "./surprisals/ngram/ngram_childes_surprisal/", full.names = TRUE)
+tables <- lapply(files, read.csv, header = TRUE)
+ngram_childes_surprisal <- do.call(rbind , tables) %>% mutate(avg_surprisal = (surprisal_2gm+surprisal_3gm+surprisal_4gm+surprisal_5gm+surprisal_6gm)/5)
+saveRDS(ngram_childes_surprisal, "./surprisals/ngram_childes_surprisal.rds" )
+```
+
+```{r load_ngram_wiki_suprisals}
+files  <- list.files(path = "./surprisals/ngram/ngram_wiki_surprisal/", full.names = TRUE)
+tables <- lapply(files, read.csv, header = TRUE)
+ngram_wiki_surprisal <- do.call(rbind , tables) %>% mutate(avg_surprisal = (surprisal_2gm+surprisal_3gm+surprisal_4gm+surprisal_5gm+surprisal_6gm)/5)
+saveRDS(ngram_wiki_surprisal, "./surprisals/ngram_wiki_surprisal.rds" )
+```
