@@ -1,19 +1,6 @@
-lang_code_map <- list(
-  "Croatian" = "hr",
-  "Danish" = "da",
-  "English (American)" = "en-us",
-  "French (Quebec)" = "fr",
-  "Italian" = "it",
-  "Norwegian" = "no",
-  "Russian" = "ru",
-  "Spanish (Mexican)" = "es",
-  "Swedish" = "sv",
-  "Turkish" = "tr"
-)
-
 get_ipa <- function(word, lang) {
-  lang_code <- lang_code_map[[lang]]
-  system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')), 
+  lang_code <- convert_lang_espeak(lang)
+  system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
           stdout=TRUE) %>%
     gsub("^ ", "", .) %>%
     gsub("[ˈˌ]", "", .)
@@ -38,7 +25,7 @@ str_phons <- function(phon_words) {
   phon_words %>% map(function(phon_word) {
     phon_word %>%
       map_chr(~.x %>% str_replace("r", "_r") %>%
-                str_replace("l", "_l") %>% 
+                str_replace("l", "_l") %>%
                 str_replace("ɹ", "_ɹ") %>% str_split("[_ \\-]+") %>% unlist() %>%
                 keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) %>%
                 paste(collapse = ""))
@@ -85,7 +72,7 @@ map_phonemes <- function(uni_lemmas) {
   fixed_words <- read_csv("data/predictors/phonemes/fixed_words.csv") %>%
     select(language, uni_lemma, definition, fixed_word) %>%
     filter(!is.na(uni_lemma), !is.na(fixed_word))
-  
+
   uni_cleaned <- uni_lemmas %>%
     unnest(cols = "items") %>%
     # distinct(language, uni_lemma, definition) %>%
@@ -94,20 +81,20 @@ map_phonemes <- function(uni_lemmas) {
            cleaned_words = map(fixed_definition, clean_words)) %>%
     select(-fixed_word) %>%
     group_by(language) %>%
-    #for each language, get the phonemes for each word 
+    #for each language, get the phonemes for each word
     mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y)))
-  
+
   fixed_phons <- read_csv("data/predictors/phonemes/fixed_phons.csv") %>%
     select(language, uni_lemma, definition, fixed_phon) %>%
     filter(!is.na(uni_lemma), !is.na(fixed_phon)) %>%
     mutate(fixed_phon = strsplit(fixed_phon, ", "))
-  
-  uni_phons_fixed <- uni_cleaned %>% 
+
+  uni_phons_fixed <- uni_cleaned %>%
     left_join(fixed_phons) %>%
     mutate(phons = if_else(map_lgl(fixed_phon, is.null), phons, fixed_phon),
            str_phons = str_phons(phons)) %>%
     select(-fixed_phon)
-  
+
   # get lengths
   uni_lengths <- uni_phons_fixed %>% mutate(num_char = num_chars(cleaned_words),
                                             num_phon = num_phons(phons)) %>%
