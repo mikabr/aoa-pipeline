@@ -1,12 +1,17 @@
 get_ipa <- function(word, lang) {
   lang_code <- convert_lang_espeak(lang)
   if(length(lang_code) == 0) {
-    message(glue("eSpeak for {language} not available"))
+    message(glue("eSpeak for {lang} not available"))
   } else {
-    system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
+    ipa <- system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
             stdout=TRUE) %>%
       gsub("^ ", "", .) %>%
       gsub("[ˈˌ]", "", .)
+    if(!is_character(ipa, 1)) {
+      message(glue("Error in processing '{word}' in {lang}"))
+    } else {
+      return(ipa)
+    }
   }
 }
 
