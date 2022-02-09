@@ -1,9 +1,13 @@
 get_ipa <- function(word, lang) {
   lang_code <- convert_lang_espeak(lang)
-  system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
-          stdout=TRUE) %>%
-    gsub("^ ", "", .) %>%
-    gsub("[ˈˌ]", "", .)
+  if(length(lang_code) == 0) {
+    message(glue("eSpeak for {language} not available"))
+  } else {
+    system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
+            stdout=TRUE) %>%
+      gsub("^ ", "", .) %>%
+      gsub("[ˈˌ]", "", .)
+  }
 }
 
 get_phons <- function(words, lang) {
@@ -14,7 +18,7 @@ num_phons <- function(phon_words) {
   phon_words %>% map_dbl(function(phon_word) {
     phon_word %>%
       map_dbl(~.x %>% str_replace("r", "_r") %>%
-                str_replace("l", "_l") %>%#add _ before r and l?
+                str_replace("l", "_l") %>% #add _ before r and l?
                 str_split("[_ \\-]+") %>% unlist() %>%
                 keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) %>% length()) %>%
       mean()
@@ -46,10 +50,12 @@ clean_words <- function(word_set){
   word_set %>%
     # dog / doggo -> c("dog", "doggo")
     strsplit("/") %>% flatten_chr() %>%
+    # dog [dogs, doggo] -> c("dog", "dogs", "doggo")
+    strsplit("[][,]") %>% flatten_chr() %>%
     # dog (animal) | (a) dog
     strsplit(" \\(.*\\)|\\(.*\\) ") %>% flatten_chr() %>%
-    # dog* | dog? | dog! | ¡dog! | dog's
-    gsub("[*?!¡']", "", .) %>%
+    # dog* | dog? | dog! | ¡dog! | dog's | dog…
+    gsub("[*?!¡'…]", "", .) %>%
     # dog(go) | (a)dog
     map_if(
       # if "dog(go)"
@@ -67,9 +73,7 @@ clean_words <- function(word_set){
 }
 
 map_phonemes <- function(uni_lemmas) {
-  #TODO: add bug check for a language missing from the language map
-  #some words eg "cugino/a" need to be mapped to "cugino / cugina"
-  fixed_words <- read_csv("data/predictors/phonemes/fixed_words.csv") %>%
+  fixed_words <- read_csv("data/predictors/fixed_words.csv") %>%
     select(language, uni_lemma, definition, fixed_word) %>%
     filter(!is.na(uni_lemma), !is.na(fixed_word))
 
@@ -84,7 +88,7 @@ map_phonemes <- function(uni_lemmas) {
     #for each language, get the phonemes for each word
     mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y)))
 
-  fixed_phons <- read_csv("data/predictors/phonemes/fixed_phons.csv") %>%
+  fixed_phons <- read_csv("data/predictors/fixed_phons.csv") %>%
     select(language, uni_lemma, definition, fixed_phon) %>%
     filter(!is.na(uni_lemma), !is.na(fixed_phon)) %>%
     mutate(fixed_phon = strsplit(fixed_phon, ", "))
