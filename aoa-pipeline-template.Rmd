@@ -123,12 +123,14 @@ Creating saved CHILDES data for many languages:
 #walk(target_langs, load_childes_metrics, uni_lemmas)
 ```
 
-Phonology:
+Get phonology via eSpeak for tokens that didn't get it from CHILDES:
 ```{r}
-# TODO: get phonology for tokens that didn't get it from CHILDES
-# http://espeak.sourceforge.net
-# phonemes <- uni_lemmas |> map_phonemes()
-# left_join(phonemes, by = c("language", "uni_lemma"))
+phonemes <- uni_lemmas |> map_phonemes()
+childes_metrics <- childes_metrics |>
+  left_join(phonemes, by = c("language", "uni_lemma")) |>
+  mutate(length_char = coalesce(length_char, num_chars),
+         length_phon = coalesce(length_phon, num_phons)) |>
+  select(-c(num_chars, num_phons))
 ```
 
 
@@ -159,7 +161,7 @@ predictor_data <- predictor_data_list |>
 predictor_sources <- list(
   c("freq", "freq_solo", "mlu"),
   c("concreteness","babiness"),
-  "length_char"
+  c("length_char", "length_phon")
 )
 
 predictors<-unlist(predictor_sources)
