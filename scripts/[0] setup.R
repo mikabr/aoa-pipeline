@@ -13,8 +13,8 @@ convert_lang_stemmer <- function(lang, method = "snowball") {
   lang_map |> filter(wordbank == lang) |> pull(!!method)
 }
 
-convert_lang_espeak <- function(lang) {
-  lang_map |> filter(wordbank == lang) |> pull(espeak)
+convert_lang_espeak <- function(lang, method = "espeak") {
+  lang_map |> filter(wordbank == lang) |> pull(!!method)
 }
 
 normalize_language <- function(language) {
