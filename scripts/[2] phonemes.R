@@ -1,6 +1,6 @@
 get_ipa <- function(word, lang, method = "espeak-ng") {
   lang_code <- convert_lang_espeak(lang, method)
-  ipa <- system2(method, args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
+  ipa <- system2("espeak", args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
                  stdout = TRUE) %>%
     gsub("^ ", "", .) %>%
     gsub("[ˈˌ0-9]", "", .)
