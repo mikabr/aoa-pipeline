@@ -1,21 +1,19 @@
-get_ipa <- function(word, lang, method = "espeak") {
+get_ipa <- function(word, lang, method = "espeak-ng") {
   lang_code <- convert_lang_espeak(lang, method)
-  if(length(lang_code) == 0) {
-    message(glue("{method} for {lang} not available"))
-  } else {
-    ipa <- system2(method, args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
-            stdout=TRUE) %>%
-      gsub("^ ", "", .) %>%
-      gsub("[ˈˌ0-9]", "", .)
-    if(!is_character(ipa, 1)) {
-      message(glue("Error in processing '{word}' in {lang}"))
-    } else {
+  ipa <- system2(method, args = c("--ipa=3", "-v", lang_code, "-q", paste0('"', word, '"')),
+                 stdout = TRUE) %>%
+    gsub("^ ", "", .) %>%
+    gsub("[ˈˌ0-9]", "", .)
+  if(attr(ipa, "errmsg") |> length() == 0) { # lang exists for espeak(-ng)
+    if(is_character(ipa, 1)) { # returns single string
       return(ipa)
+    } else {
+      message(glue("Error in processing '{word}' in {lang}"))
     }
   }
 }
 
-get_phons <- function(words, lang, method = "espeak") {
+get_phons <- function(words, lang, method = "espeak-ng") {
   words %>% map_chr(function(word) get_ipa(word, lang, method))
 }
 
@@ -77,7 +75,7 @@ clean_words <- function(word_set){
     unique()
 }
 
-map_phonemes <- function(uni_lemmas, method = "espeak") {
+map_phonemes <- function(uni_lemmas, method = "espeak-ng") {
   fixed_words <- read_csv("data/predictors/fixed_words.csv") %>%
     select(language, uni_lemma, definition, fixed_word) %>%
     filter(!is.na(uni_lemma), !is.na(fixed_word))
