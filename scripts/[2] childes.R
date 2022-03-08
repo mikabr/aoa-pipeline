@@ -40,8 +40,145 @@ compute_length_phon <- function(metric_data) {
               token_phonemes = list(token_phonemes))
 }
 
-default_metric_funs <- list(compute_count, compute_mlu, compute_positions,
-                            compute_length_char, compute_length_phon)
+
+compute_verb_frame_df <- function(metric_data){
+
+  l<- metric_data$language[1]
+  file_ <- file.path(childes_path, glue("morph_{l}.rds"))
+  morph <- readRDS(file_)
+  morph <- morph %>% mutate(next_pos = NA, next_pos2=NA, next_pos3=NA)
+  morph$next_pos[morph$utterance_id == lead(morph$utterance_id, n=1, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+  morph$next_pos2[morph$utterance_id == lead(morph$utterance_id, n=2, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+  morph$next_pos3[morph$utterance_id == lead(morph$utterance_id, n=3, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+  morph <- morph %>%
+    mutate(next_pos = ifelse(next_pos=="same_utt",lead(pos, n=1, default=NA), NA ),
+           next_pos2 = ifelse(next_pos2=="same_utt",lead(pos, n=2, default=NA), NA ),
+           next_pos3 = ifelse(next_pos3=="same_utt",lead(pos, n=3, default=NA), NA ),
+           )
+  morph= morph %>% mutate(next_pos = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos, ""),
+                          next_pos2 = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos2, ""),
+                          next_pos3 = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos3, ""))
+
+  morph$next_pos <- paste(morph$next_pos,morph$next_pos2,morph$next_pos3,sep="_")
+  morph <- morph %>% select(-next_pos2, - next_pos3)
+
+  np <- c('^neg_n:prop', '^pro:dem_', '^n:prop', '^pro_pro:dem','^det:art_','^det:gen_n', '^co_NA','^n_n:prop','^det:dem_pro:rel', '^det:poss_n', '^det:art_adj', '^pro:dem_adv')
+  pp <- c("^prep_det:art", "^pro:y_n:prop", "^prep_n", "^adv_prep")
+  s <- c("^v_prop:dem", "^pro:obj_v", "^adv_part", "^v_prep", "^v:mdl_", "^v_NA", "^part_v:mdl", "^v_co_", "v_pro")
+  adv_empty <- c("^adv:place", "^adv_pro:dem", "^adv_conj_")
+
+  morph$frame <- NA
+  morph$frame <- ifelse(grepl(paste(np, collapse = "|"), morph$next_pos),'NP',NA)
+  morph$frame <- ifelse(grepl(paste(pp, collapse = "|"), morph$next_pos),'PP', morph$frame)
+  morph$frame <- ifelse(grepl(paste(s, collapse = "|"), morph$next_pos),'S',morph$frame)
+  morph$frame <- ifelse(grepl(paste(adv_empty, collapse = "|"), morph$next_pos),'ADV_EMPTY',morph$frame)
+
+  morph |>
+    filter(!is.na(frame))
+}
+
+
+compute_verb_frame <- function(metric_data){
+  print("Computing verb frames")
+  file_u <- file.path(childes_path, glue("verb_frames_{childes_lang}.rds"))
+  if (file.exists(file_u)) {
+    morph <- readRDS(file_u)
+  } else {
+    morph<-compute_verb_frame_df(metric_data)
+    saveRDS(morph, file_u)
+  }
+  tmp_data <- metric_data |>
+    select(token_id, token, utterance_id) |>
+    left_join(morph)
+  m <- tmp_data |>
+    filter(!is.na(frame)) |>
+    group_by(token) |>
+    summarise(c=n())
+  final <- tmp_data |>
+    filter(!is.na(frame)) |>
+    group_by(token, frame) |>
+    summarise(tmp=n()) |>
+    left_join(m) |>
+    mutate(per= 100 *tmp/c)
+  a <- final %>% group_by(token) %>% filter(per == max(per)) %>%
+    select(token, frame) %>% distinct() %>% rename(main_frame=frame)
+  output <- final |>
+    group_by(token) |>
+    summarise(n_distinct_frame = n_distinct(frame), per_frame = max(per)) |>
+    mutate(relia = ifelse(per_frame >60 & per_frame <80,"1", NA),
+           relia = ifelse(per_frame >80,"2", relia),
+           relia = ifelse(per_frame <60,"0", relia)) |>
+    left_join(a[!duplicated(a$token), ])
+  print(output)
+}
+
+
+compute_n_sfx_cat <-function(metric_data){
+  print("Computing number of morphemes and categories")
+  file_u <- file.path(childes_path, glue("n_sfx_cat_{childes_lang}.rds"))
+  if (file.exists(file_u)) {
+    morph <- readRDS(file_u)
+  } else {
+  l<- metric_data$language[1]
+  file_ <- file.path(childes_path, glue("morph_{l}.rds"))
+  morph <- readRDS(file_)
+  morph$number.of.sfx <- str_remove(morph$affix_type_m, "sfxf")
+  morph$number.of.sfx <- str_count(morph$number.of.sfx, "sfx")
+
+  morph_ <- metric_data |>
+    left_join(morph) |>
+    mutate(n_affix = ifelse(affix_m=="NULL", NA, lengths(as.list(affix_m)))) |>
+    group_by(token) |>
+    summarise(n_category = mean(n_affix, na.rm = TRUE),
+              token_morphemes = list(unique(na.omit(affix_m))),
+              n_sfx = mean(number.of.sfx, na.rm = TRUE))
+  saveRDS(morph_, file_u)
+  print(morph_)
+  }
+}
+
+
+compute_n_type <- function(metric_data){
+  print("Computing number of types")
+  l<- metric_data$language[1]
+  file_ <- file.path(childes_path, glue("morph_{l}.rds"))
+  morph <- readRDS(file_)
+  tmp <- metric_data |>
+    left_join(morph)  |>
+    select(token, stem_m)
+  a <- tmp |>
+    distinct() |>
+    group_by(stem_m) |>
+    summarise(token_types = list(unique(token))) |>
+    mutate(n_type = lengths(token_types)) |>
+    filter(!n_type >99)
+  tmp |>
+    left_join(a) |>
+    mutate(token_types = ifelse(token_types == "NULL", NA, token_types)) |>
+    group_by(token) |>
+    summarise(n_type = mean(n_type, na.rm=TRUE),
+              token_stem= list(unique(na.omit(stem_m))))
+}
+
+compute_prefix <- function(metric_data){
+  print("Prefix")
+  l<- metric_data$language[1]
+  file_ <- file.path(childes_path, glue("morph_{l}.rds"))
+  morph <- readRDS(file_)
+  morph <- morph %>%
+    rename(token_id=id)
+  metric_data |>
+    left_join(morph) |>
+  # filter(!is.na(gloss_m)) |>
+    mutate(prefix = ifelse(prefix_m == "", 0, 1)) |>
+    group_by(token) |>
+    summarise(prefix = mean(prefix, na.rm=TRUE))
+}
+
+
+default_metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char,
+                            compute_length_phon, compute_n_type, compute_n_sfx_cat, compute_verb_frame)
+
 default_corpus_args <- list(corpus = NULL, role = NULL,
                             role_exclude = "Target_Child", age = NULL,
                             sex = NULL, part_of_speech = NULL, token = "*")
