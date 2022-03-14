@@ -92,24 +92,25 @@ compute_verb_frame <- function(metric_data){
     left_join(morph)
   m <- tmp_data |>
     filter(!is.na(frame)) |>
-    group_by(token) |>
+    group_by(token, pos) |>
     summarise(c=n())
   final <- tmp_data |>
     filter(!is.na(frame)) |>
-    group_by(token, frame) |>
+    group_by(token, frame, pos) |>
     summarise(tmp=n()) |>
     left_join(m) |>
     mutate(per= 100 *tmp/c)
-  a <- final %>% group_by(token) %>% filter(per == max(per)) %>%
+  a <- final %>% group_by(token, pos) %>% filter(per == max(per)) %>%
     select(token, frame) %>% distinct() %>% rename(main_frame=frame)
-  output <- final |>
-    group_by(token) |>
+  final |>
+    group_by(token, pos) |>
     summarise(n_distinct_frame = n_distinct(frame), per_frame = max(per)) |>
-    mutate(relia = ifelse(per_frame >60 & per_frame <80,"1", NA),
-           relia = ifelse(per_frame >80,"2", relia),
-           relia = ifelse(per_frame <60,"0", relia)) |>
-    left_join(a[!duplicated(a$token), ])
-  print(output)
+    left_join(a[!duplicated(a$token), ]) |>
+    group_by(token) |>
+    summarise(n_distinct_frame = mean(n_distinct_frame, na.rm=TRUE),
+              per_frame = mean(per_frame,  na.rm=TRUE),
+              main_frame = paste(main_frame, collapse=","),)
+}
 }
 
 
@@ -124,14 +125,19 @@ compute_n_sfx_cat <-function(metric_data){
   morph <- readRDS(file_)
   morph$number.of.sfx <- str_remove(morph$affix_type_m, "sfxf")
   morph$number.of.sfx <- str_count(morph$number.of.sfx, "sfx")
-
   morph_ <- metric_data |>
     left_join(morph) |>
     mutate(n_affix = ifelse(affix_m=="NULL", NA, lengths(as.list(affix_m)))) |>
-    group_by(token) |>
+    group_by(token, pos) |>
     summarise(n_category = mean(n_affix, na.rm = TRUE),
-              token_morphemes = list(unique(na.omit(affix_m))),
-              n_sfx = mean(number.of.sfx, na.rm = TRUE))
+              token_cats = list(unique(na.omit(affix_m))),
+              n_sfx = mean(number.of.sfx, na.rm = TRUE)) |>
+    filter(!is.na(n_category)) |>
+    group_by(token) |>
+    summarise(token_morphemes = paste(token_morphemes, collapse=","),
+              n_sfx = mean(n_sfx,  na.rm=TRUE),
+              n_category = mean(n_category,  na.rm=TRUE),
+              pos = paste(pos, collapse=","))
   saveRDS(morph_, file_u)
   print(morph_)
   }
@@ -145,39 +151,48 @@ compute_n_type <- function(metric_data){
   morph <- readRDS(file_)
   tmp <- metric_data |>
     left_join(morph)  |>
-    select(token, stem_m)
+    select(token, stem_m, pos)
   a <- tmp |>
     distinct() |>
-    group_by(stem_m) |>
+    group_by(stem_m, pos) |>
     summarise(token_types = list(unique(token))) |>
     mutate(n_type = lengths(token_types)) |>
-    filter(!n_type >99)
+    filter(!is.na(stem_m)) |>
+    filter(!stem_m =="")
   tmp |>
     left_join(a) |>
     mutate(token_types = ifelse(token_types == "NULL", NA, token_types)) |>
-    group_by(token) |>
+    group_by(token, pos) |>
     summarise(n_type = mean(n_type, na.rm=TRUE),
-              token_stem= list(unique(na.omit(stem_m))))
+              token_types = list(unique(token_types)),
+              token_stem = list(unique(na.omit(stem_m)))) |>
+    filter(!is.na(n_type)) |>
+    group_by(token) |>
+    summarise(n_type = mean(n_type,  na.rm=TRUE),
+              token_types = paste(token_types, collapse=","),
+              token_stem = paste(token_stem, collapse=","))
+
 }
 
 compute_prefix <- function(metric_data){
-  print("Prefix")
+  print("Computing prefixes")
   l<- metric_data$language[1]
   file_ <- file.path(childes_path, glue("morph_{l}.rds"))
   morph <- readRDS(file_)
-  morph <- morph %>%
-    rename(token_id=id)
   metric_data |>
     left_join(morph) |>
-  # filter(!is.na(gloss_m)) |>
     mutate(prefix = ifelse(prefix_m == "", 0, 1)) |>
-    group_by(token) |>
+    group_by(token, pos) |>
+    summarise(prefix = mean(prefix, na.rm=TRUE)) |>
+    filter(!is.na(prefix)) |>
+    group_by(token)|>
     summarise(prefix = mean(prefix, na.rm=TRUE))
 }
 
 
+
 default_metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char,
-                            compute_length_phon, compute_n_type, compute_n_sfx_cat, compute_verb_frame)
+                            compute_length_phon, compute_n_type, compute_n_sfx_cat, compute_verb_frame, compute_prefix)
 
 default_corpus_args <- list(corpus = NULL, role = NULL,
                             role_exclude = "Target_Child", age = NULL,
@@ -239,17 +254,13 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
     filter(gloss != "") |>
     mutate(gloss = tolower(gloss), stem = tolower(stem))|>
     select(token_id = id, token = gloss, token_stem = stem, token_order,
-           token_phonemes = actual_phonology, utterance_id)
-  token_stems <- tokens |> select(token, token_stem) |> distinct()
+           token_phonemes = actual_phonology, utterance_id, language)
 
   metric_data <- tokens |> left_join(utterances)
-
   token_metrics <- map(metric_funs, \(fun) fun(metric_data)) |>
-    reduce(partial(full_join, by = "token")) |>
-    left_join(token_stems, by = "token") |>
+    reduce(partial(full_join, by = c("token"))) |>
     mutate(language = lang) |>
     mutate(freq_raw = count / sum(count))
-  # across(starts_with("count"), sum, .names = "sum{.col}"))
 
   if (write) {
     norm_lang <- normalize_language(lang)
