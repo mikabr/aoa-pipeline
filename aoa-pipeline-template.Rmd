@@ -109,12 +109,13 @@ childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |>
 
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes, eval=FALSE}
-metric_funs <- list(compute_count, compute_mlu, compute_positions,
-                    compute_length_char, compute_length_phon)
+metric_funs <- list(compute_count, compute_mlu, compute_positions,compute_length_char, 
+            compute_length_phon,  compute_n_category, compute_n_sfx, compute_n_type, compute_prefix)
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
-#eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
-#eng_unilemmas <- get_uni_lemma_metrics("English (American)", build_uni_lemma_map(uni_lemmas))
+eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
+eng_unilemmas <- get_uni_lemma_metrics("English (American)", build_uni_lemma_map(uni_lemmas))
+childes_metrics = eng_unilemmas
 ```
 
 Creating saved CHILDES data for many languages:
@@ -140,9 +141,9 @@ childes_metrics <- childes_metrics |>
 
 By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualize_freqs()` residualizes all columns that starts with "freq_" from the column "freq".
 
-```{r prepare_frequency}
+```{r prepare_frequency and morph preds}
 childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs() |>
-  select(-n_types, -freq_last, -freq_first )
+  residualize_morph() 
 ```
 
 ## Combining sources
@@ -161,12 +162,12 @@ predictor_data <- predictor_data_list |>
 predictor_sources <- list(
   c("freq", "freq_solo", "mlu"),
   c("concreteness","babiness"),
-  c("length_char", "length_phon")
+  c("length_char", "length_phon"),
+  c("n_type", "n_sfx", "n_category")
 )
 
 predictors<-unlist(predictor_sources)
-predictors_short<- c("freq", "mlu", "babiness",  "freq_solo", "concreteness")
-```
+predictors_short<- c("freq", "mlu", "babiness",  "freq_solo", "concreteness", "n_type", "n_sfx", "n_category")```
 
 
 ## Preparing data for regression
