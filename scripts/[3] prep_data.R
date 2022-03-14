@@ -30,7 +30,19 @@ residualize_freqs <- function(childes_metrics) {
     mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
 }
 
+residualize_morph <- function(childes_metrics) {
+  a <- childes_metrics |>
+    filter(!is.na(n_type)) |>
+    filter(!is.na(n_sfx)) |>
+    filter(!is.na(n_category)) |>
+    mutate(across(starts_with("n_sfx"), partial(residualize_col, n_type))) |>
+    mutate(across(starts_with("n_category"), partial(residualize_col, n_type)))
+#    mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
 
+  childes_metrics |>
+    select(-n_type, -n_sfx, -n_category) |>
+    left_join(a)
+}
 
 ## Imputation
 
