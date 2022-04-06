@@ -105,6 +105,15 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
         mean(na.rm = T)
     }))
 
+  uni_phons_fixed <- uni_phons_fixed %>%
+    mutate(phon_neighborhood = sapply(str_phons, \(x) {
+      lapply(x, partial(count_phon_neighbors,
+                        ipa_list = uni_phons_fixed$str_phons,
+                        radius = radius)) %>%
+        unlist() %>%
+        mean(na.rm = T)
+    }))
+
   # get lengths
   uni_lengths <- uni_phons_fixed %>% mutate(num_char = num_chars(cleaned_words),
                                             num_phon = num_chars(str_phons)) %>%
