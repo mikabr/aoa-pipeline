@@ -111,7 +111,6 @@ compute_verb_frame <- function(metric_data){
               per_frame = mean(per_frame,  na.rm=TRUE),
               main_frame = paste(main_frame, collapse=","),)
 }
-}
 
 
 compute_n_sfx_cat <-function(metric_data){

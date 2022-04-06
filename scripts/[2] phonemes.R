@@ -17,23 +17,13 @@ get_phons <- function(words, lang, method = "espeak-ng") {
   words %>% map_chr(function(word) get_ipa(word, lang, method))
 }
 
-num_phons <- function(phon_words) {
-  phon_words %>% map_dbl(function(phon_word) {
-    phon_word %>%
-      map_dbl(~.x %>% str_replace("r", "_r") %>%
-                str_replace("l", "_l") %>% #add _ before r and l?
-                str_split("[_ \\-]+") %>% unlist() %>%
-                keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) %>% length()) %>%
-      mean()
-  })
-}
-
 str_phons <- function(phon_words) {
   phon_words %>% map(function(phon_word) {
     phon_word %>%
       map_chr(~.x %>% str_replace("r", "_r") %>%
                 str_replace("l", "_l") %>%
-                str_replace("ɹ", "_ɹ") %>% str_split("[_ \\-]+") %>% unlist() %>%
+                str_replace("ɹ", "_ɹ") %>%
+                str_split("[_ \\-]+") %>% unlist() %>%
                 keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) %>%
                 paste(collapse = ""))
   })
@@ -41,6 +31,10 @@ str_phons <- function(phon_words) {
 
 num_chars <- function(words) {
   map_dbl(words, ~gsub("[[:punct:]]", "", .x) %>% nchar() %>% mean())
+}
+
+count_phon_neighbors <- function(ipa, ipa_list, radius) {
+  (adist(ipa, ipa_list |> unlist()) <= 2) %>% sum() - 1
 }
 
 #some predictors are sensitive to the word, not the uni-lemma. Eg pronounciation
@@ -58,7 +52,7 @@ clean_words <- function(word_set){
     # dog (animal) | (a) dog
     strsplit(" \\(.*\\)|\\(.*\\) ") %>% flatten_chr() %>%
     # dog* | dog? | dog! | ¡dog! | dog's | dog…
-    gsub("[*?!¡'…]", "", .) %>%
+    gsub("[*?!¡'…\\.]", "", .) %>%
     # dog(go) | (a)dog
     map_if(
       # if "dog(go)"
@@ -75,7 +69,7 @@ clean_words <- function(word_set){
     unique()
 }
 
-map_phonemes <- function(uni_lemmas, method = "espeak-ng") {
+map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
   fixed_words <- read_csv("data/predictors/fixed_words.csv") %>%
     select(language, uni_lemma, definition, fixed_word) %>%
     filter(!is.na(uni_lemma), !is.na(fixed_word))
@@ -102,11 +96,21 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng") {
            str_phons = str_phons(phons)) %>%
     select(-fixed_phon)
 
+  uni_phons_fixed <- uni_phons_fixed %>%
+    mutate(phon_neighborhood = sapply(str_phons, \(x) {
+      lapply(x, \(y) {
+        count_phon_neighbors(y, uni_phons_fixed$str_phons, radius)
+      }) %>%
+        unlist() %>%
+        mean(na.rm = T)
+    }))
+
   # get lengths
   uni_lengths <- uni_phons_fixed %>% mutate(num_char = num_chars(cleaned_words),
-                                            num_phon = num_phons(phons)) %>%
+                                            num_phon = num_chars(str_phons)) %>%
     group_by(language, uni_lemma) %>%
     summarize(num_chars = mean(num_char),
-              num_phons = mean(num_phon))
+              num_phons = mean(num_phon),
+              phon_neighbors = mean(phon_neighborhood))
   return(uni_lengths)
 }
