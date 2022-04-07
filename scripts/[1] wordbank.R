@@ -5,9 +5,9 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
                                     form = form,
                                     original_ids = TRUE)
 
-   if (is.na(unique(admins$original_id[1]))==TRUE){
-    admins <- admins %>%
-      select(-(original_id)) %>%
+  if (is.na(unique(admins$original_id[1]))==TRUE){
+    admins <- admins |>
+      select(-(original_id)) |>
       rename(original_id = data_id)
   }
 
@@ -20,10 +20,10 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
       ungroup()
 
   }
- if (!("data_id" %in% colnames(admins))){
-   admins <- admins %>%
-   rename(data_id = original_id)
- }
+  if (!("data_id" %in% colnames(admins))){
+    admins <- admins |>
+      rename(data_id = original_id)
+  }
 
   admins |> select(language, form, age, data_id)
 }
@@ -58,14 +58,14 @@ get_inst_data <- function(language, form, admins, items,
     norm_lang <- normalize_language(language)
     unilemma_loc <- glue("{wb_path}/unilemmas/{norm_lang}_unilemmas.csv")
     if (file.exists(unilemma_loc)) {
-      unilemma_data <- read_csv(unilemma_loc) %>%
+      unilemma_data <- read_csv(unilemma_loc) |>
         select(definition, category, uni_lemma)
-      inst_data <- inst_data %>%
-        select(-uni_lemma) %>%
+      inst_data <- inst_data |>
+        select(-uni_lemma) |>
         left_join(unilemma_data, by = c("definition", "category"))
     }
   }
-  inst_data %>%
+  inst_data |>
     filter(!is.na(uni_lemma))
 }
 
