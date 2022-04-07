@@ -36,15 +36,15 @@ get_inst_words <- function(language, form) {
            item_id, num_item_id)
 }
 
-get_inst_data <- function(language, form, admins, items) {
+get_inst_data <- function(language, form, admins, items,
+                          custom_unilemmas = TRUE) {
   message(glue("Getting data for {language} {form}..."))
 
-  if (language !="Portuguese (European)"){
-  get_instrument_data(language = language,
-                      form = form,
-                      items = items$item_id,
-                      administrations = admins,
-                      iteminfo = items) |>
+  inst_data <- get_instrument_data(language = language,
+                                   form = form,
+                                   items = items$item_id,
+                                   administrations = admins,
+                                   iteminfo = items) |>
     mutate(produces = !is.na(value) & value == "produces",
            understands = !is.na(value) &
              (value == "understands" | value == "produces")) |>
@@ -52,27 +52,21 @@ get_inst_data <- function(language, form, admins, items) {
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
     filter(measure == "produces" | form == "WG") |>
-    select(-num_item_id) |>
-    filter(!is.na(uni_lemma))
-  }else{
-    unil <- read_csv("data/wordbank/portuguese_unilemmas.csv") %>%
-      select(uni_lemma, definition, category)
-    get_instrument_data(language = language,
-                        form = form,
-                        items = items$item_id,
-                        administrations = admins,
-                        iteminfo = items) |>
-      mutate(produces = !is.na(value) & value == "produces",
-             understands = !is.na(value) &
-               (value == "understands" | value == "produces")) |>
-      select(-value) |>
-      pivot_longer(names_to = "measure", values_to = "value",
-                   cols = c(produces, understands)) |>
-      filter(measure == "produces" | form == "WG") |>
-      select(-num_item_id, -uni_lemma) |>
-      left_join(unil) |>
-      filter(!is.na(uni_lemma))
+    select(-num_item_id)
+
+  if (custom_unilemmas) {
+    norm_lang <- normalize_language(language)
+    unilemma_loc <- glue("{wb_path}/unilemmas/{norm_lang}_unilemmas.csv")
+    if (file.exists(unilemma_loc)) {
+      unilemma_data <- read_csv(unilemma_loc) %>%
+        select(definition, category, uni_lemma)
+      inst_data <- inst_data %>%
+        select(-uni_lemma) %>%
+        left_join(unilemma_data, by = c("definition", "category"))
+    }
   }
+  inst_data %>%
+    filter(!is.na(uni_lemma))
 }
 
 collapse_inst_data <- function(inst_data) {
@@ -93,7 +87,6 @@ collapse_inst_data <- function(inst_data) {
     summarise(num_true = sum(uni_value), total = n()) |>
     ungroup() |>
     left_join(inst_uni_lemmas)
-
 }
 
 combine_form_data <- function(inst_summaries) {
@@ -107,13 +100,13 @@ combine_form_data <- function(inst_summaries) {
     ungroup()
 }
 
-create_inst_data <- function(language, form) {
+create_inst_data <- function(language, form, custom_unilemmas = TRUE) {
   inst_admins <- get_inst_admins(language, form)
   inst_words <- get_inst_words(language, form)
-  get_inst_data(language, form, inst_admins, inst_words)
+  get_inst_data(language, form, inst_admins, inst_words, custom_unilemmas)
 }
 
-create_wb_data <- function(language, write = TRUE) {
+create_wb_data <- function(language, write = TRUE, custom_unilemmas = TRUE) {
   lang <- language # for filter name scope issues
   insts <- get_instruments()
   forms <- insts |> filter(language == lang) |> pull(form)
@@ -122,13 +115,15 @@ create_wb_data <- function(language, write = TRUE) {
     return()
   }
 
-  lang_datas <- map(forms, partial(create_inst_data, language = language))
+  lang_datas <- map(forms, partial(create_inst_data,
+                                   language = language,
+                                   custom_unilemmas = custom_unilemmas))
   lang_summaries <- map(lang_datas, collapse_inst_data)
   lang_summary <- combine_form_data(lang_summaries)
 
   if (write) {
-    lang_label <- normalize_language(language)
-    saveRDS(lang_summary, file = glue("{wb_path}/{lang_label}.rds"))
+    norm_lang <- normalize_language(language)
+    saveRDS(lang_summary, file = glue("{wb_path}/{norm_lang}.rds"))
   }
   return(lang_summary)
 }
