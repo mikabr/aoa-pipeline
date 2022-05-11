@@ -73,14 +73,14 @@ clean_words <- function(word_set){
 
 map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
   fixed_words <- read_csv("data/predictors/fixed_words.csv") |>
-    select(language, uni_lemma, definition, fixed_word) |>
+    select(language, uni_lemma, item_definition, fixed_word) |>
     filter(!is.na(uni_lemma), !is.na(fixed_word))
 
   uni_cleaned <- uni_lemmas |>
     unnest(cols = "items") |>
     # distinct(language, uni_lemma, definition) %>%
     left_join(fixed_words) |>
-    mutate(fixed_definition = ifelse(is.na(fixed_word), definition, fixed_word),
+    mutate(fixed_definition = ifelse(is.na(fixed_word), item_definition, fixed_word),
            cleaned_words = map(fixed_definition, clean_words)) |>
     select(-fixed_word) |>
     group_by(language) |>
@@ -88,7 +88,7 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
     mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, method)))
 
   fixed_phons <- read_csv("data/predictors/fixed_phons.csv") |>
-    select(language, uni_lemma, definition, fixed_phon) |>
+    select(language, uni_lemma, item_definition, fixed_phon) |>
     filter(!is.na(uni_lemma), !is.na(fixed_phon)) |>
     mutate(fixed_phon = strsplit(fixed_phon, ", "))
 
