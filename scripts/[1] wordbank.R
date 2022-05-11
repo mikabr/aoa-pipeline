@@ -3,26 +3,15 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
 
   admins <- get_administration_data(language = language,
                                     form = form,
-                                    original_ids = TRUE)
-
-  if (is.na(unique(admins$original_id[1]))==TRUE){
-    admins <- admins |>
-      select(-(original_id)) |>
-      rename(original_id = data_id)
-  }
+                                    db_args = db_args)
 
   if (exclude_longitudinal) {
     # take earliest administration for any child with multiple administrations
     admins <- admins |>
-      mutate(source_group = str_replace(source_name, " \\(.*\\)", "")) |>
-      group_by(source_group, original_id) |>
+      group_by(dataset_origin_name, child_id) |>
       slice_min(age, with_ties = FALSE) |>
       ungroup()
 
-  }
-  if (!("data_id" %in% colnames(admins))){
-    admins <- admins |>
-      rename(data_id = original_id)
   }
 
   admins |> select(language, form, age, data_id)
@@ -30,10 +19,12 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
 
 get_inst_words <- function(language, form) {
   message(glue("Getting words for {language} {form}..."))
-  get_item_data(language = language, form = form) |>
-    filter(type == "word") |>
-    select(language, form, lexical_class, category, uni_lemma, definition,
-           item_id, num_item_id)
+  get_item_data(language = language,
+                form = form,
+                db_args = db_args) |>
+    filter(item_kind == "word") |>
+    select(language, form, lexical_class, category, uni_lemma, item_definition,
+           item_id)
 }
 
 get_inst_data <- function(language, form, admins, items,
@@ -44,15 +35,12 @@ get_inst_data <- function(language, form, admins, items,
                                    form = form,
                                    items = items$item_id,
                                    administrations = admins,
-                                   iteminfo = items) |>
-    mutate(produces = !is.na(value) & value == "produces",
-           understands = !is.na(value) &
-             (value == "understands" | value == "produces")) |>
+                                   item_info = items,
+                                   db_args = db_args) |>
     select(-value) |>
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
-    filter(measure == "produces" | form == "WG") |>
-    select(-num_item_id)
+    filter(measure == "produces" | form == "WG")
 
   if (custom_unilemmas) {
     norm_lang <- normalize_language(language)
@@ -62,7 +50,8 @@ get_inst_data <- function(language, form, admins, items,
         select(definition, category, uni_lemma)
       inst_data <- inst_data |>
         select(-uni_lemma) |>
-        left_join(unilemma_data, by = c("definition", "category"))
+        left_join(unilemma_data,
+                  by = c("item_definition" = "definition", "category"))
     }
   }
   inst_data |>
@@ -73,9 +62,9 @@ collapse_inst_data <- function(inst_data) {
   message(glue("Collapsing data for {unique(inst_data$language)} {unique(inst_data$form)}..."))
 
   inst_uni_lemmas <- inst_data |>
-    distinct(measure, uni_lemma, lexical_class, category, item_id, definition) |>
+    distinct(measure, uni_lemma, lexical_class, category, item_id, item_definition) |>
     group_by(uni_lemma) |>
-    nest(items = c(lexical_class, category, item_id, definition))
+    nest(items = c(lexical_class, category, item_id, item_definition))
 
   inst_data |>
     filter(!is.na(value)) |>
