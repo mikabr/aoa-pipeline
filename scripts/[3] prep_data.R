@@ -12,10 +12,15 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
   if (normalize) trans_funs <- c(trans_funs, \(count) count / sum(count))
   if (log_transform) trans_funs <- c(trans_funs, \(count) log(count))
 
+  morph_funs <-c()
+  if (log_transform) morph_funs <- c(morph_funs, \(count) log(count))
+
   for (fun in trans_funs) {
     trans_metrics <- trans_metrics |> mutate(across(starts_with("count"), fun))
   }
-
+  #for (fun in morph_funs) {
+  #  trans_metrics <- trans_metrics |> mutate(across(starts_with("n_"), fun))
+  #}
   trans_metrics |> ungroup() |>
     rename_with(\(col) str_replace(col, "count", "freq"), starts_with("count"))
 }
@@ -30,10 +35,22 @@ residualize_freqs <- function(childes_metrics) {
     mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
 }
 
-
+residualize_morph <- function(childes_metrics) {
+  a<-  childes_metrics |>
+    filter(!is.na(n_type)) |>
+    filter(!is.na(n_sfx)) |>
+    filter(!is.na(n_category)) |>
+    mutate(across(starts_with("n_sfx"), partial(residualize_col, n_type))) |>
+    mutate(across(starts_with("n_category"), partial(residualize_col, n_type)))
+#    mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
+#    mutate(n_category = ifelse(is.na(n_category), NA, log(n_category))) |>
+#    mutate(n_sfx = ifelse(is.na(n_sfx), NA, log(n_sfx))) |>
+  childes_metrics |>
+    select(-n_type, -n_sfx, -n_category) |>
+    left_join(a)
+}
 
 ## Imputation
-
 fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources |> discard(\(s) pred %in% s) |> unlist()
   x_str <- xs |> paste(collapse = " + ")
@@ -125,7 +142,7 @@ do_full_imputation <- function(model_data, pred_sources, max_steps) {
     nest()
 
   imputed_data <- nested_data |>
-    mutate(imputed = map2(language, data, function(lang, dat) {
+    mutate(imputed = purrr::map2(language, data, function(lang, dat) {
       do_lang_imputation(lang, dat, pred_sources, max_steps)
     }))
 
@@ -169,6 +186,7 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
     filter(!(language == "Russian" & category == "sounds"))
 }
 
-
-
+#
+#scand_w<- readRDS("/Users/loukatou/Documents/childes-mor-data/childes/Scandinavian/w.rds")
+#dplyr::filter(scand_w, grepl("Swedish",transcript))
 

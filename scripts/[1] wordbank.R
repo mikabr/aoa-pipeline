@@ -134,7 +134,7 @@ create_wb_data <- function(language, write = TRUE) {
 }
 
 load_wb_data <- function(languages, cache = TRUE) {
-  wb_data <- map_df(languages, function(lang) {
+   wb_data <- map_df(languages, function(lang) {
     norm_lang <- normalize_language(lang)
     lang_file <- glue("{wb_path}/{norm_lang}.rds")
     if (file.exists(lang_file)) {

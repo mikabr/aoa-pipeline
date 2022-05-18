@@ -79,3 +79,4 @@ Undetermined,,,0,und,0,0,0,,,,,,,1,FALSE,,FALSE,FALSE,,FALSE
 Vietnamese,,,0,,0,0,0,,vi_VN,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,vi,"This is interesting because it's a tone language. I don't know how it should sound, so it's just a guess and I need feedback.",vi,1,FALSE,,FALSE,FALSE,,FALSE
 Yau (Morobe Province),,,0,yuw,19658,0,4,,,,,,,1,FALSE,,FALSE,FALSE,,FALSE
 Yiddish,,,0,yid,0,0,0,,yi,https://github.com/alephreish/hunspell-yi,,,,1,FALSE,,FALSE,FALSE,,FALSE
+artificial_simple,artificial_simple,,,artificial_simple,,,,,,,,,,,,,,,,

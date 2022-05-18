@@ -15,7 +15,7 @@ library(tidyverse)
 library(widyr)
 library(ggthemes)
 library(devtools)
-#install_github("langcog/langcog")
+install_github("langcog/langcog")
 library(ggstance)
 library(langcog)
 library(ggdendro)
@@ -28,9 +28,9 @@ walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
 
 
 ```{r basic_plots, fig.width=14, fig.height=10, fig.cap="Plotting each predictor with AOA for all languages, within each lexical category. N_types is unexpected, maybe because it relies on matching of definitions to CHILDES words which is not precise enough."}
-aoa_predictor_data <- readRDS("data/aoa_predictor_data.rds" )
+aoa_predictor_data <- readRDS("data/plots/aoa_predictor_data.rds" )
 
-ggplot(aoa_predictor_data, aes(x = freq, y = aoa)) + 
+ggplot(aoa_predictor_data, aes(x = freq, y = aoa, col=language)) + 
   geom_point(aes(x = freq, y = aoa, col=language), alpha = .1) + 
   facet_grid(measure~lexical_category) +
   geom_smooth(method = "lm") + 
@@ -46,7 +46,7 @@ ggplot(aoa_predictor_data, aes(x = freq, y = aoa)) +
   ggtitle("Frequency~AOA")
 
 
-ggplot(aoa_predictor_data, aes(x = concreteness, y = aoa)) + 
+ggplot(aoa_predictor_data, aes(x = concreteness, y = aoa, col=language)) + 
   geom_point(aes(x = concreteness, y = aoa, col=language), alpha = .1) + 
   facet_grid(measure~lexical_category) +
   geom_smooth(method = "lm") + 
@@ -61,13 +61,13 @@ ggplot(aoa_predictor_data, aes(x = concreteness, y = aoa)) +
   theme_bw()+
   ggtitle("Concreteness~AOA")
 
-ggplot(aoa_predictor_data, aes(x = mlu, y = aoa)) + 
+ggplot(aoa_predictor_data, aes(x = mlu, y = aoa, col=language)) + 
   geom_point(aes(x = mlu, y = aoa, col=language), alpha = .1) + 
   facet_grid(measure~lexical_category) +
   geom_smooth(method = "lm") + 
  # facet_grid(language ~ lexical_class, scales = "free_x") + 
-  langcog::theme_mikabr() + 
-  langcog::scale_color_solarized() + 
+  #langcog::theme_mikabr() + 
+  #langcog::scale_color_solarized() + 
   theme(legend.position = "bottom") + 
   xlab("Mlu") + 
   ylab("Age of Acquisition (months)")+
@@ -76,13 +76,13 @@ ggplot(aoa_predictor_data, aes(x = mlu, y = aoa)) +
   ggtitle("MLU~AOA")
 
 
-ggplot(aoa_predictor_data, aes(x = freq_solo, y = aoa)) +  #not precise enough
+ggplot(aoa_predictor_data, aes(x = freq_solo, y = aoa, col=language)) +  #not precise enough
   geom_point(aes(x = freq_solo, y = aoa, col=language), alpha = .1) + 
   facet_grid(measure~lexical_category) +
   geom_smooth(method = "lm") + 
  # facet_grid(language ~ lexical_class, scales = "free_x") + 
-  langcog::theme_mikabr() + 
-  langcog::scale_color_solarized() + 
+  #langcog::theme_mikabr() + 
+  #langcog::scale_color_solarized() + 
   theme(legend.position = "bottom") + 
   xlab("Freq_solo") + 
   ylab("Age of Acquisition (months)")+
@@ -91,19 +91,66 @@ ggplot(aoa_predictor_data, aes(x = freq_solo, y = aoa)) +  #not precise enough
   ggtitle("Freq_solo~AOA")
 
 
-ggplot(aoa_predictor_data, aes(x = length_char, y = aoa)) +  #not precise enough
+ggplot(aoa_predictor_data, aes(x = length_char, y = aoa, col=language)) +  #not precise enough
   geom_point(aes(x = length_char, y = aoa, col=language), alpha = .1) + 
   facet_grid(measure~lexical_category) +
   geom_smooth(method = "lm") + 
  # facet_grid(language ~ lexical_class, scales = "free_x") + 
-  langcog::theme_mikabr() + 
-  langcog::scale_color_solarized() + 
+  #langcog::theme_mikabr() + 
+  #langcog::scale_color_solarized() + 
   theme(legend.position = "bottom") + 
   xlab("Length_char") + 
   ylab("Age of Acquisition (months)")+
   theme(legend.position="none")+
   theme_bw()+
   ggtitle("Length_char~AOA")
+
+ggplot(aoa_predictor_data, aes(x = prefix, y = aoa)) + 
+  geom_point(aes(x = prefix, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+  theme(legend.position = "bottom") + 
+  xlab("Prefix") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("Prefix~AOA")
+
+#show
+ggplot(aoa_predictor_data, aes(x = n_sfx, y = aoa, col=language)) + 
+  geom_point(aes(x = n_sfx, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+  theme(legend.position = "bottom") + 
+  xlab("N_sfx") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("N_sfx~AOA")
+
+#show
+ggplot(aoa_predictor_data, aes(x = n_category, y = aoa, col=language)) + 
+  geom_point(aes(x = n_category, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+  theme(legend.position = "bottom") + 
+  xlab("N_category") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("N_category~AOA")
+
+#show
+ggplot(aoa_predictor_data, aes(x = n_type, y = aoa, col=language)) + 
+  geom_point(aes(x = n_type, y = aoa, col=language), alpha = .1) + 
+  facet_grid(measure~lexical_category) +
+  geom_smooth(method = "lm") + 
+  theme(legend.position = "bottom") + 
+  xlab("N_type") + 
+  ylab("Age of Acquisition (months)")+
+  theme(legend.position="none")+
+  theme_bw()+
+  ggtitle("N_type~AOA")
 
 ```
 
@@ -116,7 +163,7 @@ ggplot(aoa_predictor_data, aes(x = length_char, y = aoa)) +  #not precise enough
 
 ```{r basic_plots2, fig.width=14, fig.height=10, fig.cap="Sample of n_types values in df before regression."}
 
-predictor_data_lexcat <- readRDS("data/predictor_data_lexcat.rds")
+predictor_data_lexcat <- readRDS("data/plots/predictor_data_lexcat.rds")
 head(predictor_data_lexcat %>% 
        filter(language=="English (American)") %>%
        select(language, uni_lemma, tokens,  freq_solo), n=50L)
@@ -124,8 +171,8 @@ head(predictor_data_lexcat %>%
 
 
 ```{r setup2, include=FALSE}
-aoa_coefs<- readRDS("data/aoa_coefs.rds") 
-aoa_coefs_fw<- readRDS("data/aoa_coefs_fw.rds") 
+aoa_coefs<- readRDS("data/plots/aoa_coefs.rds") 
+aoa_coefs_fw<- readRDS("data/plots/aoa_coefs_fw.rds") 
 
 
 
@@ -197,14 +244,15 @@ plt_lang_coefs <- aoa_coefs %>%
   filter(!is.na(term)) %>%
   filter(effect=="main")
 
-ref_coefs <- plt_lang_coefs %>% filter(language1 == "English")
+ref_coefs <- plt_lang_coefs #%>% filter(language1 == "English")
 
-ref_coefs$term <- factor(ref_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness",  "Freq solo", "Length char", "Function words", "Predicates", "Nouns"))
+#ref_coefs$term <- factor(ref_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness",  "Freq solo", "Length char", "Function words", "Predicates", "Nouns"))
 
 ggplot(ref_coefs %>% filter(effect=="main", signif=="significant"), aes(x = estimate, y = term)) +
-  facet_grid(language ~ measure, scales = "free",
-             labeller = as_labeller(label_caps)) +
-  geom_pointrangeh(aes(colour = term, shape = signif,
+  facet_grid(language~measure) +
+ # facet_grid(language ~ measure, scales = "free",
+  #           labeller = as_labeller(label_caps)) +
+  geom_pointrange(aes(colour = term, shape = signif,
                        xmin = estimate - 1.96 * std.error,
                        xmax = estimate + 1.96 * std.error)) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
@@ -213,16 +261,17 @@ ggplot(ref_coefs %>% filter(effect=="main", signif=="significant"), aes(x = esti
   theme_bw()+
   labs(y = "", x = "Coefficient estimate")
 
-
-ggplot(ref_coefs %>% filter(signif=="significant"), aes(x = estimate, y = term, colour = term)) +
-  facet_grid(measure ~ effect, scales = "free",
+#show
+ggplot(ref_coefs, aes(x = estimate, y = term, colour = signif)) +
+  facet_grid(measure ~ language, scales = "free",
              labeller = as_labeller(label_caps)) +
-  geom_point(aes(shape=language), size = 1.8, alpha = 0.7) +
-  stat_summaryh(geom = "crossbarh", fun.x = mean, fun.xmin = mean,
+  geom_point(aes(shape=signif), size = 3, alpha = 0.7) +
+  stat_summary(geom = "crossbar", fun.x = mean, fun.xmin = mean,
                 fun.xmax = mean, fatten = 3) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
  # scale_colour_ptol(guide = FALSE) +
   labs(x = "Coefficient estimate", y = "")+
+ # scale_shape_manual(values = c(19, 1), guide = "none") +
   theme(legend.position="none") +
 #  langcog::theme_mikabr() + 
   theme_bw()+
@@ -235,7 +284,7 @@ ggplot(ref_coefs %>% filter(signif=="significant"), aes(x = estimate, y = term, 
 
 ```{r langcoefs,  fig.width=14, fig.height=7, fig.cap="Estimates of coefficients in predicting words' developmental trajectories for all languages and measures. Each point represents a predictor's coefficient in one language, with the bar showing the mean across languages. Only coefficients for which $p < 0.05$ are presented."}
 
-plt_lang_coefs$term <- factor(plt_lang_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness", "Freq solo", "Length char", "Function words", "Predicates", "Nouns"))
+plt_lang_coefs$term <- factor(plt_lang_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness", "Freq solo", "Length char", "Function words", "Predicates", "Nouns", "N sfx", "N category", "N type", "Freq first", "Freq last"))
 
 ggplot(plt_lang_coefs %>% filter(signif=="significant"), aes(x = estimate, y = term)) +
   facet_grid(measure ~ effect, scales = "free",
@@ -497,11 +546,11 @@ ggplot(plt_lexcat_coefs, aes(x = estimate, y = term, colour = term)) +
 ```{r crossvalidation, fig.width=14, fig.height=10, fig.cap="Cross validation for American English" }
 wb_data <- load_wb_data(target_langs)
 
-cv_results <- readRDS("data/cv_results.rds" )
-cv_results_pos <- readRDS("data/cv_results_pos.rds" )
-cv_results_cat<- readRDS("data/cv_results_cat.rds" )
-cv_results_lex <- readRDS("data/cv_results_lex.rds" )
-eng_across_lang_lex_desc<- readRDS("data/eng_across_lang_lex_desc.rds" )
+cv_results <- readRDS("data/plots/cv_results.rds" )
+cv_results_pos <- readRDS("data/plots/cv_results_pos.rds" )
+cv_results_cat<- readRDS("data/plots/cv_results_cat.rds" )
+cv_results_lex <- readRDS("data/plots/cv_results_lex.rds" )
+eng_across_lang_lex_desc<- readRDS("data/plots/eng_across_lang_lex_desc.rds" )
 
 cv_dev_lang<- function(cv_across_lang){
   ggplot(cv_across_lang, aes(x = mean_abs_dev, y = language)) +
@@ -586,12 +635,12 @@ dev_words(eng_across_lang_lex_desc)
    theme_bw(base_size = 14) +
    theme(panel.grid = element_blank())
  
-man_t_across_lang_lex_desc<- readRDS("data/man_t_across_lang_lex_desc.rds" )
+#man_t_across_lang_lex_desc<- readRDS("data/plots/man_t_across_lang_lex_desc.rds" )
 
- ggplot(man_t_across_lang_lex_desc %>% filter(abs_dev>5), aes(x=abs_dev, y=reorder(test_word, -abs_dev), fill=lexical_category)) + 
-  geom_bar(stat = "identity") +
-   theme_bw()+
-   scale_fill_manual(values = c("red", "blue", "forestgreen", "orange", "grey"))
+# ggplot(man_t_across_lang_lex_desc %>% filter(abs_dev>5), aes(x=abs_dev, #y=reorder(test_word, -abs_dev), fill=lexical_category)) + 
+#  geom_bar(stat = "identity") +
+#   theme_bw()+
+#   scale_fill_manual(values = c("red", "blue", "forestgreen", "orange", "grey"))
  
 
 ``` 
@@ -601,11 +650,11 @@ man_t_across_lang_lex_desc<- readRDS("data/man_t_across_lang_lex_desc.rds" )
 ```{r crossvalidation2, fig.width=13, fig.height=10 }
 ####### cross-validation across languages
 
-cv_results <- readRDS("data/cv_results.rds" )
-cv_results_pos <- readRDS("data/cv_results_pos.rds" )
-cv_results_cat<- readRDS("data/cv_results_cat.rds" )
-cv_results_lex <- readRDS("data/cv_results_lex.rds" )
-eng_across_lang_lex_desc<- readRDS("data/eng_across_lang_lex_desc.rds" )
+cv_results <- readRDS("data/plots/cv_results.rds" )
+cv_results_pos <- readRDS("data/plots/cv_results_pos.rds" )
+cv_results_cat<- readRDS("data/plots/cv_results_cat.rds" )
+cv_results_lex <- readRDS("data/plots/cv_results_lex.rds" )
+eng_across_lang_lex_desc<- readRDS("data/plots/eng_across_lang_lex_desc.rds" )
 
  cv_results_cat$mean_abs_dev <- as.numeric(cv_results_cat$mean_abs_dev) 
  ggplot(aes(x = mean_abs_dev, y = language),
@@ -621,8 +670,8 @@ eng_across_lang_lex_desc<- readRDS("data/eng_across_lang_lex_desc.rds" )
    
 
  
-worst_produce <- readRDS("data/worst_uni_produce.rds" )
-worst_understand <- readRDS("data/worst_uni_understand.rds" )
+worst_produce <- readRDS("data/plots/worst_uni_produce.rds" )
+worst_understand <- readRDS("data/plots/worst_uni_understand.rds" )
 
 
 ggplot(aes(x = aoa_mean, y = aoa_pred_mean),data = worst_produce %>% filter(count_lang >1)) +
