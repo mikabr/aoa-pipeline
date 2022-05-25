@@ -34,7 +34,7 @@ get_inst_data <- function(language, form, admins, items,
   inst_data <- get_instrument_data(language = language,
                                    form = form,
                                    items = items$item_id,
-                                   administrations = admins,
+                                   administration_info = admins,
                                    item_info = items,
                                    db_args = db_args) |>
     select(-value) |>
@@ -97,7 +97,7 @@ create_inst_data <- function(language, form, custom_unilemmas = TRUE) {
 
 create_wb_data <- function(language, write = TRUE, custom_unilemmas = TRUE) {
   lang <- language # for filter name scope issues
-  insts <- get_instruments()
+  insts <- get_instruments(db_args = db_args)
   forms <- insts |> filter(language == lang) |> pull(form)
   if (length(forms) == 0) {
     message(glue("\tNo instruments found for language {lang}, skipping."))
