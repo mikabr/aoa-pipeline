@@ -31,6 +31,9 @@ get_inst_data <- function(language, form, admins, items,
                           custom_unilemmas = TRUE) {
   message(glue("Getting data for {language} {form}..."))
 
+  # temp solution:
+  items <- items |> mutate(form_type = "")
+
   inst_data <- get_instrument_data(language = language,
                                    form = form,
                                    items = items$item_id,
