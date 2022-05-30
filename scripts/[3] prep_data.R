@@ -12,8 +12,8 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
   if (normalize) trans_funs <- c(trans_funs, \(count) count / sum(count))
   if (log_transform) trans_funs <- c(trans_funs, \(count) log(count))
 
-  morph_funs <-c()
-  if (log_transform) morph_funs <- c(morph_funs, \(count) log(count))
+  #morph_funs <-c()
+  #if (log_transform) morph_funs <- c(morph_funs, \(count) log(count))
 
   for (fun in trans_funs) {
     trans_metrics <- trans_metrics |> mutate(across(starts_with("count"), fun))
@@ -36,19 +36,41 @@ residualize_freqs <- function(childes_metrics) {
 }
 
 residualize_morph <- function(childes_metrics) {
-  a<-  childes_metrics |>
+  l1 = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
+  childes_metrics1 = childes_metrics[childes_metrics$language %in% l1 ,]
+  a1<-  childes_metrics1 |>
     filter(!is.na(n_type)) |>
-    filter(!is.na(n_sfx)) |>
-    filter(!is.na(n_category)) |>
-    mutate(across(starts_with("n_sfx"), partial(residualize_col, n_type))) |>
-    mutate(across(starts_with("n_category"), partial(residualize_col, n_type)))
-#    mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
-#    mutate(n_category = ifelse(is.na(n_category), NA, log(n_category))) |>
-#    mutate(n_sfx = ifelse(is.na(n_sfx), NA, log(n_sfx))) |>
-  childes_metrics |>
-    select(-n_type, -n_sfx, -n_category) |>
-    left_join(a)
+    filter(!is.na(n_affix)) |>
+    filter(!is.na(n_cat)) |>
+    mutate(across(starts_with("n_cat$"), partial(residualize_col, n_type))) |>
+    mutate(across(starts_with("n_affix"), partial(residualize_col, n_type))) #|>
+    #mutate(n_type = log(n_type)) #|>
+    #mutate(n_cat = log(n_cat)) |>
+    #mutate(n_affix = log(n_affix))
+  #mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
+    #mutate(n_category = ifelse(is.na(n_cat), NA, log(n_cat))) |>
+    #mutate(n_affix = ifelse(is.na(n_affix), NA, log(n_affix)))
+  f <- childes_metrics1 |>
+    select(-n_affix, -n_cat, -n_type) |>
+    left_join(a1)
+  childes_metrics2 = childes_metrics[!childes_metrics$language %in% l1 ,]
+  a2 <- childes_metrics2 |>
+      filter(!is.na(n_type)) |>
+      filter(!is.na(n_cat)) |>
+      #mutate(across(starts_with("n_sfx"), partial(residualize_col, n_type))) |>
+      mutate(across(starts_with("n_cat$"), partial(residualize_col, n_type))) #|>
+     # mutate(n_type = log(n_type)) #|>
+      #mutate(n_cat = log(n_cat))
+      #mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
+      #mutate(n_category = ifelse(is.na(n_cat), NA, log(n_cat)))
+   s<- childes_metrics2 |>
+      select(-n_cat, -n_type) |>
+      left_join(a2)
+   s$n_affix = NA
+   la<- dplyr::bind_rows(f, s)
+   return(la)
 }
+
 
 ## Imputation
 fit_predictor <- function(pred, d, pred_sources) {
@@ -132,8 +154,8 @@ do_lang_imputation <- function(language, data, pred_sources, max_steps) {
 do_full_imputation <- function(model_data, pred_sources, max_steps) {
   # restrict to the sources in pred_sources
   # catch cases where a predictor in the predictor set isn't in the data
-  pred_sources <- map(pred_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
 
+  pred_sources <- map(pred_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
            all_of(!!unlist(pred_sources))) |>
@@ -172,7 +194,7 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
     filter(!lexical_category=="other") |>
            # collapse v, adj, adv into one category
     mutate(lexical_category = lexical_category |> as_factor() |>
-             fct_collapse("predicates" = c("verbs", "adjectives", "adverbs")) |>
+             fct_collapse("predicates" = c("verbs", "adjectives")) |>
              fct_relevel("nouns","predicates","function_words")) |>
     select(-lexical_class)
   lexical_categories$lexical_category <- relevel(lexical_categories$lexical_category, ref=ref_value)
@@ -186,7 +208,6 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
     filter(!(language == "Russian" & category == "sounds"))
 }
 
-#
-#scand_w<- readRDS("/Users/loukatou/Documents/childes-mor-data/childes/Scandinavian/w.rds")
-#dplyr::filter(scand_w, grepl("Swedish",transcript))
+
+
 
