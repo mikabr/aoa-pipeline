@@ -23,8 +23,8 @@ Yue Chinese,Cantonese,987,1,yue,8376,0,160,no need,no need,,zh-yue,"Just a naive
 Hebrew,Hebrew,540,0.5,heb,876201,0.9,787,,he_IL,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,,,he,2,TRUE,,FALSE,TRUE,,TRUE
 Korean,Korean,1988,2,kor,391258,0.4,188,,ko,https://github.com/spellcheck-ko/hunspell-dict-ko/releases,,,ko,2,TRUE,,FALSE,TRUE,,TRUE
 Catalan,,0,0,cat,253574,0.3,327,catalan,ca_ES,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,ca,,ca,3,FALSE,,FALSE,FALSE,no wordbank,FALSE
-Dutch,,0,0,nld,2555023,2.6,1966,dutch,nl_NL,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,nl,Needs improvement of the spelling-to-phoneme rules.,nl,3,FALSE,waiting,FALSE,TRUE,,TRUE
-Hungarian,,372,0.4,hun,308814,0.3,328,hungarian,hu_HU,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,hu,This has had assistance from a native speaker and it should be OK.,hu,3,FALSE,waiting,FALSE,TRUE,might be too few kids?,TRUE
+Dutch,Dutch,0,0,nld,2555023,2.6,1966,dutch,nl_NL,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,nl,Needs improvement of the spelling-to-phoneme rules.,nl,3,FALSE,waiting,FALSE,TRUE,,TRUE
+Hungarian,Hungarian,372,0.4,hun,308814,0.3,328,hungarian,hu_HU,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,hu,This has had assistance from a native speaker and it should be OK.,hu,3,FALSE,waiting,FALSE,TRUE,might be too few kids?,TRUE
 Indonesian,,0,0,ind,0,0,0,indonesian,id_ID,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,id,"An initial guess, no feedback yet.",id,3,FALSE,,FALSE,FALSE,,FALSE
 Romanian,,0,0,ron,197825,0.2,165,romanian,ro_RO,http://ftp.snt.utwente.nl/pub/software/openoffice/contrib/dictionaries/,ro,Probably OK. More work is needed to improve the position of stress within words.,ro,3,FALSE,,FALSE,FALSE,,FALSE
 Tamil,,0,0,tam,15490,0,25,tamil,ta,https://github.com/thamizha/thamizha-solthiruthi,ta,"This has had assistance from a native speaker, so it should be OK.",ta,3,FALSE,,FALSE,FALSE,,FALSE

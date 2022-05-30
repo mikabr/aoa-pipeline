@@ -39,7 +39,7 @@ Loading cached Wordbank data for English:
 
 Loading Wordbank data for multiple languages (cached or not):
 ```{r load_wordbank_xling}
-target_langs <- c("English (American)", "Norwegian","Russian", 
+target_langs_main <- c("English (American)", "Norwegian","Russian", 
                   "Turkish", "Italian", "Swedish",  
                   "French (Quebecois)", "Danish", "Croatian", 
                   "French (French)","German", 
@@ -48,8 +48,9 @@ target_langs <- c("English (American)", "Norwegian","Russian",
 
 #English American ok Spanish (Mexican) ok French French ok
 
-target_langs <- c("Italian", "French (French)", "Spanish (Mexican)", "English (American)")
-
+target_langs <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)",  "German", "Portuguese (European)", "Hungarian", "Swedish", "Italian", "Norwegian", "Dutch", "Turkish", "Danish")
+target_langs1 <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)",  "German", "Portuguese (European)", "Hungarian", "Swedish")
+target_langs2<- c("Italian", "Norwegian", "Dutch", "Turkish", "Danish")
 #Mandarin taiwanese:  problematic
 
 sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
@@ -107,15 +108,22 @@ Loading cached CHILDES data for multiple languages:
 ```{r load_childes_xling}
 childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |>
   filter(!is.na(uni_lemma))
-  
 ```
 
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes, eval=FALSE}
-metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_prefix, compute_verb_frame)
+
+metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_verb_frame ) # 
+
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
+
 #ita_childes <- get_token_metrics("Italian", metric_funs, corpus_args)
+#childes_lang = "nld"
+##l="nld"
+#fra_childes <- get_token_metrics("Danish", metric_funs, corpus_args)#
+#fra_unilemmas <- get_uni_lemma_metrics("Danish", build_uni_lemma_map(uni_lemmas|> filter(language #=="Danish")))
+
 #spa_childes <- get_token_metrics("Spanish (Mexican)", metric_funs, corpus_args)
 #eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
 #ita_unilemmas <- get_uni_lemma_metrics("Italian", build_uni_lemma_map(uni_lemmas))
@@ -161,21 +169,26 @@ predictor_data_list <- list(babiness, concreteness, childes_metrics_)
 predictor_data <- predictor_data_list |>
   reduce(partial(full_join, by = c("language", "uni_lemma"))) 
 
-predictor_data$n_distinct_frame[is.na(predictor_data$n_distinct_frame)] <- 0
-predictor_data$prefix[is.na(predictor_data$prefix)] <- 0
+#predictor_data$n_distinct_frame[is.na(predictor_data$n_distinct_frame)] <- 0
+#predictor_data$prefix[is.na(predictor_data$prefix)] <- 0
 ```
 
 ## Setting predictors
 
 ```{r set_predictors}
-predictor_sources <- list(
-  c("freq", "freq_solo", "freq_last", "freq_first"),
+predictor_sources1 <- list(
+  c("freq"),
   c("concreteness","babiness"),
   c("length_char"), #"length_phon"
-  c("n_type", "n_sfx", "n_category"),
-  c("mlu")
-)
+  c("n_type",  "n_cat", "n_affix"), #
+  c("mlu"))
 
+predictor_sources2 <- list(
+  c("freq"),
+  c("concreteness","babiness"),
+  c("length_char"), #"length_phon"
+  c("n_type",  "n_cat"), #
+  c("mlu"))
 #predictor_sources_short <- list(
 #  c("freq", "freq_solo", "freq_last", "freq_first", "mlu"),
 #  c("concreteness","babiness"),
@@ -185,7 +198,8 @@ predictor_sources <- list(
 #  c("n_type", "n_sfx", "n_category")
 #)
 
-predictors<-unlist(predictor_sources)
+predictors1<-unlist(predictor_sources1)
+predictors2<-unlist(predictor_sources2)
 ```
 
 
@@ -195,27 +209,50 @@ predictors<-unlist(predictor_sources)
 ref_cat ="nouns"
 
 predictor_data_lexcat <- prep_lexcat(predictor_data, uni_lemmas, ref_cat) ## Set lexical categories
+predictor_data_lexcat  <- predictor_data_lexcat  |> unnest(options)
 
-prefix_verb_frame <- predictor_data_lexcat |>
-  select(c(uni_lemma, lexical_category, prefix, n_distinct_frame))
+
+
+#prefix_verb_frame <- predictor_data_lexcat |>
+#  select(c(uni_lemma, lexical_category, prefix, n_distinct_frame))
+
+#target_langs0 <- c("German" )
+
+#predictor_data_lexcat0 <- predictor_data_lexcat |> filter(language %in% target_langs0)
+
+predictor_data_lexcat1 <- predictor_data_lexcat |> filter(language %in% target_langs1)
+predictor_data_lexcat2 <- predictor_data_lexcat |> filter(language %in% target_langs2)
+
+
+saveRDS(predictor_data_lexcat1, "data/predictor_data_lexcat1.rds" )
+saveRDS(predictor_data_lexcat2, "data/predictor_data_lexcat2.rds" )
+
+
+
+predictor_data_imputed1 <- predictor_data_lexcat1 |> ## Impute
+  do_full_imputation(predictor_sources1, max_steps = 20) #|>
+  #left_join(prefix_verb_frame)
+
+predictor_data_imputed2 <- predictor_data_lexcat2 |> ## Impute
+  do_full_imputation(predictor_sources2, max_steps = 20) #|>
+
  
-predictor_data_imputed <- predictor_data_lexcat |> ## Impute
-  do_full_imputation(predictor_sources, max_steps = 20) |>
-  left_join(prefix_verb_frame)
-  
-
-predictor_data_scaled <- do_scaling(predictor_data_imputed, predictors) |>## Scale  
+predictor_data_scaled1 <- do_scaling(predictor_data_imputed1, predictors1) |>## Scale  
   mutate(length_char = ifelse (language %in% sinotibetan_languages, NA, length_char))
 
+predictor_data_scaled2 <- do_scaling(predictor_data_imputed2, predictors2) |>## Scale  
+  mutate(length_char = ifelse (language %in% sinotibetan_languages, NA, length_char))
 ```
  
 ## Merge with AOAs
 
 ```{r merge_aoa}
 
-aoa_predictor_data <- predictor_data_scaled |> left_join(aoas) |>## merge with AOAs
+aoa_predictor_data1 <- predictor_data_scaled1 |> left_join(aoas) |>## merge with AOAs
   filter(!(aoa>36))
  
+aoa_predictor_data2 <- predictor_data_scaled2 |> left_join(aoas) |>## merge with AOAs
+  filter(!(aoa>36))
 ```
 
 ## Run model 
@@ -228,7 +265,7 @@ run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_c
   
   aoa_predictor_data_lexcat <- prep_lexcat(aoa_predictor_data, uni_lemmas |> filter(language==lang), ref_cat) ## Set again lexical category contrasts
 
-  m<-fit_models(predictors, aoa_predictor_data_lexcat) |> 
+  m<-fit_models(predictors, aoa_predictor_data_lexcat, lexcat_interactions = TRUE) |> 
     mutate(language=lang)
   return(m)
 }
@@ -236,15 +273,21 @@ run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_c
 #predictors_short<- c("freq", "freq_solo", "freq_last", "freq_first", "length_char", #"length_phon", "mlu", "babiness",  "freq_solo", "concreteness", "n_type", "n_sfx", #"n_category")
 
 
-aoa_models <- map_df(target_langs, run_main_model, aoa_predictor_data, predictors, uni_lemmas, ref_cat)
+aoa_models1 <- map_df(target_langs, run_main_model, aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
+
+aoa_models2 <- map_df(target_langs2, run_main_model, aoa_predictor_data2, predictors2, uni_lemmas, ref_cat)
+
+aoa_models <- bind_rows(aoa_models1, aoa_models2)
+
 
 ref_cat_v ="predicates"
 
-predictors_v <-  c("freq", "freq_solo", "freq_last", "freq_first","concreteness","babiness","length_char","n_type", "n_sfx", "n_category","mlu", "n_distinct_frame")
+#predictors_v <-  c("freq", "freq_solo", "freq_last", #"freq_first","concreteness","babiness","length_char","n_type", "n_sfx", "n_category","mlu", #"n_distinct_frame")
 
-aoa_models_v <- fit_models(predictors_v, aoa_predictor_data |>filter(lexical_category =="predicates"), lexcat_interactions = FALSE )
+aoa_models_v1<- fit_models(predictors1, aoa_predictor_data1 |>filter(lexical_category =="predicates"), lexcat_interactions = FALSE )
 
 
+aoa_models_v2 <- fit_models(predictors2, aoa_predictor_data2 |>filter(lexical_category =="predicates"), lexcat_interactions = FALSE )
 #aoa_models_fw <- map_df(target_langs[0:16], run_main_model, aoa_predictor_data, predictors, uni_lemmas, #"function_words")
 
 ```
@@ -254,16 +297,23 @@ aoa_models_v <- fit_models(predictors_v, aoa_predictor_data |>filter(lexical_cat
 Coefficients:
 ```{r}
 aoa_models |> select(language, measure, coefs) |> unnest(coefs)
+
 ```
 
 Summary stats:
 ```{r}
 aoa_models |> select(language, measure, stats) |> unnest(stats)
+
 ```
 
 Variance inflation factors:
 ```{r}
 aoa_models |> select(language, measure, vifs) |> unnest(vifs)
+
+
+saveRDS(aoa_predictor_data1, "data/aoa_predictor_data1.rds" )
+saveRDS(aoa_predictor_data2, "data/aoa_predictor_data2.rds" )
+
 ```
 
 
@@ -281,7 +331,7 @@ loo_df <- aoa_predictor_data_lexcat |>
   group_nest(language, meas) |>
   mutate(language=lang,
          measure=meas,
-    loo_models = ifelse(language %in% sinotibetan_languages, map(data, fit_cv_models, list(make_predictor_formula(predictors_short))), map(data, fit_cv_models, list(make_predictor_formula(predictors)))),
+    loo_models = ifelse(language %in% sinotibetan_languages, map(data, fit_cv_models, list(make_predictor_formula(predictors))), map(data, fit_cv_models, list(make_predictor_formula(predictors)))),
          loo_preds = map2(loo_models, data, get_cv_preds),
          cv_results = map(loo_preds, get_cv_results))  
     
@@ -289,10 +339,24 @@ return(loo_df)
 }
 
 # for simple cv result extraction
-xval_und_model <- map_df(unique((aoa_predictor_data %>% filter(measure=="understands"))$language),run_cross_validation_model,"understands", aoa_predictor_data, predictors, uni_lemmas, ref_cat) 
-xval_prod_model <- map_df(target_langs,run_cross_validation_model,"produces", aoa_predictor_data, predictors, uni_lemmas, ref_cat)
+xval_und_model1 <- map_df(unique((aoa_predictor_data1 %>% filter(measure=="understands"))$language),run_cross_validation_model,"understands", aoa_predictor_data1, predictors1, uni_lemmas, ref_cat) 
+xval_prod_model1 <- map_df(target_langs1,run_cross_validation_model,"produces", aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
 
-loo_df <- bind_rows(xval_und_model, xval_prod_model)
+loo_df1 <- bind_rows(xval_und_model1, xval_prod_model1)
+
+
+# for simple cv result extraction
+xval_und_model2 <- map_df(unique((aoa_predictor_data2 %>% filter(measure=="understands"))$language),run_cross_validation_model,"understands", aoa_predictor_data2, predictors2, uni_lemmas, ref_cat) 
+
+xval_prod_model2 <- map_df(unique((aoa_predictor_data2 %>% filter(measure=="produces"))$language),run_cross_validation_model,"produces", aoa_predictor_data2, predictors2, uni_lemmas, ref_cat) 
+
+#xval_prod_model2 <- map_df(target_langs2,run_cross_validation_model,"produces", #aoa_predictor_data2, predictors2, uni_lemmas, ref_cat)
+
+loo_df2 <- bind_rows(xval_und_model2, xval_prod_model2)
+
+
+loo_df <- bind_rows(loo_df1, loo_df2)
+
 ```
 
 
@@ -306,6 +370,7 @@ cv_results <- loo_df |>
 
 loo_preds <- loo_df |>
   select(language, measure, loo_preds, data)
+
 
 cv_results_pos <- loo_preds |>
   unnest(loo_preds) |> 
@@ -358,9 +423,8 @@ aoa_coefs <- aoa_models |>
                         str_remove(term, ":?lexical_category[0-9]:?"),
                         term),
          term = fct_recode(term, !!!lexcats),
-         term = factor(term, levels = c(predictors, names(lexcats))),
+         term = factor(term), #, levels = c(predictors, names(lexcats))
          language = factor(language, levels = target_langs))
-
 
 #aoa_coefs <- aoa_models |>
 #  select(language, measure, coefs) |>
@@ -407,11 +471,12 @@ aoa_coefs <- aoa_models |>
 ```
 
 
-```{r save data}
-saveRDS(predictor_data_lexcat, "data/plots/predictor_data_lexcat.rds")
-saveRDS(aoa_predictor_data, "data/plots/aoa_predictor_data.rds" )
+```{r savedata}
+saveRDS(predictor_data_lexcat,"data/plots/predictor_data_lexcat.rds")
+#saveRDS(aoa_predictor_data,"data/plots/aoa_predictor_data.rds" )
 
 saveRDS(aoa_coefs, "data/plots/aoa_coefs.rds" )
+
 
 saveRDS(cv_results, "data/plots/cv_results.rds" )
 saveRDS(cv_results_pos, "data/plots/cv_results_pos.rds" )
@@ -420,26 +485,43 @@ saveRDS(cv_results_lex, "data/plots/cv_results_lex.rds" )
 saveRDS(eng_across_lang_lex_desc, "data/plots/eng_across_lang_lex_desc.rds" )
 
 
-worst_predicted_unilemmas<- function(lang, meas){ loo_preds |>
+worst_predicted_unilemmas<- function(lang, meas, loo_preds){ loo_preds |>
   unnest(cols = c(loo_preds))|>
   filter(language == lang, measure == meas) |>
   arrange(desc(abs_dev)) |>
   head(50)
 }
 
-worst_uni_produce<-map_df(target_langs, worst_predicted_unilemmas, "produces") %>% 
+worst_uni_produce1<-map_df(target_langs, worst_predicted_unilemmas, "produces", loo_preds) %>% 
   group_by(test_word) %>%
   summarise(count_lang=n(),
   lang_names = paste0(language, collapse = ","),
   aoa_mean=mean(aoa),
   aoa_pred_mean=mean(aoa_pred))
 
-worst_uni_understand<-map_df(target_langs, worst_predicted_unilemmas, "understands") %>% 
+worst_uni_understand1<-map_df(target_langs, worst_predicted_unilemmas, "understands", loo_preds) %>% 
   group_by(test_word) %>%
   summarise(count_lang=n(),
   lang_names = paste0(language, collapse = ","),
   aoa_mean=mean(aoa),
   aoa_pred_mean=mean(aoa_pred))
+
+
+worst_uni_produce<-map_df(target_langs, worst_predicted_unilemmas, "produces", loo_preds) %>% 
+  group_by(test_word) %>%
+  summarise(count_lang=n(),
+  lang_names = paste0(language, collapse = ","),
+  aoa_mean=mean(aoa),
+  aoa_pred_mean=mean(aoa_pred))
+
+worst_uni_understand<-map_df(target_langs, worst_predicted_unilemmas, "understands", loo_preds) %>% 
+  group_by(test_word) %>%
+  summarise(count_lang=n(),
+  lang_names = paste0(language, collapse = ","),
+  aoa_mean=mean(aoa),
+  aoa_pred_mean=mean(aoa_pred))
+
+
 
 
 worst_uni_understand1<-loo_preds |>
@@ -459,4 +541,6 @@ saveRDS(worst_uni_produce, "data/plots/worst_uni_produce.rds" )
 saveRDS(worst_uni_understand, "data/plots/worst_uni_understand.rds" )
 saveRDS(worst_uni_produce1, "data/plots/worst_uni_produce1.rds" )
 saveRDS(worst_uni_understand1, "data/plots/worst_uni_understand1.rds" )
+
+
 ```
