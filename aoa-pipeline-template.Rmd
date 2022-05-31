@@ -119,10 +119,11 @@ corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
 #ita_childes <- get_token_metrics("Italian", metric_funs, corpus_args)
-#childes_lang = "nld"
-##l="nld"
-#fra_childes <- get_token_metrics("Danish", metric_funs, corpus_args)#
-#fra_unilemmas <- get_uni_lemma_metrics("Danish", build_uni_lemma_map(uni_lemmas|> filter(language #=="Danish")))
+#dutch danish norwegian swedish german italian spanish french portuguese hungarian
+#childes_lang = "hun"
+#l="hun"
+#fra_childes <- get_token_metrics("Hungarian", metric_funs, corpus_args)#
+#fra_unilemmas <- get_uni_lemma_metrics("Hungarian", build_uni_lemma_map(uni_lemmas|> #filter(language =="Hungarian")))
 
 #spa_childes <- get_token_metrics("Spanish (Mexican)", metric_funs, corpus_args)
 #eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
@@ -181,6 +182,7 @@ predictor_sources1 <- list(
   c("concreteness","babiness"),
   c("length_char"), #"length_phon"
   c("n_type",  "n_cat", "n_affix"), #
+  c("per_frame"),
   c("mlu"))
 
 predictor_sources2 <- list(
@@ -188,6 +190,7 @@ predictor_sources2 <- list(
   c("concreteness","babiness"),
   c("length_char"), #"length_phon"
   c("n_type",  "n_cat"), #
+  c("per_frame"),
   c("mlu"))
 #predictor_sources_short <- list(
 #  c("freq", "freq_solo", "freq_last", "freq_first", "mlu"),
@@ -259,13 +262,40 @@ aoa_predictor_data2 <- predictor_data_scaled2 |> left_join(aoas) |>## merge with
 
 ```{r}
 
-run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_cat){
+predictor_sources1 <- list(
+  c("freq"),
+  c("concreteness","babiness"),
+  c("length_char"), #"length_phon"
+  c("n_type",  "n_cat", "n_affix"), #
+  c("mlu"))
+
+predictor_sources2 <- list(
+  c("freq"),
+  c("concreteness","babiness"),
+  c("length_char"), #"length_phon"
+  c("n_type",  "n_cat"), #
+  c("mlu"))
+#predictor_sources_short <- list(
+#  c("freq", "freq_solo", "freq_last", "freq_first", "mlu"),
+#  c("concreteness","babiness"),
+#  c("length_char"),
+#  c("n_type"),
+#  c("length_char", "length_phon"),
+#  c("n_type", "n_sfx", "n_category")
+#)
+
+predictors1<-unlist(predictor_sources1)
+predictors2<-unlist(predictor_sources2)
+
+
+
+run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_cat, lexcat_interactions = TRUE){
   aoa_predictor_data <- aoa_predictor_data|> select(-lexical_category)|>
     filter(language==lang)
   
   aoa_predictor_data_lexcat <- prep_lexcat(aoa_predictor_data, uni_lemmas |> filter(language==lang), ref_cat) ## Set again lexical category contrasts
 
-  m<-fit_models(predictors, aoa_predictor_data_lexcat, lexcat_interactions = TRUE) |> 
+  m<-fit_models(predictors, aoa_predictor_data_lexcat, lexcat_interactions) |> 
     mutate(language=lang)
   return(m)
 }
@@ -273,22 +303,60 @@ run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_c
 #predictors_short<- c("freq", "freq_solo", "freq_last", "freq_first", "length_char", #"length_phon", "mlu", "babiness",  "freq_solo", "concreteness", "n_type", "n_sfx", #"n_category")
 
 
-aoa_models1 <- map_df(target_langs, run_main_model, aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
+aoa_models1 <- map_df(target_langs1, run_main_model, aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
 
 aoa_models2 <- map_df(target_langs2, run_main_model, aoa_predictor_data2, predictors2, uni_lemmas, ref_cat)
 
 aoa_models <- bind_rows(aoa_models1, aoa_models2)
 
 
-ref_cat_v ="predicates"
+#ref_cat_v ="predicates"
 
 #predictors_v <-  c("freq", "freq_solo", "freq_last", #"freq_first","concreteness","babiness","length_char","n_type", "n_sfx", "n_category","mlu", #"n_distinct_frame")
 
-aoa_models_v1<- fit_models(predictors1, aoa_predictor_data1 |>filter(lexical_category =="predicates"), lexcat_interactions = FALSE )
+predictor_sources_verb1 <- list(
+  c("freq"),
+  c("concreteness","babiness"),
+  c("length_char"), #"length_phon"
+  c("n_type",  "n_cat", "n_affix"), #
+  c("per_frame"),
+  c("mlu"))
+
+predictor_sources_verb2 <- list(
+  c("freq"),
+  c("concreteness","babiness"),
+  c("length_char"), #"length_phon"
+  c("n_type",  "n_cat"), #
+  c("per_frame"),
+  c("mlu"))
+
+predictors_verb1<-unlist(predictor_sources_verb1)
+predictors_verb2<-unlist(predictor_sources_verb2)
 
 
-aoa_models_v2 <- fit_models(predictors2, aoa_predictor_data2 |>filter(lexical_category =="predicates"), lexcat_interactions = FALSE )
+aoa_models_verb1 <- map_df(target_langs1, run_main_model, aoa_predictor_data1|>filter(lexical_category =="predicates"), predictors_verb1, uni_lemmas, ref_cat, lexcat_interactions = FALSE)
+
+
+aoa_models_verb2 <- map_df(target_langs2, run_main_model, aoa_predictor_data2|>filter(lexical_category =="predicates" & !(language=="Turkish")), predictors_verb2, uni_lemmas, ref_cat, lexcat_interactions = FALSE)
+
+aoa_models_verb <- bind_rows(aoa_models_verb1, aoa_models_verb2) 
+aoa_models_verb <- aoa_models_verb |> unnest(coefs) |>filter(term =="per_frame") |>
+  select(language, measure, term, estimate, std.error, statistic, p.value)
+         
+         
+         #|> #nest(coefs =c(term, estimate, std.error, statistic, p.value) )
+
+
+
 #aoa_models_fw <- map_df(target_langs[0:16], run_main_model, aoa_predictor_data, predictors, uni_lemmas, #"function_words")
+
+
+aoa_models <- aoa_models |> 
+  unnest(coefs) |>
+  rbind(aoa_models_verb) |>
+  nest(coefs =c(term, estimate, std.error, statistic, p.value))
+  
+  
 
 ```
 
@@ -296,7 +364,8 @@ aoa_models_v2 <- fit_models(predictors2, aoa_predictor_data2 |>filter(lexical_ca
 
 Coefficients:
 ```{r}
-aoa_models |> select(language, measure, coefs) |> unnest(coefs)
+aoa_models |> select(language, measure, coefs) |> unnest(coefs) 
+
 
 ```
 
@@ -340,10 +409,19 @@ return(loo_df)
 
 # for simple cv result extraction
 xval_und_model1 <- map_df(unique((aoa_predictor_data1 %>% filter(measure=="understands"))$language),run_cross_validation_model,"understands", aoa_predictor_data1, predictors1, uni_lemmas, ref_cat) 
-xval_prod_model1 <- map_df(target_langs1,run_cross_validation_model,"produces", aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
+xval_prod_model1 <- map_df(unique((aoa_predictor_data1 %>% filter(measure=="produces"))$language),run_cross_validation_model,"produces", aoa_predictor_data1, predictors1, uni_lemmas, ref_cat) 
+
+#xval_prod_model1 <- map_df(target_langs1,run_cross_validation_model,"produces", #aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
 
 loo_df1 <- bind_rows(xval_und_model1, xval_prod_model1)
 
+
+
+
+```
+
+
+```{r cross_validate2}
 
 # for simple cv result extraction
 xval_und_model2 <- map_df(unique((aoa_predictor_data2 %>% filter(measure=="understands"))$language),run_cross_validation_model,"understands", aoa_predictor_data2, predictors2, uni_lemmas, ref_cat) 
@@ -358,9 +436,6 @@ loo_df2 <- bind_rows(xval_und_model2, xval_prod_model2)
 loo_df <- bind_rows(loo_df1, loo_df2)
 
 ```
-
-
-
 
 ```{r cross_validate_results}
 

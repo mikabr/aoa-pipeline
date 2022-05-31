@@ -289,7 +289,7 @@ ggplot(ref_coefs, aes(x = estimate, y = term, colour = signif)) +
 
 ```{r langcoefs,  fig.width=14, fig.height=7, fig.cap="Estimates of coefficients in predicting words' developmental trajectories for all languages and measures. Each point represents a predictor's coefficient in one language, with the bar showing the mean across languages. Only coefficients for which $p < 0.05$ are presented."}
 
-plt_lang_coefs$term <- factor(plt_lang_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness", "N affix", "N cat", "N type", "Length char", "Predicates", "Nouns"))
+plt_lang_coefs$term <- factor(plt_lang_coefs$term, levels=c("Freq", "Concreteness", "MLU-w", "Babiness", "N affix", "N cat", "N type", "Length char", "Predicates", "Nouns", "Per frame"))
 
 # %>% filter(signif=="significant")
 ggplot(plt_lang_coefs, aes(x = estimate, y = term)) +
@@ -545,7 +545,7 @@ ggplot(plt_lexcat_coefs, aes(x = estimate, y = term, colour = term)) +
   scale_colour_ptol(guide = FALSE) +
   theme_bw()+
   labs(x = "Coefficient estimate", y = "")+
-  xlim(-2.5,2.5)
+  xlim(-3,3)
 ggsave("data/plots/interaction.png")
 
 ```
