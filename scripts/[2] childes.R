@@ -45,16 +45,47 @@ compute_verb_frame_df <- function(metric_data){
   l<- metric_data$language[1]
   file_ <-  glue("{childes_path}/morph_{childes_lang}.rds")
   morph <- readRDS(file_)
-  morph <- morph %>% mutate(next_pos = NA, next_pos2=NA, next_pos3=NA)
-  morph$next_pos[morph$utterance_id == lead(morph$utterance_id, n=1, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
-  morph$next_pos2[morph$utterance_id == lead(morph$utterance_id, n=2, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
-  morph$next_pos3[morph$utterance_id == lead(morph$utterance_id, n=3, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
-  morph <- morph %>%
-    mutate(next_pos = ifelse(next_pos=="same_utt",lead(pos, n=1, default=NA), NA ),
-           next_pos2 = ifelse(next_pos2=="same_utt",lead(pos, n=2, default=NA), NA ),
-           next_pos3 = ifelse(next_pos3=="same_utt",lead(pos, n=3, default=NA), NA ),
-           )
+  morph <- morph |>
+    distinct()
+  morph <- morph[!duplicated(morph$id), ]
 
+  morph <- morph %>% mutate(next_pos_ = NA, next_pos2_=NA, next_pos3_=NA)
+
+
+  l1 = c("deu", "tur", "nld")
+  if (childes_lang %in% l1){
+
+    morph$next_pos_[morph$utterance_id == lag(morph$utterance_id, n=1, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+    morph$next_pos2_[morph$utterance_id == lag(morph$utterance_id, n=2, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+    morph$next_pos3_[morph$utterance_id == lag(morph$utterance_id, n=3, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+    #morph$next_pos[morph$next_pos == "same_utt"] = lag(morph$next_pos, n=1, default=NA)
+
+    morph$next_pos <- shift(morph$pos, 1, type = "lag")
+    morph$next_pos2 <- shift(morph$pos, 2, type = "lag")
+    morph$next_pos3 <- shift(morph$pos, 3, type = "lag")
+
+    morph <- morph %>%
+      mutate(next_pos = ifelse(next_pos_=="same_utt",next_pos, NA),
+             next_pos2 = ifelse(next_pos2_=="same_utt",next_pos2, NA),
+             next_pos3 = ifelse(next_pos3_=="same_utt",next_pos3, NA ),
+      )
+  }else{
+    morph$next_pos_[morph$utterance_id == lead(morph$utterance_id, n=1, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+    morph$next_pos2_[morph$utterance_id == lead(morph$utterance_id, n=2, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+    morph$next_pos3_[morph$utterance_id == lead(morph$utterance_id, n=3, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
+    #morph$next_pos[morph$next_pos == "same_utt"] = lag(morph$next_pos, n=1, default=NA)
+
+    morph$next_pos <- shift(morph$pos, 1, type = "lead")
+    morph$next_pos2 <- shift(morph$pos, 2, type = "lead")
+    morph$next_pos3 <- shift(morph$pos, 3, type = "lead")
+
+    morph <- morph %>%
+      mutate(next_pos = ifelse(next_pos_=="same_utt",next_pos, NA),
+             next_pos2 = ifelse(next_pos2_=="same_utt",next_pos2, NA),
+             next_pos3 = ifelse(next_pos3_=="same_utt",next_pos3, NA ),
+      )
+
+  }
  # morph= morph %>% mutate(next_pos = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos, ""),
 #                          next_pos2 = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos2, ""),
 #                          next_pos3 = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos3, ""))
@@ -333,10 +364,11 @@ build_uni_lemma_map <- function(uni_lemmas) {
     group_by(language, uni_lemma, definition) |>
     summarise(special_cases = list(option))
 
+
   uni_lemmas |>
     unnest(items) |>
     left_join(special_case_map) |>
-    mutate(option = pmap(list(language, definition, special_cases),
+    mutate(option = pmap(list(language, definition, special_cases), #be careful dutch has item_definition
                          build_options)) |>
     select(language, uni_lemma, option) |>
     unnest(option) |>
@@ -355,13 +387,13 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
   tokens_mapped <- token_metrics |>
     select(token, token_stem) |>
     mutate(token_self = token,
-           token_stemmed = SnowballC::wordStem(token, lang)) |> #stem(token, lang)) |>
+           token_stemmed =stem(token, lang)) |> # SnowballC::wordStem(token, lang)) |> #stem(token, lang)) |> #SnowballC::wordStem(token, lang)) |> #
     pivot_longer(c(token_self, token_stemmed), names_to = "src", #token_stem,
                  values_to = "option") |>
     filter(!is.na(option), option != "") |>
     select(-src) |>
     distinct() |>
-    inner_join(build_uni_lemma_map(uni_lemmas|> filter(language =="Dutch"))) |>
+    inner_join(uni_lemma_map) |>
     group_by(uni_lemma, token) |>
     summarise(options = list(option)) |>
     ungroup()
