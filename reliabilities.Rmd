@@ -22,16 +22,16 @@ library(childesr)
 
 walk(list.files("/Users/loukatou/Documents/aoa-pipeline/scripts", pattern = "*.R", full.names = TRUE), source)
 
-target_langs <- c("French (French)", "English (American)", "Italian")#, "Italian", "Turkish"
+target_langs <- c("French (French)", "Turkish", "Italian")#, "Italian", "Turkish"
 #target_langs <- c("Danish", "Norwegian", "Croatian", "Italian", "Spanish (Mexican)", #"Turkish", "Swedish", "French (Quebecois)", "Russian") #, "English (American)"
 
-target_langs <- "artificial_simple"
+#target_langs <- "artificial_simple"
 
 childes_path <- "/Users/loukatou/Documents/aoa-pipeline/data/childes"
 
 temp_path <- "/Users/loukatou/Documents/aoa-pipeline/data/temp_saved_data"
 
-metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_prefix, compute_verb_frame)
+metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_verb_frame ) # 
 
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
@@ -118,8 +118,12 @@ return(df)
 
 #################  
 
+
 # main function for reliabilities of aoa within wordbank
 get_main_rel_aoa <-function(lang, meas){
+  langn = str_replace(lang, " ", "_")
+  rel_aoa <- file.path(glue("/Users/loukatou/Documents/aoa-pipeline/data/reliabilities_aoa_{langn}.rds"))
+  if(!file.exists(rel_aoa)){
   print(glue("Get CDI item data for {lang} {meas} and measure aoas..."))
   if (is.null(nrow(split_wordbank(lang, "WS", meas)[[1]]))){
      if (!is.null(nrow(split_wordbank(lang, "WG", meas)[[1]]))){
@@ -143,9 +147,14 @@ get_main_rel_aoa <-function(lang, meas){
   first_aoas <- measure_aoas(first_summary)
   second_aoas <-measure_aoas(second_summary)
   print(glue("Measure correlation ..."))
-  r<-cor(first_aoas$aoa, second_aoas$aoa, use="complete.obs", method="pearson") #measure r
-    }
+  r<-cor(first_aoas$aoa, second_aoas$aoa, use="complete.obs", method="pearson") 
+  }
   return(r)
+  } else {
+  r<- readRDS(rel_aoa) 
+  r <- r|> filter(language == lang, measure == meas) |> select(r_aoa)
+  return(r$r_aoa)
+  }
 }
 
 ```
@@ -158,22 +167,26 @@ Implement functions above, for each target language, measure (and optionally wor
 
 ```{r aoas, warning = FALSE, message=FALSE}
 
-rel_aoa <- file.path(glue("/Users/loukatou/Documents/aoa-pipeline/data/reliabilities_aoa.rds")) #check whether cached data exist
-  if(!file.exists(rel_aoa)) {
+target_langs <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)",  "German", "Portuguese (European)", "Swedish", "Italian", "Norwegian", "Turkish", "Danish") #Dutch, Hungarian, Spanish (European)
+
+#rel_aoa <- file.path(glue("/Users/loukatou/Documents/aoa-pipeline/data/reliabilities_aoa.rds")) #check whether cached data exist
+#  if(!file.exists(rel_aoa)) {
     
 reliabilities_aoa <- expand_grid(lang = target_langs,
                                  meas = c("produces", "understands"),
                             word_class = c("all")) %>% # 
   rowwise %>%
-  mutate(r_aoa = ifelse(is.na(get_main_rel_aoa(lang, meas)), NA, (sum(get_main_rel_aoa(lang, meas), get_main_rel_aoa(lang, meas), get_main_rel_aoa(lang, meas),get_main_rel_aoa(lang, meas),get_main_rel_aoa(lang, meas)))/5),
+  mutate(r_aoa = ifelse(is.na(get_main_rel_aoa(lang, meas)), NA,
+                        get_main_rel_aoa(lang, meas)),
+  #(sum(get_main_rel_aoa(lang, meas), get_main_rel_aoa(lang, meas), get_main_rel_aoa(lang, meas),get_main_rel_aoa(lang, meas),get_main_rel_aoa(lang, meas)))/5),
           sbr_aoa = sbformula(r_aoa))
   #mutate(split_half_aoa = ifelse(word_class == "all", 
   #                           split_half_cor_aoa(language, measure),
   #                           split_half_cor_aoa(language, word_class)),
         
-  }else{
-reliabilities_aoa <-  readRDS(rel_aoa)
-}
+#  }else{
+#reliabilities_aoa <-  readRDS(rel_aoa)
+#}
 
 
 pathrelaoa<- glue("data/reliabilities_aoa.rds")
@@ -184,16 +197,24 @@ reliabilities_aoa %>%
 ```
 ```{r functions childes}
 
-predictor_list <- c("length_char", "n_type", "mlu", "freq","freq_solo", "freq_first", "freq_last", "n_sfx", "n_category",  "prefix") #"n_distinct_frame"
+target_langs <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)",  "German", "Portuguese (European)", "Swedish", "Italian", "Norwegian", "Turkish", "Danish") #Dutch, Hungarian, Spanish (European)
+
+predictor_list <- c("length_char", "n_type", "mlu", "freq", "n_cat", "per_frame" ) #"n_affix"
 
 # main function for reliabilities of predictors within childes
 get_main_rel <-function(lang){
+  langn = str_replace(lang, " ", "_")
+  rel_childes <- file.path(glue("/Users/loukatou/Documents/aoa-pipeline/data/reliabilities_childes_{langn}.rds"))
+  if(!file.exists(rel_childes)){
   both<-split_half(lang)
   df<- same_size_df(both[[1]],both[[2]])
-  r=c(pred_cor("length_char", df),pred_cor("n_type", df), pred_cor("mlu", df),  pred_cor("freq", df), pred_cor("freq_solo", df), pred_cor("freq_first", df), pred_cor("freq_last", df), pred_cor("n_sfx", df), pred_cor("n_category", df), pred_cor("prefix", df)) # pred_cor("n_distinct_frame", df),
+  r=c(pred_cor("length_char", df),pred_cor("n_type", df), pred_cor("mlu", df),  pred_cor("freq", df), pred_cor("n_cat", df), pred_cor("per_frame", df)) # , pred_cor("n_affix", df),
   names= predictor_list
   rdata <- data.frame(names, r)
   rdata <- rdata %>% mutate(language=lang)
+  }else{
+  rdata <- readRDS(rel_childes)  
+  }
   return(rdata)
 }
 
@@ -262,12 +283,16 @@ get_predictors<- function(half, lang){
       uni_lemmas <- extract_uni_lemmas(comb_summary)
       uni_metrics<- get_uni_lemma_metrics(lang, build_uni_lemma_map(uni_lemmas), token_metrics)
       uni_metrics_ <- uni_metrics |> transform_counts() |> residualize_freqs() |>
-  residualize_morph() 
+  residualize_morph_s() 
       #uni_metrics <- prepare_frequency(lang, uni_metrics, uni_lemmas, count, count_first, count_last, count_solo, frequency, first_frequency, final_frequency, solo_frequency) 
      return(uni_metrics_[order(uni_metrics$uni_lemma),])
      } else{
-      uni_metrics <- NA  
-     return(uni_metrics)   
+      wb_data <- load_wb_data(lang)
+      uni_lemmas <- extract_uni_lemmas(wb_data)
+      uni_metrics<- get_uni_lemma_metrics(lang, build_uni_lemma_map(uni_lemmas), token_metrics)
+      uni_metrics_ <- uni_metrics |> transform_counts() |> residualize_freqs() |>
+  residualize_morph_s() 
+     return(uni_metrics_[order(uni_metrics$uni_lemma),])  
      }
 }
 #############################
@@ -323,20 +348,23 @@ rel <- file.path(glue("/Users/loukatou/Documents/aoa-pipeline/data/reliabilities
  
 split_corpora <- lapply(target_langs, get_main_rel) %>% bind_rows()
 
-split_corpora1 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+#split_corpora1 <- lapply(target_langs, get_main_rel) %>% bind_rows()
 
-split_corpora2 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+#split_corpora2 <- lapply(target_langs, get_main_rel) %>% bind_rows()
 
-split_corpora3 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+#split_corpora3 <- lapply(target_langs, get_main_rel) %>% bind_rows()
 
-split_corpora4 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+#split_corpora4 <- lapply(target_langs, get_main_rel) %>% bind_rows()
+
+predictor_list <- c("length_char", "n_type", "mlu", "freq", "n_cat", "per_frame", "n_affix" ) #
 
 
 reliabilities <- expand_grid(lang = target_langs,
                             word_class = c("all"),
                             pred = predictor_list) %>%  
-                            rowwise %>%            
-                            mutate(r =  (sum(lang_pred_half(lang, pred, split_corpora), lang_pred_half(lang, pred, split_corpora1), lang_pred_half(lang, pred, split_corpora2), lang_pred_half(lang, pred, split_corpora3), lang_pred_half(lang, pred, split_corpora4)))/5) %>% 
+                            rowwise %>%        
+                            mutate(r = lang_pred_half(lang, pred, split_corpora)) |>
+                        #    mutate(r =  (sum(lang_pred_half(lang, pred, split_corpora), lang_pred_half(lang, pred, split_corpora1), lang_pred_half(lang, pred, split_corpora2), lang_pred_half(lang, pred, split_corpora3), lang_pred_half(lang, pred, split_corpora4)))/5) %>% 
   mutate(sbr = sbformula(as.numeric(r)))
 
 reliabilities %>%
@@ -355,19 +383,29 @@ reliabilities <-  readRDS(rel)
 
 The rsq_cv function measures the R squared of the cross-validated test models
 ```{r x-validation}
+sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
 
 rsq <- file.path(glue("/Users/loukatou/Documents/aoa-pipeline/data/rsq.rds")) #check whether cached data exist
   if(!file.exists(rsq)) {
 
 #Italian: 25, 308 (bath, sit, a)
 rsq_cv<- function(word_values, predictor, lang, meas) {
-  r<-word_values |>
-  filter(language==lang, measure==meas) |>
-  group_nest() |>
-  mutate(loo_data = map(data, crossv_loo),
-         loo_models = map(data, fit_cv_models, list(make_predictor_formula(predictor, TRUE))),
+  r <- word_values |>
+    filter(language == lang, measure == meas) |>
+  group_nest(language, meas) |>
+  mutate(#language=lang,
+         #measure=meas,
+    loo_models = ifelse(language %in% sinotibetan_languages, map(data, fit_cv_models, list(make_predictor_formula(predictor))), map(data, fit_cv_models, list(make_predictor_formula(predictor)))),
          loo_preds = map2(loo_models, data, get_cv_preds),
-         cv_results = map(loo_preds, get_cv_results))
+         cv_results = map(loo_preds, get_cv_results))  
+
+  #r<-word_values |>
+  #filter(language==lang, measure==meas) |>
+  #group_nest() |>
+  #mutate(loo_data = map(data, crossv_loo),
+  #       loo_models = map(data, fit_cv_models, list(make_predictor_formula(predictor, TRUE))),
+  #       loo_preds = map2(loo_models, data, get_cv_preds),
+  #       cv_results = map(loo_preds, get_cv_results))
   r_lp<- r |>
     unnest(cv_results) %>% 
     dplyr::select(r2) %>%
@@ -376,17 +414,51 @@ rsq_cv<- function(word_values, predictor, lang, meas) {
   return(as.character(r)) 
   }
 
-file_wv <- file.path(glue("/Users/lscpuser/Documents/aoa-pipeline8/aoa-pipeline-main-1/data/word_values.rds"))
-word_values <- readRDS(file_wv) ####data needed from aoa-template
-word_values <- word_values %>% 
+#file_wv <- file.path(glue("/Users/lscpuser/Documents/aoa-pipeline8/aoa-pipeline-main-1/data/word_values.rds"))
+
+file_wv <- file.path(glue("~/Documents/aoa-pipeline/data/aoa_predictor_data1.rds"))
+word_values1 <- readRDS(file_wv) ####data needed from aoa-template
+
+predictor_list <- c("length_char", "n_type", "mlu", "freq", "n_cat", "n_affix", "per_frame" )
+
+word_values1 <- word_values1 %>% 
   filter(!(language=="Russian" & category=="sounds"))
 
-rsq <- expand_grid(  #     class = c("all"),
+target_langs1 <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)", "Swedish") #Dutch, Hungarian, Spanish (European) , "Italian", "Norwegian", "Turkish", "Danish"
+
+target_langs2 <- c("Italian", "Norwegian", "Turkish", "Danish")
+
+target_langs3 <- c("German", "Portuguese (European)") #Dutch, Hungarian, Spanish (European) , "Italian", "Norwegian", "Turkish", "Danish"
+
+predictor_list2 <- c("length_char","n_type", "mlu", "freq", "n_cat","per_frame" )
+
+file_wv2 <- file.path(glue("~/Documents/aoa-pipeline/data/aoa_predictor_data2.rds"))
+word_values2 <- readRDS(file_wv2) ####data needed from aoa-template
+
+
+rsq1 <- expand_grid(  #     class = c("all"),
                    pred = predictor_list,
-                   lang = target_langs,
+                   lang = target_langs1,
                    meas = c("produces", "understands")) %>% 
                    rowwise %>%
-                   mutate(r2= rsq_cv(word_values, pred, lang, meas))
+                   mutate(r2= rsq_cv(word_values1, pred, lang, meas))
+
+rsq2 <- expand_grid(  #     class = c("all"),
+                   pred = predictor_list2,
+                   lang = target_langs2,
+                   meas = c("produces", "understands")) %>% 
+                   rowwise %>%
+                   mutate(r2= rsq_cv(word_values2, pred, lang, meas))
+
+rsq3 <- expand_grid(  #     class = c("all"),
+                   pred = predictor_list,
+                   lang = target_langs3,
+                   meas = c("produces")) %>% 
+                   rowwise %>%
+                   mutate(r2= rsq_cv(word_values1, pred, lang, meas))
+
+rsq <- rbind(rsq2, rsq3)
+rsq <- do.call("rbind", list(rsq1, rsq2, rsq3))
 
 rsqpath<- glue("data/rsq.rds")
 saveRDS(rsq, rsqpath)
