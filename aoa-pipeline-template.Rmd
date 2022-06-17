@@ -113,17 +113,17 @@ childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |>
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes, eval=FALSE}
 
-metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_verb_frame ) # 
+metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_verb_frame ) 
 
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
 #ita_childes <- get_token_metrics("Italian", metric_funs, corpus_args)
 #dutch danish norwegian swedish german italian spanish french portuguese hungarian
-#childes_lang = "hun"
-#l="hun"
-#fra_childes <- get_token_metrics("Hungarian", metric_funs, corpus_args)#
-#fra_unilemmas <- get_uni_lemma_metrics("Hungarian", build_uni_lemma_map(uni_lemmas|> #filter(language =="Hungarian")))
+childes_lang = "dan"
+l="dan"
+dan_childes <- get_token_metrics("Danish", metric_funs, corpus_args)#
+dan_unilemmas <- get_uni_lemma_metrics("Danish", build_uni_lemma_map(uni_lemmas|> filter(language =="Danish")))
 
 #spa_childes <- get_token_metrics("Spanish (Mexican)", metric_funs, corpus_args)
 #eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
@@ -157,8 +157,9 @@ Get phonology via eSpeak for tokens that didn't get it from CHILDES:
 By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualize_freqs()` residualizes all columns that starts with "freq_" from the column "freq".
 
 ```{r prepare_frequency}
-childes_metrics_ <- childes_metrics |> transform_counts() |> residualize_freqs() |>
-  residualize_morph() 
+childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs() 
+
+childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
 ```
 
 ## Combining sources
@@ -166,7 +167,7 @@ childes_metrics_ <- childes_metrics |> transform_counts() |> residualize_freqs()
 Combine mapped predictors and CHILDES predictors:
 
 ```{r merge_all}
-predictor_data_list <- list(babiness, concreteness, childes_metrics_)
+predictor_data_list <- list(babiness, concreteness, childes_metrics)
 predictor_data <- predictor_data_list |>
   reduce(partial(full_join, by = c("language", "uni_lemma"))) 
 
@@ -227,8 +228,8 @@ predictor_data_lexcat1 <- predictor_data_lexcat |> filter(language %in% target_l
 predictor_data_lexcat2 <- predictor_data_lexcat |> filter(language %in% target_langs2)
 
 
-saveRDS(predictor_data_lexcat1, "data/predictor_data_lexcat1.rds" )
-saveRDS(predictor_data_lexcat2, "data/predictor_data_lexcat2.rds" )
+#saveRDS(predictor_data_lexcat1, "data/predictor_data_lexcat1.rds" )
+#saveRDS(predictor_data_lexcat2, "data/predictor_data_lexcat2.rds" )
 
 
 
@@ -301,6 +302,9 @@ run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_c
 }
 
 #predictors_short<- c("freq", "freq_solo", "freq_last", "freq_first", "length_char", #"length_phon", "mlu", "babiness",  "freq_solo", "concreteness", "n_type", "n_sfx", #"n_category")
+
+saveRDS(aoa_predictor_data1, "data/aoa_predictor_data1.rds")
+saveRDS(aoa_predictor_data2, "data/aoa_predictor_data2.rds")
 
 
 aoa_models1 <- map_df(target_langs1, run_main_model, aoa_predictor_data1, predictors1, uni_lemmas, ref_cat)
@@ -376,7 +380,7 @@ aoa_models |> select(language, measure, stats) |> unnest(stats)
 ```
 
 Variance inflation factors:
-```{r}
+```{r, eval = FALSE}
 aoa_models |> select(language, measure, vifs) |> unnest(vifs)
 
 
@@ -435,6 +439,7 @@ loo_df2 <- bind_rows(xval_und_model2, xval_prod_model2)
 
 loo_df <- bind_rows(loo_df1, loo_df2)
 
+saveRDS(loo_df, "data/loo_df.rds")
 ```
 
 ```{r cross_validate_results}
@@ -546,7 +551,7 @@ aoa_coefs <- aoa_models |>
 ```
 
 
-```{r savedata}
+```{r savedata, eval = FALSE }
 saveRDS(predictor_data_lexcat,"data/plots/predictor_data_lexcat.rds")
 #saveRDS(aoa_predictor_data,"data/plots/aoa_predictor_data.rds" )
 
