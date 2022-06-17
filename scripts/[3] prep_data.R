@@ -35,24 +35,25 @@ residualize_freqs <- function(childes_metrics) {
     mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
 }
 
-residualize_morph <- function(childes_metrics) {
+
+residualize_morph_s <- function(childes_metrics) {
   l1 = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
   childes_metrics1 = childes_metrics[childes_metrics$language %in% l1 ,]
-  a1<-  childes_metrics1 |>
-    filter(!is.na(n_type)) |>
-    filter(!is.na(n_affix)) |>
-    filter(!is.na(n_cat)) |>
-    mutate(across(starts_with("n_cat$"), partial(residualize_col, n_type))) |>
-    mutate(across(starts_with("n_affix"), partial(residualize_col, n_type))) #|>
-    #mutate(n_type = log(n_type)) #|>
-    #mutate(n_cat = log(n_cat)) |>
-    #mutate(n_affix = log(n_affix))
-  #mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
-    #mutate(n_category = ifelse(is.na(n_cat), NA, log(n_cat))) |>
-    #mutate(n_affix = ifelse(is.na(n_affix), NA, log(n_affix)))
-  f <- childes_metrics1 |>
-    select(-n_affix, -n_cat, -n_type) |>
-    left_join(a1)
+ # a1<-  childes_metrics1 |>
+#  filter(!is.na(n_type)) |>
+ #   filter(!is.na(n_affix)) |>
+  #  filter(!is.na(n_cat)) |>
+#    mutate(across(starts_with("n_cat$"), partial(residualize_col, n_type))) |>
+#    mutate(across(starts_with("n_affix"), partial(residualize_col, n_type))) #|>
+  #  #mutate(n_type = log(n_type)) #|>
+#    #mutate(n_cat = log(n_cat)) |>
+ #   #mutate(n_affix = log(n_affix))
+#  #mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
+ #   #mutate(n_category = ifelse(is.na(n_cat), NA, log(n_cat))) |>
+  #  #mutate(n_affix = ifelse(is.na(n_affix), NA, log(n_affix)))
+#  f <- childes_metrics1 |>
+#    select(-n_affix, -n_cat, -n_type) |>
+ #   left_join(a1)
   childes_metrics2 = childes_metrics[!childes_metrics$language %in% l1 ,]
   a2 <- childes_metrics2 |>
       filter(!is.na(n_type)) |>
@@ -67,10 +68,74 @@ residualize_morph <- function(childes_metrics) {
       select(-n_cat, -n_type) |>
       left_join(a2)
    s$n_affix = NA
-   la<- dplyr::bind_rows(f, s)
-   return(la)
+   #la<- dplyr::bind_rows(f, s)
+   return(s)
 }
 
+
+
+
+residualize_morph_c <- function(childes_metrics) {
+  l1 = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
+  childes_metrics1 = childes_metrics[childes_metrics$language %in% l1 ,]
+  a1<-  childes_metrics1 |>
+    filter(!is.na(n_type)) |>
+    filter(!is.na(n_affix)) |>
+    filter(!is.na(n_cat)) |>
+    mutate(across(starts_with("n_cat$"), partial(residualize_col, n_type))) |>
+    mutate(across(starts_with("n_affix"), partial(residualize_col, n_type))) #|>
+  #mutate(n_type = log(n_type)) #|>
+  #mutate(n_cat = log(n_cat)) |>
+  #mutate(n_affix = log(n_affix))
+  #mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
+  #mutate(n_category = ifelse(is.na(n_cat), NA, log(n_cat))) |>
+  #mutate(n_affix = ifelse(is.na(n_affix), NA, log(n_affix)))
+  f <- childes_metrics1 |>
+    select(-n_affix, -n_cat, -n_type) |>
+    left_join(a1)
+  #childes_metrics2 = childes_metrics[!childes_metrics$language %in% l1 ,]
+  #a2 <- childes_metrics2 |>
+  #  filter(!is.na(n_type)) |>
+  #  filter(!is.na(n_cat)) |>
+  #  #mutate(across(starts_with("n_sfx"), partial(residualize_col, n_type))) |>
+  #  mutate(across(starts_with("n_cat$"), partial(residualize_col, n_type))) #|>
+  ## mutate(n_type = log(n_type)) #|>
+  ##mutate(n_cat = log(n_cat))
+  ##mutate(n_type = ifelse(is.na(n_type), NA, log(n_type))) |>
+  ##mutate(n_category = ifelse(is.na(n_cat), NA, log(n_cat)))
+  #s<- childes_metrics2 |>
+   # select(-n_cat, -n_type) |>
+  #  left_join(a2)
+  #s$n_affix = NA
+  #la<- dplyr::bind_rows(f, s)
+  return(f)
+}
+
+
+residualize_morph <- function(lang, childes_metrics) {
+  l1 = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
+  if (lang %in% l1){
+  a<-  childes_metrics |>
+    filter(!is.na(n_type)) |>
+    filter(!is.na(n_affix)) |>
+    filter(!is.na(n_cat)) |>
+    mutate(across(starts_with("n_cat"), partial(residualize_col, n_type))) |>
+    mutate(across(starts_with("n_affix"), partial(residualize_col, n_type)))
+  f <- childes_metrics |>
+    select(-n_affix, -n_cat, -n_type) |>
+    left_join(a)
+  } else {
+  a <- childes_metrics |>
+    filter(!is.na(n_type)) |>
+    filter(!is.na(n_cat)) |>
+    mutate(across(starts_with("n_cat"), partial(residualize_col, n_type)))
+  f<- childes_metrics |>
+   select(-n_cat, -n_type) |>
+    left_join(a)
+  f$n_affix = NA
+  }
+  return(f)
+}
 
 ## Imputation
 fit_predictor <- function(pred, d, pred_sources) {
