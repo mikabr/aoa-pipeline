@@ -201,11 +201,19 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   return(imputation_data)
 }
 
-
 do_lang_imputation <- function(language, data, pred_sources, max_steps) {
   # if all the predictors are from one source, fix the pred_sources
   if (length(pred_sources) == 1) pred_sources <- unlist(pred_sources)
-  predictors <- unlist(pred_sources)
+
+
+  l1 = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
+  if (language %in% l1){
+    predictors <- unlist(pred_sources)
+  } else{
+    predictors <- unlist(pred_sources)
+    predictors = predictors[predictors!= "n_affix"]
+    }
+
   print(glue("Imputing {language} with {max_steps} steps..."))
   predictor_list <- get_predictor_order(data, predictors, max_steps)
   # what do we do if a language is missing a predictor entirely?
@@ -213,6 +221,7 @@ do_lang_imputation <- function(language, data, pred_sources, max_steps) {
   imputed_data <- get_imputation_seed(data, predictors)
   imputed_data <- do_iterate_imputation(pred_sources, imputed_data,
                                         missing_data)
+  scaled_data <- do_scaling(imputed_data, predictors)
   return(imputed_data)
 }
 
