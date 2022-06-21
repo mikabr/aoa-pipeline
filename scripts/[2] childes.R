@@ -1,3 +1,5 @@
+library(data.table)
+
 compute_count <- function(metric_data) {
   print("Computing count...")
   metric_data |> count(token, name = "count")
@@ -43,6 +45,7 @@ compute_length_phon <- function(metric_data) {
 compute_verb_frame_df <- function(metric_data){
 
   l<- metric_data$language[1]
+  childes_lang <- convert_lang_childes(l)
   file_ <-  glue("{childes_path}/morph_{childes_lang}.rds")
   morph <- readRDS(file_)
   morph <- morph |>
@@ -58,7 +61,6 @@ compute_verb_frame_df <- function(metric_data){
     morph$next_pos_[morph$utterance_id == lag(morph$utterance_id, n=1, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
     morph$next_pos2_[morph$utterance_id == lag(morph$utterance_id, n=2, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
     morph$next_pos3_[morph$utterance_id == lag(morph$utterance_id, n=3, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
-    #morph$next_pos[morph$next_pos == "same_utt"] = lag(morph$next_pos, n=1, default=NA)
 
     morph$next_pos <- shift(morph$pos, 1, type = "lag")
     morph$next_pos2 <- shift(morph$pos, 2, type = "lag")
@@ -73,7 +75,6 @@ compute_verb_frame_df <- function(metric_data){
     morph$next_pos_[morph$utterance_id == lead(morph$utterance_id, n=1, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
     morph$next_pos2_[morph$utterance_id == lead(morph$utterance_id, n=2, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
     morph$next_pos3_[morph$utterance_id == lead(morph$utterance_id, n=3, default=NA) & !is.na(morph$utterance_id)] <- "same_utt"
-    #morph$next_pos[morph$next_pos == "same_utt"] = lag(morph$next_pos, n=1, default=NA)
 
     morph$next_pos <- shift(morph$pos, 1, type = "lead")
     morph$next_pos2 <- shift(morph$pos, 2, type = "lead")
@@ -86,10 +87,6 @@ compute_verb_frame_df <- function(metric_data){
       )
 
   }
- # morph= morph %>% mutate(next_pos = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos, ""),
-#                          next_pos2 = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos2, ""),
-#                          next_pos3 = ifelse(grepl('^v', pos) & pos!="v:aux" & pos!="v:int", next_pos3, ""))
-
   morph$next_pos <- paste(morph$next_pos,morph$next_pos2,morph$next_pos3,sep="_")
   morph <- morph %>% select(-next_pos2, - next_pos3)
 
@@ -111,10 +108,10 @@ compute_verb_frame_df <- function(metric_data){
 
 compute_verb_frame <- function(metric_data){
   print("Computing verb frames")
-  file_u <- glue("{childes_path}/verb_frames_{childes_lang}.rds")
-  if (file.exists(file_u)) {
-    aa <- readRDS(file_u)
-  } else {
+  #file_u <- glue("{childes_path}/verb_frames_{childes_lang}.rds")
+  #if (file.exists(file_u)) {
+  #  aa <- readRDS(file_u)
+  #} else {
     morph<-compute_verb_frame_df(metric_data)
     #saveRDS(morph, file_u)
   tmp_data <- metric_data |>
@@ -140,8 +137,6 @@ compute_verb_frame <- function(metric_data){
     summarise(n_distinct_frame = mean(n_distinct_frame, na.rm=TRUE),
               per_frame = mean(per_frame,  na.rm=TRUE),
               main_frame = paste(main_frame, collapse=","),)
-  saveRDS(aa, file_u)
-  }
   return(aa)
 }
 
@@ -152,50 +147,59 @@ comma_sep = function(x) {
 
 compute_n_sfx_cat <-function(metric_data){
   print("Computing number of morphemes and categories")
-  file_u <- glue("{childes_path}/n_sfx_cat_{childes_lang}.rds")
-  if (file.exists(file_u)) {
-    morph <- readRDS(file_u)
-  } else {
+  #file_u <- glue("{childes_path}/n_sfx_cat_{childes_lang}.rds")
+  #if (file.exists(file_u)) {
+  #  morph <- readRDS(file_u)
+  #} else {
   l<- metric_data$language[1]
   print("morph file")
-  file_ <-glue("{childes_path}/morph_{l}.rds")
-  morph <- readRDS(file_)
-  #morph$number.of.sfx <- str_remove(morph$affix_type_m, "sfxf")
-  #morph$number.of.sfx <- str_count(morph$number.of.sfx, "sfx")
+  childes_lang <- convert_lang_childes(l)
+  file_ <-glue("{childes_path}/morph_{childes_lang}.rds")
+  morph <- readRDS(file_) |>
+    rename(gloss= gloss_m)
+  if("n_morpheme" %in% colnames(morph)){
   morph2 <- metric_data |>
     left_join(morph) |>
     group_by(gloss) |>
     summarise(n_cat = mean(n_cat, na.rm = TRUE),
-              #n_affix = mean(n_morpheme, na.rm = TRUE),
-              #token_morphemes= list(unique(na.omit(affix_m))),
-              #token_categories= list(unique(na.omit(cat_m))),
+              n_affix = mean(n_morpheme, na.rm = TRUE),
               pos = pos) |>
     filter(!is.na(pos)) |>
     rename(token = gloss) |>
     group_by(token) |>
-    summarise(#token_morphemes = paste(token_morphemes, collapse=","),
-              #n_affix = mean(n_affix,  na.rm=TRUE),
+    summarise(n_affix = mean(n_affix,  na.rm=TRUE),
               n_cat = mean(n_cat,  na.rm=TRUE),
               pos = paste(pos))
-  morph2$pos = str_replace_all(morph2$pos,"V.PTCP","V")
-  morph <- morph2 |> distinct()
-  print("Save file")
-  saveRDS(morph, file_u)
+  } else {
+  morph2 <- metric_data |>
+      left_join(morph) |>
+      group_by(gloss) |>
+      summarise(n_cat = mean(n_cat, na.rm = TRUE),
+                pos = pos) |>
+      filter(!is.na(pos)) |>
+      rename(token = gloss) |>
+      group_by(token) |>
+      summarise(n_cat = mean(n_cat,  na.rm=TRUE),
+        pos = paste(pos))
   }
-  print("print ")
-  print(morph)
+    morph2$pos = str_replace_all(morph2$pos,"V.PTCP","V")
+    morph <- morph2 |> distinct()
+    #saveRDS(morph, file_u)
+    print(morph)
 }
 
 
 compute_n_type <- function(metric_data){
   print("Computing number of types")
-  file_u <- glue("{childes_path}/n_type_{childes_lang}.rds")
-  if (file.exists(file_u)) {
-    last <- readRDS(file_u)
-  } else {
+  #file_u <- glue("{childes_path}/n_type_{childes_lang}.rds")
+  #if (file.exists(file_u)) {
+  #  last <- readRDS(file_u)
+  #} else {
   l<- metric_data$language[1]
-  file_ <-glue("{childes_path}/morph_{l}.rds")
-  morph <- readRDS(file_)
+  childes_lang <- convert_lang_childes(l)
+  file_ <-glue("{childes_path}/morph_{childes_lang}.rds")
+  morph <- readRDS(file_) |>
+    rename(gloss= gloss_m)
   tmp <- metric_data |>
     left_join(morph)  |>
     select(gloss, stem_m, pos)
@@ -208,7 +212,6 @@ compute_n_type <- function(metric_data){
     filter(!stem_m =="")
   last <- tmp |>
     left_join(a) |>
-   # mutate(token_types = ifelse(token_types == "NULL", NA, token_types)) |>
     group_by(gloss) |>
     summarise(n_type = mean(n_type, na.rm=TRUE),
               #token_types = list(unique(token_types)),
@@ -221,15 +224,16 @@ compute_n_type <- function(metric_data){
               #token_types = paste(token_types, collapse=","),
               token_stem = paste(token_stem, collapse=",")) |>
     rename(token = gloss)
-  saveRDS(last, file_u)
-  }
+  #saveRDS(last, file_u)
+  #}
   print(last)
 }
 
 compute_prefix <- function(metric_data){
   print("Computing prefixes")
   l<- metric_data$language[1]
-  file_ <- ("~/Documents/aoa_pipeline/data/childes/morph_{l}.rds")
+  childes_lang <- convert_lang_childes(l)
+  file_ <- ("~/Documents/aoa_pipeline/data/childes/morph_{childes_lang}.rds")
   morph <- readRDS(file_)
   metric_data |>
     left_join(morph) |>
