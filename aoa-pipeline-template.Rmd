@@ -42,13 +42,13 @@ Loading Wordbank data for multiple languages (cached or not):
 
 target_langs <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)",  "German", "Portuguese (European)", "Hungarian", "Swedish", "Italian", "Norwegian", "Dutch", "Turkish", "Danish")
 
-target_langs <- c("Danish")
+target_langs <- c("Dutch")
 
 wb_data <- load_wb_data(target_langs)
 aoas <- fit_aoas(wb_data)
 
-childes_lang = "dan"
-l="dan"
+#childes_lang = "dan"
+#l="dan"
 
 ```
 
@@ -96,7 +96,7 @@ eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 ```
 
 Loading cached CHILDES data for multiple languages:
-```{r load_childes_xling, eval=FALSE}
+```{r load_childes_xling, eval=TRUE}
 childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |>
   filter(!is.na(uni_lemma))
 ```
@@ -110,15 +110,17 @@ corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 
 
-dan_childes <- get_token_metrics("Danish", metric_funs, corpus_args)
-dan_unilemmas <- get_uni_lemma_metrics("Danish", build_uni_lemma_map(uni_lemmas|> filter(language =="Danish")))
+#dan_childes <- get_token_metrics("Danish", metric_funs, corpus_args)
+#dan_unilemmas <- get_uni_lemma_metrics("Danish", build_uni_lemma_map(uni_lemmas|> filter(language =="Danish")))
 
 ```
 
 Creating saved CHILDES data for many languages:
-```{r create_childes_xling, eval=FALSE}
+```{r create_childes_xling, eval=TRUE}
 walk(target_langs, get_token_metrics, metric_funs, corpus_args)
+
 walk(target_langs, load_childes_metrics, uni_lemmas)
+
 ```
 
 Get phonology via eSpeak for tokens that didn't get it from CHILDES:
@@ -140,7 +142,6 @@ By default, `transform_counts()` transforms any column that starts with "count" 
 
 ```{r prepare_frequency}
 
-childes_metrics <- dan_unilemmas 
 childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs() 
 childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
 ```
@@ -186,7 +187,7 @@ predictor_data_lexcat  <- predictor_data_lexcat  |> unnest(options)
 
 #Imputed and scaling
 predictor_data_imputed_scaled <- predictor_data_lexcat |> #
-  do_full_imputation(predictor_sources1, max_steps = 20) 
+  do_full_imputation(predictor_sources, max_steps = 20) 
 
 ```
  
