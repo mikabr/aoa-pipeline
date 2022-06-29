@@ -149,4 +149,12 @@ extract_uni_lemmas <- function(wb_data) {
     select(-c(form,item_id)) |>
     distinct() |>
     nest(items = -c(language, uni_lemma))
+    uni_lemmas <- uni_lemmas |>
+    unnest(items)
+  
+  if("definition" %in% colnames(uni_lemmas)){
+    uni_lemmas <- uni_lemmas |>
+      rename(item_definition = definition)
+  }else{
+  }
 }
