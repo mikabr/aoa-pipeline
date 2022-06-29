@@ -185,7 +185,7 @@ do_scaling <- function(model_data, predictors) {
 
 prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
   lexical_categories <- uni_lemmas |>
-    unnest(cols = "items") |>
+   # unnest(cols = "items") |>
    # filter(!lexical_class=="adverbs") |>
     distinct() |>
     # uni_lemmas with item in multiple different classes treated as "other"
