@@ -1,3 +1,5 @@
+library(data.table)
+
 compute_count <- function(metric_data) {
   print("Computing count...")
   metric_data |> count(token, name = "count")
@@ -201,7 +203,8 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
     inner_join(token_metrics) |>
     select(uni_lemma, tokens = token, where(is_numeric)) |>
     group_by(uni_lemma) |>
-    distinct()
+    distinct() |>
+    filter(!is.na(count))
 
   uni_lemma_tokens <- tokens_mapped |>
     select(uni_lemma, token) |>
