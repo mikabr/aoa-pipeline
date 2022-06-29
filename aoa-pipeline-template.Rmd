@@ -32,28 +32,26 @@ The general steps are:
 # Load Wordbank data
 
 Loading cached Wordbank data for English:
-```{r load_wordbank_eng}
+```{r load_wordbank_eng, eval=FALSE}
 eng_wb_data <- load_wb_data("English (American)")
 eng_wb_data
 ```
 
 Loading Wordbank data for multiple languages (cached or not):
 ```{r load_wordbank_xling}
-target_langs <- c("English (American)", "Norwegian","Russian", 
+#target_langs <- c("English (American)", "Norwegian","Russian", 
                   "Turkish", "Italian", "Swedish",  
                   "French (Quebecois)", "Danish", "Croatian", 
                   "French (French)","German", 
                   "English (British)", "Spanish (European)", "Spanish (Mexican)",
                   "Portuguese (European)", "Mandarin (Beijing)", "English (Australian)")
-#Mandarin taiwanese:  problematic
 
 sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
 
-#target_langs <- c( "English (American)")
+target_langs <- c("French (French)", "French (Quebecois)", "Spanish (Mexican)", "Spanish (European)",  "German", "Portuguese (European)", "Hungarian", "Swedish", "Italian", "Norwegian","Turkish", "Danish", "Dutch")
 
 wb_data <- load_wb_data(target_langs)
 aoas <- fit_aoas(wb_data)
-
 
 ```
 
