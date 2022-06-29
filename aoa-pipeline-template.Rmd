@@ -77,7 +77,9 @@ Creating saved Wordbank data one step at a time (potentially making changes betw
 Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
 ```{r merge_unilemmas}
-uni_lemmas <- extract_uni_lemmas(wb_data)
+#uni_lemmas <- extract_uni_lemmas(wb_data)
+uni_lemmas <- map_df(target_langs, extract_uni_lemmas, wb_data)
+
 ```
 
 ```{r load_predictors}
