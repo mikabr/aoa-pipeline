@@ -4,6 +4,10 @@
 
 # transform any column that starts with "count" by smoothing (add 1),
 # normalizing, and log transforming, then rename "count_x" to "freq_x"
+
+l_with_n_affix = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
+
+
 transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
                              log_transform = TRUE) {
   trans_metrics <- childes_metrics |> group_by(language)
@@ -31,8 +35,7 @@ residualize_freqs <- function(childes_metrics) {
 }
 
 residualize_morph <- function(lang, childes_metrics) {
-  l1 = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
-  if (lang %in% l1){
+  if (lang %in% l_with_n_affix){
   a<-  childes_metrics |>
     filter(!is.na(n_type)) |>
     filter(!is.na(n_affix)) |>
