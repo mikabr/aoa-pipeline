@@ -16,10 +16,15 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
   if (normalize) trans_funs <- c(trans_funs, \(count) count / sum(count))
   if (log_transform) trans_funs <- c(trans_funs, \(count) log(count))
 
+  #morph_funs <-c()
+  #if (log_transform) morph_funs <- c(morph_funs, \(count) log(count))
+
   for (fun in trans_funs) {
     trans_metrics <- trans_metrics |> mutate(across(starts_with("count"), fun))
   }
-
+  #for (fun in morph_funs) {
+  #  trans_metrics <- trans_metrics |> mutate(across(starts_with("n_"), fun))
+  #}
   trans_metrics |> ungroup() |>
     rename_with(\(col) str_replace(col, "count", "freq"), starts_with("count"))
 }
@@ -34,23 +39,33 @@ residualize_freqs <- function(childes_metrics) {
     mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
 }
 
+
 residualize_morph <- function(lang, childes_metrics) {
   if (lang %in% l_with_n_affix){
+    message(glue(" {lang} containing data for n_affix."))
   a<-  childes_metrics |>
+    filter(language == lang) |>
     filter(!is.na(n_type)) |>
     filter(!is.na(n_affix)) |>
     filter(!is.na(n_cat)) |>
     mutate(across(starts_with("n_cat"), partial(residualize_col, n_type))) |>
     mutate(across(starts_with("n_affix"), partial(residualize_col, n_type)))
   f <- childes_metrics |>
+    filter(language == lang) |>
     select(-n_affix, -n_cat, -n_type) |>
     left_join(a)
   } else {
+    message(glue("{lang} not containing data for n_affix."))
   a <- childes_metrics |>
+    filter(language == lang) |>
     filter(!is.na(n_type)) |>
-    filter(!is.na(n_cat)) |>
+    filter(!is.na(n_cat))
+  if (!(all(is.na(a[,"n_cat"])))) {
+    a<- a|>
     mutate(across(starts_with("n_cat"), partial(residualize_col, n_type)))
+  }
   f<- childes_metrics |>
+   filter(language == lang) |>
    select(-n_cat, -n_type) |>
     left_join(a)
   f$n_affix = NA
@@ -59,7 +74,6 @@ residualize_morph <- function(lang, childes_metrics) {
 }
 
 ## Imputation
-
 fit_predictor <- function(pred, d, pred_sources) {
   xs <- pred_sources |> discard(\(s) pred %in% s) |> unlist()
   x_str <- xs |> paste(collapse = " + ")
@@ -108,6 +122,7 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   prediction_list <- unlist(pred_sources)
   # iterates through the predictor list for that language
   for (pred in prediction_list) {
+
     imputation_fits <- fit_predictor(pred, imputation_data, pred_sources)
     imputation_data <- missing |>
       select(uni_lemma, lexical_category, category, !!pred) |>
@@ -123,70 +138,107 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   return(imputation_data)
 }
 
-
 do_lang_imputation <- function(language, data, pred_sources, max_steps) {
   # if all the predictors are from one source, fix the pred_sources
   if (length(pred_sources) == 1) pred_sources <- unlist(pred_sources)
-  
-  if (language %in% l_with_n_affix){
-    predictors <- unlist(pred_sources)
-  } else{
-    predictors <- unlist(pred_sources)
-    predictors = predictors[predictors!= "n_affix"]
-    }
+  #data[colSums(!is.na(data)) > 0]
+  data<- data |> distinct()
+  print("language")
+  print(language)
+  print("data")
+  print(data)
+  #predictors <- unlist(pred_sources)
+  #if (language %in% l_with_n_affix){
+  #  message(glue(" {language} containing data for n_affix."))
+  #
+  #  predictors <- unlist(pred_sources)
+  #} else{
+  #  message(glue(" {language} not containing data for n_affix."))
+  #  pred_sources[[4]] = pred_sources[[4]][pred_sources[[4]]!="n_affix"]
+  #  predictors <- unlist(pred_sources)
+  #  predictors = predictors[predictors!= "n_affix"]
+  #}
+  print("pred_sources1")
+  print(pred_sources)
 
+  if (all(is.na(data[,"n_type"]))) {    pred_sources[[4]] =
+    pred_sources[[4]][pred_sources[[4]]!="n_type"]
+  }
+  if (all(is.na(data[,"n_affix"]))) {    pred_sources[[4]] =
+    pred_sources[[4]][pred_sources[[4]]!="n_affix"]
+  }
+  if (all(is.na(data[,"n_cat"]))) {    pred_sources[[4]] =
+    pred_sources[[4]][pred_sources[[4]]!="n_cat"]
+  }
+  if (all(is.na(data[,"per_frame"]))) {    pred_sources[[5]] =
+    pred_sources[[5]][pred_sources[[5]]!="per_frame"]
+  }
+  print("pred_sources2")
+  print(pred_sources)
+  predictors <- unlist(pred_sources)
   print(glue("Imputing {language} with {max_steps} steps..."))
   predictor_list <- get_predictor_order(data, predictors, max_steps)
+  print(glue("get predictor order."))
   missing_data <- get_missing_data(data, predictors)
+  print(glue("get missing data"))
   imputed_data <- get_imputation_seed(data, predictors)
+  print(glue("get imputation seed"))
+  print(glue("pred_sources"))
+  print(glue("{pred_sources}"))
   imputed_data <- do_iterate_imputation(pred_sources, imputed_data,
                                         missing_data)
+  print(glue("do iterate imputation"))
   scaled_data <- do_scaling(imputed_data, predictors)
+  print(glue("do scaling"))
   return(imputed_data)
 }
 
-do_full_imputation <- function(language, model_data, pred_sources, max_steps) {
+do_full_imputation <- function(model_data, predictor_sources, max_steps) {
   # restrict to the sources in pred_sources
   # catch cases where a predictor in the predictor set isn't in the data
 
-  l = normalize_language(language)
-  file__ <-  glue("{childes_path}/imputed_scaled_{l}.rds")
-  if (file.exists(file__)) {
-    imputed_data <- readRDS(file__)
-  }else{
-  pred_sources <- map(pred_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
+  #language = model_data$language[1][1]
+  #l = normalize_language(language)
+  #file__ <-  glue("{childes_path}/imputed_scaled_{l}.rds")
+  #if (file.exists(file__)) {
+  #  imputed_data <- readRDS(file__)
+  #}else{
+
+  pred_sources <- map(predictor_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
-           all_of(!!unlist(pred_sources))) |>
+           all_of(!!unlist(predictor_sources))) |>
     distinct() |>
     group_by(language) |>
     nest()
+
+
   imputed_data <- nested_data |>
     mutate(imputed = purrr::map2(language, data, function(lang, dat) {
-      do_lang_imputation(lang, dat, pred_sources, max_steps)
+      do_lang_imputation(lang, dat, predictor_sources, max_steps)
     }))
+
   imputed_data <- imputed_data |>
     ungroup() |>
     select(language, imputed) |>
     unnest(imputed) |>
     distinct()
-  saveRDS(imputed_data, file__)
-  }
+#  saveRDS(imputed_data, file__)
+ # }
   return(imputed_data)
 }
+
 
 # scaling predictors
 do_scaling <- function(model_data, predictors) {
   model_data |>
-    group_by(language) |>
+    #group_by(language) |>
     mutate(across(all_of(predictors), \(x) as.numeric(scale(x))))
 }
 
 
-prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
+prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
   lexical_categories <- uni_lemmas |>
-   # unnest(cols = "items") |>
-   # filter(!lexical_class=="adverbs") |>
     distinct() |>
     # uni_lemmas with item in multiple different classes treated as "other"
     mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
@@ -194,10 +246,10 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
     filter(!lexical_category=="other") |>
            # collapse v, adj, adv into one category
     mutate(lexical_category = lexical_category |> as_factor() |>
-             fct_collapse("predicates" = c("verbs", "adjectives", "adverbs")) |>
+             fct_collapse("predicates" = c("verbs", "adjectives")) |>
              fct_relevel("nouns","predicates","function_words")) |>
     select(-lexical_class)
-  lexical_categories$lexical_category <- relevel(lexical_categories$lexical_category, ref=ref_value)
+  lexical_categories$lexical_category <- relevel(lexical_categories$lexical_category, ref_cat)
 
   contrasts(lexical_categories$lexical_category) <- contr.sum
 
@@ -205,9 +257,5 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_value) {
     left_join(lexical_categories) |>
     filter(!is.na(uni_lemma))  |>
     filter(!is.na(lexical_category)) |>
-    filter(!(language == "Russian" & category == "sounds"))
+    distinct()
 }
-
-
-
-
