@@ -63,7 +63,7 @@ compute_verb_frame_df <- function(metric_data){
 
 compute_verb_frame <- function(metric_data){
   print("Computing verb frames")
-    morph<-compute_verb_frame_df(metric_data)
+  morph<-compute_verb_frame_df(metric_data)
   tmp_data <- metric_data |>
     select(token_id, token, utterance_id) |>
     left_join(morph)
@@ -98,26 +98,34 @@ comma_sep = function(x) {
 compute_n_sfx_cat <-function(metric_data){
   print("Computing number of morphemes and categories")
   l<- metric_data$language[1]
-  print("morph file")
+  print("Checking for morph file")
   file_ <- file.path(childes_path, glue("morph_{l}.rds"))
-  morph <- readRDS(file_) |>
-    rename(gloss= gloss_m)
-
+  if (file.exists(file_)) {
+    morph <- readRDS(file_)
+  }else{
+    print("No morph file, looking for unimorph or morphnet data")
+    unimorph_languages <- c("nld", "nor", "tur", "dan")
+    if (l %in% unimorph_languages){
+      morph <- unimorph_extract(l)
+    }else{
+      morph <- morphnet_extract(l)
+    }
+  }
   if("n_morpheme" %in% colnames(morph)){
-  morph2 <- metric_data |>
-    left_join(morph) |>
-    group_by(gloss) |>
-    summarise(n_cat = mean(n_cat, na.rm = TRUE),
-              n_affix = mean(n_morpheme, na.rm = TRUE),
-              pos = pos) |>
-    filter(!is.na(pos)) |>
-    rename(token = gloss) |>
-    group_by(token) |>
-    summarise(n_affix = mean(n_affix,  na.rm=TRUE),
-              n_cat = mean(n_cat,  na.rm=TRUE),
-              pos = paste(pos))
+    morph2 <- metric_data |>
+      left_join(morph) |>
+      group_by(gloss) |>
+      summarise(n_cat = mean(n_cat, na.rm = TRUE),
+                n_affix = mean(n_morpheme, na.rm = TRUE),
+                pos = pos) |>
+      filter(!is.na(pos)) |>
+      rename(token = gloss) |>
+      group_by(token) |>
+      summarise(n_affix = mean(n_affix,  na.rm=TRUE),
+                n_cat = mean(n_cat,  na.rm=TRUE),
+                pos = paste(pos))
   } else {
-  morph2 <- metric_data |>
+    morph2 <- metric_data |>
       left_join(morph) |>
       group_by(gloss) |>
       summarise(n_cat = mean(n_cat, na.rm = TRUE),
@@ -126,11 +134,11 @@ compute_n_sfx_cat <-function(metric_data){
       rename(token = gloss) |>
       group_by(token) |>
       summarise(n_cat = mean(n_cat,  na.rm=TRUE),
-        pos = paste(pos))
+                pos = paste(pos))
   }
-    morph2$pos = str_replace_all(morph2$pos,"V.PTCP","V")
-    morph <- morph2 |> distinct()
-    print(morph)
+  morph2$pos = str_replace_all(morph2$pos,"V.PTCP","V")
+  morph <- morph2 |> distinct()
+  print(morph)
 }
 
 
@@ -138,8 +146,7 @@ compute_n_type <- function(metric_data){
   print("Computing number of types")
   l<- metric_data$language[1]
   file_ <- file.path(childes_path, glue("morph_{l}.rds"))
-  morph <- readRDS(file_) |>
-    rename(gloss= gloss_m)
+  morph <- readRDS(file_)
   tmp <- metric_data |>
     left_join(morph)  |>
     select(gloss, stem_m, pos)
