@@ -5,23 +5,23 @@ library(tidyverse)
 morphnet_extract <- function(childes_lang){
 
   if (childes_lang == "spa"){
-    unimorph1 <- read.csv("data/unimorph_spa1.tsv", sep="\t")
+    unimorph1 <- read.csv("data/temp_saved_data/unimorph_spa1.tsv", sep="\t")
     colnames(unimorph1) <- c("stem","gloss","morph_info", "segment_info")
 
-    unimorph2 <- read.csv("data/unimorph_spa2.tsv", sep="\t")
+    unimorph2 <- read.csv("data/temp_saved_data/unimorph_spa2.tsv", sep="\t")
     colnames(unimorph2) <- c("stem","gloss","morph_info", "segment_info")
 
     unimorph <- dplyr::bind_rows(unimorph1, unimorph2)
-    write.table(unimorph, "data/unimorph_spa.tsv", sep = "\t")
+    write.table(unimorph, "data/temp_saved_data/unimorph_spa.tsv", sep = "\t")
   }
-  f <- file.path(glue("data/unimorph_{childes_lang}.tsv"))
+  f <- file.path(glue("data/temp_saved_data/unimorph_{childes_lang}.tsv"))
   unimorph <- read.csv(f, sep = "\t")
 
   if (childes_lang == "eng"){
     unimorph <- head(unimorph, 100000)
   }
 
-  d <- file.path(glue("data/unimorph_{childes_lang}_der.tsv"))
+  d <- file.path(glue("data/temp_saved_data/unimorph_{childes_lang}_der.tsv"))
   if (!(childes_lang=="rus")){
   unimorph_dev <- read.csv(d, sep = "\t")
   }
@@ -113,7 +113,7 @@ return(corpus)
 
 
 unimorph_extract <- function(childes_lang){
-  f <- file.path(glue("data/unimorph_{childes_lang}.csv"))
+  f <- file.path(glue("data/temp_saved_data/unimorph_{childes_lang}.csv"))
 unimorph <- read.csv(f, sep = "\t" ) #remove sep = "\t" for Norwegian data
 
 childes<- get_childes_data({childes_lang}, corpus_args)
@@ -165,6 +165,3 @@ o <- file.path(glue("data/childes/morph_{childes_lang}.rds"))
 saveRDS(corpus, o)
 return(corpus)
 }
-
-##################################
-Footer
