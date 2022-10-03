@@ -1,4 +1,5 @@
-get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
+get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
+                            db_args = NULL) {
   message(glue("Getting administrations for {language} {form}..."))
 
   admins <- get_administration_data(language = language,
@@ -17,7 +18,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE) {
   admins |> select(language, form, age, data_id)
 }
 
-get_inst_words <- function(language, form) {
+get_inst_words <- function(language, form, db_args = NULL) {
   message(glue("Getting words for {language} {form}..."))
   get_item_data(language = language,
                 form = form,
@@ -28,7 +29,7 @@ get_inst_words <- function(language, form) {
 }
 
 get_inst_data <- function(language, form, admins, items,
-                          custom_unilemmas = TRUE) {
+                          custom_unilemmas = TRUE, db_args = NULL) {
   message(glue("Getting data for {language} {form}..."))
 
   # temp solution:
@@ -98,7 +99,8 @@ create_inst_data <- function(language, form, custom_unilemmas = TRUE) {
   get_inst_data(language, form, inst_admins, inst_words, custom_unilemmas)
 }
 
-create_wb_data <- function(language, write = TRUE, custom_unilemmas = TRUE) {
+create_wb_data <- function(language, write = TRUE,
+                           custom_unilemmas = TRUE, db_args = NULL) {
   lang <- language # for filter name scope issues
   insts <- get_instruments(db_args = db_args)
   forms <- insts |> filter(language == lang) |> pull(form)
@@ -142,7 +144,7 @@ load_wb_data <- function(languages, cache = TRUE) {
 }
 
 extract_uni_lemmas <- function(lang, wb_data) {
-  uni_lemmas<-wb_data |>
+  uni_lemmas <- wb_data |>
     filter(language == lang)|>
     filter(!is.na(uni_lemma)) |>
     distinct(language, uni_lemma, items) |>
@@ -158,6 +160,7 @@ extract_uni_lemmas <- function(lang, wb_data) {
   if("definition" %in% colnames(uni_lemmas)){
     uni_lemmas <- uni_lemmas |>
       rename(item_definition = definition)
-  }else{
   }
+  uni_lemmas |>
+    nest(items = -c(language, uni_lemma))
 }
