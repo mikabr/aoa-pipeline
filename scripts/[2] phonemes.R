@@ -98,23 +98,18 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
            str_phons = str_phons(phons)) |>
     select(-fixed_phon)
 
-  uni_phons_fixed <- uni_phons_fixed |>
-    mutate(phon_neighborhood = sapply(str_phons, \(x) {
-      lapply(x, \(y) {
-        count_phon_neighbors(y, uni_phons_fixed$str_phons, radius)
-      }) |>
-        unlist() |>
-        mean(na.rm = T)
-    }))
-
-  uni_phons_fixed <- uni_phons_fixed |>
-    mutate(phon_neighborhood = sapply(str_phons, \(x) {
-      lapply(x, partial(count_phon_neighbors,
-                        ipa_list = uni_phons_fixed$str_phons,
-                        radius = radius)) |>
-        unlist() |>
-        mean(na.rm = T)
-    }))
+  uni_phons_fixed__ <- uni_phons_fixed |>
+    nest(items = -language) |>
+    mutate(items = lapply(items, \(w) {
+      w |> mutate(phon_neighborhood = sapply(str_phons, \(x) {
+        lapply(x, \(y) {
+          count_phon_neighbors(y, w$str_phons, radius)
+        }) |>
+          unlist() |>
+          mean(na.rm = T)
+      }))
+    })) |>
+    unnest(cols = items)
 
   # get lengths
   uni_lengths <- uni_phons_fixed |>
