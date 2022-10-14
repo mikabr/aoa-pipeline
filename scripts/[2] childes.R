@@ -142,15 +142,15 @@ build_special_case_map <- function(lang) {
   special_case_file <- glue("resources/special_cases/{norm_lang}.csv")
   if (file.exists(special_case_file)) {
     special_case_map <- read_csv(special_case_file, col_names = FALSE) |>
-      rename(uni_lemma = X1, definition = X2) |>
-      pivot_longer(-c(uni_lemma, definition),
+      rename(uni_lemma = X1, item_definition = X2) |>
+      pivot_longer(-c(uni_lemma, item_definition),
                    names_to = "x", values_to = "option") |>
       filter(!is.na(option)) |>
       select(-x) |>
       mutate(language = lang)
   } else {
     special_case_map <- tibble(language = character(), uni_lemma = character(),
-                               definition = character(), option = character())
+                               item_definition = character(), option = character())
   }
   return(special_case_map)
 }
@@ -169,12 +169,12 @@ build_options <- function(language, word, special_cases) {
 build_uni_lemma_map <- function(uni_lemmas) {
   special_case_map <- unique(uni_lemmas$language) |>
     map_df(build_special_case_map) |>
-    group_by(language, uni_lemma, definition) |>
+    group_by(language, uni_lemma, item_definition) |>
     summarise(special_cases = list(option))
   uni_lemmas |>
-    #unnest(items) |>
+    unnest(items) |>
     left_join(special_case_map) |>
-    mutate(option = pmap(list(language, definition, special_cases), #be careful Dutch and Hungarian has item_definition instead of definition
+    mutate(option = pmap(list(language, item_definition, special_cases),
                          build_options)) |>
     select(language, uni_lemma, option) |>
     unnest(option) |>

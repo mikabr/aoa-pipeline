@@ -15,7 +15,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
 
   }
 
-  admins |> select(language, form, age, data_id)
+  admins |> select(language, form, form_type, age, data_id)
 }
 
 get_inst_words <- function(language, form, db_args = NULL) {
@@ -24,8 +24,8 @@ get_inst_words <- function(language, form, db_args = NULL) {
                 form = form,
                 db_args = db_args) |>
     filter(item_kind == "word") |>
-    select(language, form, lexical_class, category, uni_lemma, item_definition,
-           item_id)
+    select(language, form, item_kind, lexical_category, category,
+           uni_lemma, item_definition, item_id)
 }
 
 get_inst_data <- function(language, form, admins, items,
@@ -66,9 +66,9 @@ collapse_inst_data <- function(inst_data) {
   message(glue("Collapsing data for {unique(inst_data$language)} {unique(inst_data$form)}..."))
 
   inst_uni_lemmas <- inst_data |>
-    distinct(measure, uni_lemma, lexical_class, category, item_id, item_definition) |>
+    distinct(measure, uni_lemma, lexical_category, category, item_id, item_definition) |>
     group_by(uni_lemma) |>
-    nest(items = c(lexical_class, category, item_id, item_definition))
+    nest(items = c(lexical_category, category, item_id, item_definition))
 
   inst_data |>
     filter(!is.na(value)) |>

@@ -239,17 +239,19 @@ do_scaling <- function(model_data, predictors) {
 
 prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
   lexical_categories <- uni_lemmas |>
+    unnest(items) |>
     distinct() |>
+    # mutate(lexical_category = sapply(items, \(x) {
+    #   lc <- x |> pull(lexical_category) |> unique()
+    #   if(length(lc) > 1) return("other") else lc
+    # })) |>
     # uni_lemmas with item in multiple different classes treated as "other"
-    mutate(lexical_category = if_else(str_detect(lexical_class, ","), "other",
-                                      lexical_class)) |>
     filter(!lexical_category=="other") |>
            # collapse v, adj, adv into one category
     mutate(lexical_category = lexical_category |> as_factor() |>
-             fct_collapse("predicates" = c("verbs", "adjectives")) |>
-             fct_relevel("nouns","predicates","function_words")) |>
-    select(-lexical_class)
-  lexical_categories$lexical_category <- relevel(lexical_categories$lexical_category, ref_cat)
+             # fct_collapse("predicates" = c("verbs", "adjectives")) |>
+             fct_relevel("nouns","predicates","function_words") |>
+             fct_relevel(ref_cat))
 
   contrasts(lexical_categories$lexical_category) <- contr.sum
 

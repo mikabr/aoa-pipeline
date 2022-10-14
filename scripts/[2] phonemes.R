@@ -98,7 +98,7 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
            str_phons = str_phons(phons)) |>
     select(-fixed_phon)
 
-  uni_phons_fixed__ <- uni_phons_fixed |>
+  uni_phons_fixed <- uni_phons_fixed |>
     nest(items = -language) |>
     mutate(items = lapply(items, \(w) {
       w |> mutate(phon_neighborhood = sapply(str_phons, \(x) {
