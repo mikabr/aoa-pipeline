@@ -14,7 +14,7 @@ extract_unimorph_data <- function(unimorph_lang) {
              str_replace_all("[ |]", ";") |>
              str_replace(";$", "")) |>
     separate(morph_info, c("pos", "morph_info"), sep = "-", fill = "right") |>
-    mutate(n_cat = morph_info |> str_split(";") |> lengths())
+    mutate(n_cat = morph_info |> str_split(";") |> lengths()) # num_morph_categories
 
   seg_file <- glue("data/morphology/{unimorph_lang}.segmentations.tsv")
   if(!file.exists(seg_file)) {
@@ -45,34 +45,40 @@ extract_unimorph_data <- function(unimorph_lang) {
   return(morph_data)
 }
 
-get_morph_data <- function(lang, corpus_args) {
+get_morph_data <- function(lang, corpus_args = default_corpus_args) {
+
   childes_lang <- convert_lang_childes(lang)
-  childes_data <- get_childes_data(childes_lang, corpus_args)
+  file_m <- file.path(childes_path, glue("morph_metrics_{childes_lang}.rds"))
 
-  unimorph_lang <- convert_lang_unimorph(lang)
-  morph_data <- extract_unimorph_data(unimorph_lang)
+  if(file.exists(file_m)) {
+    morph_data <- readRDS(file_m)
+  } else {
+    childes_data <- get_childes_data(childes_lang, corpus_args)
 
-  childes_data <- childes_data$tokens |>
-    left_join(morph_data, by = "gloss") |>
-    mutate(stem = coalesce(stem.x, stem.y)) |>
-    group_by(id, utterance_id, corpus_name, gloss) |>
-    summarise(stem = stem |> unique() |> sort() |> paste(collapse = ", "),
-              morph_info = morph_info |> unique() |> sort() |> paste(collapse = ", "),
-              segment_info = if("segment_info" %in% colnames(morph_data)) {
-                segment_info |> unique() |> sort() |> paste(collapse = ", ")} else NA,
-              pos = pos |> unique() |> sort() |> paste(collapse = ", "),
-              n_morpheme = if("n_morpheme" %in% colnames(morph_data)) {
-                mean(n_morpheme)} else NA,
-              n_cat  = mean(n_cat),
-              is_derivation = if("is_derivation" %in% colnames(morph_data)) {
-                max(is_derivation)} else NA,
-              has_prefix = if("has_prefix" %in% colnames(morph_data)) {
-                max(has_prefix)} else NA) |>
-    distinct()
+    unimorph_lang <- convert_lang_unimorph(lang)
+    morph_data <- extract_unimorph_data(unimorph_lang)
 
-  saveRDS(childes_data,
-          file.path(glue("data/childes/morph_metrics_{childes_lang}.rds")))
-  return(childes_data)
+    morph_data <- childes_data$tokens |>
+      left_join(morph_data, by = "gloss") |>
+      mutate(stem = coalesce(stem.x, stem.y)) |>
+      group_by(id, utterance_id, corpus_name, gloss) |>
+      summarise(stem_m = stem |> unique() |> sort() |> paste(collapse = ", "),
+                morph_info = morph_info |> unique() |> sort() |> paste(collapse = ", "),
+                segment_info = if("segment_info" %in% colnames(morph_data)) {
+                  segment_info |> unique() |> sort() |> paste(collapse = ", ")} else NA,
+                pos = pos |> unique() |> sort() |> paste(collapse = ", "),
+                n_morpheme = if("n_morpheme" %in% colnames(morph_data)) {
+                  mean(n_morpheme)} else NA,
+                n_cat  = mean(n_cat),
+                is_derivation = if("is_derivation" %in% colnames(morph_data)) {
+                  max(is_derivation)} else NA,
+                prefix_m = if("has_prefix" %in% colnames(morph_data)) {
+                  max(has_prefix)} else NA) |>
+      distinct()
+
+    saveRDS(morph_data, file_m)
+  }
+  return(morph_data)
 }
 
 #

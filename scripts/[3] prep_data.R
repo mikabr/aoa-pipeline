@@ -5,7 +5,7 @@
 # transform any column that starts with "count" by smoothing (add 1),
 # normalizing, and log transforming, then rename "count_x" to "freq_x"
 
-l_with_n_affix = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
+l_with_n_affixes = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
 
 
 transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
@@ -41,34 +41,34 @@ residualize_freqs <- function(childes_metrics) {
 
 
 residualize_morph <- function(lang, childes_metrics) {
-  if (lang %in% l_with_n_affix){
-    message(glue(" {lang} containing data for n_affix."))
+  if (lang %in% l_with_n_affixes){
+    message(glue(" {lang} containing data for n_affixes."))
   a<-  childes_metrics |>
     filter(language == lang) |>
-    filter(!is.na(n_type)) |>
-    filter(!is.na(n_affix)) |>
-    filter(!is.na(n_cat)) |>
-    mutate(across(starts_with("n_cat"), partial(residualize_col, n_type))) |>
-    mutate(across(starts_with("n_affix"), partial(residualize_col, n_type)))
+    filter(!is.na(n_forms)) |>
+    filter(!is.na(n_affixes)) |>
+    filter(!is.na(n_morph_categories)) |>
+    mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms))) |>
+    mutate(across(starts_with("n_affixes"), partial(residualize_col, n_forms)))
   f <- childes_metrics |>
     filter(language == lang) |>
-    select(-n_affix, -n_cat, -n_type) |>
+    select(-n_affixes, -n_morph_categories, -n_forms) |>
     left_join(a)
   } else {
-    message(glue("{lang} not containing data for n_affix."))
+    message(glue("{lang} not containing data for n_affixes."))
   a <- childes_metrics |>
     filter(language == lang) |>
-    filter(!is.na(n_type)) |>
-    filter(!is.na(n_cat))
-  if (!(all(is.na(a[,"n_cat"])))) {
+    filter(!is.na(n_forms)) |>
+    filter(!is.na(n_morph_categories))
+  if (!(all(is.na(a[,"n_morph_categories"])))) {
     a<- a|>
-    mutate(across(starts_with("n_cat"), partial(residualize_col, n_type)))
+    mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms)))
   }
   f<- childes_metrics |>
    filter(language == lang) |>
-   select(-n_cat, -n_type) |>
+   select(-n_morph_categories, -n_forms) |>
     left_join(a)
-  f$n_affix = NA
+  f$n_affixes = NA
   }
   return(f)
 }
@@ -148,30 +148,30 @@ do_lang_imputation <- function(language, data, pred_sources, max_steps) {
   print("data")
   print(data)
   #predictors <- unlist(pred_sources)
-  #if (language %in% l_with_n_affix){
-  #  message(glue(" {language} containing data for n_affix."))
+  #if (language %in% l_with_n_affixes){
+  #  message(glue(" {language} containing data for n_affixes."))
   #
   #  predictors <- unlist(pred_sources)
   #} else{
-  #  message(glue(" {language} not containing data for n_affix."))
-  #  pred_sources[[4]] = pred_sources[[4]][pred_sources[[4]]!="n_affix"]
+  #  message(glue(" {language} not containing data for n_affixes."))
+  #  pred_sources[[4]] = pred_sources[[4]][pred_sources[[4]]!="n_affixes"]
   #  predictors <- unlist(pred_sources)
-  #  predictors = predictors[predictors!= "n_affix"]
+  #  predictors = predictors[predictors!= "n_affixes"]
   #}
-  print("pred_sources1")
-  print(pred_sources)
-
-  if (all(is.na(data[,"n_type"]))) {    pred_sources[[4]] =
-    pred_sources[[4]][pred_sources[[4]]!="n_type"]
+  # print("pred_sources1")
+  # print(pred_sources)
+  #
+  if (all(is.na(data[,"n_forms"]))) {    pred_sources[[4]] =
+    pred_sources[[4]][pred_sources[[4]]!="n_forms"]
   }
-  if (all(is.na(data[,"n_affix"]))) {    pred_sources[[4]] =
-    pred_sources[[4]][pred_sources[[4]]!="n_affix"]
+  if (all(is.na(data[,"n_affixes"]))) {    pred_sources[[4]] =
+    pred_sources[[4]][pred_sources[[4]]!="n_affixes"]
   }
-  if (all(is.na(data[,"n_cat"]))) {    pred_sources[[4]] =
-    pred_sources[[4]][pred_sources[[4]]!="n_cat"]
+  if (all(is.na(data[,"n_morph_categories"]))) {    pred_sources[[4]] =
+    pred_sources[[4]][pred_sources[[4]]!="n_morph_categories"]
   }
-  if (all(is.na(data[,"per_frame"]))) {    pred_sources[[5]] =
-    pred_sources[[5]][pred_sources[[5]]!="per_frame"]
+  if (all(is.na(data[,"main_frame_prop"]))) {    pred_sources[[5]] =
+    pred_sources[[5]][pred_sources[[5]]!="main_frame_prop"]
   }
   print("pred_sources2")
   print(pred_sources)

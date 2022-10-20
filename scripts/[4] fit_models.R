@@ -20,7 +20,7 @@ fit_aoas <- function(wb_data, max_steps = 200, min_aoa = 0, max_aoa = 72) {
     mutate(num_false = total - num_true) |>
     nest(data = -c(language, measure, uni_lemma)) |>
     mutate(aoas = map(data, fit_bglm)) |>
-    select(-data) |>
+    dplyr::select(-data) |>
     unnest(aoas) |>
     filter(aoa >= min_aoa, aoa <= max_aoa)
 }

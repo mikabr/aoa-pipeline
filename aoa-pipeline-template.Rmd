@@ -37,7 +37,10 @@ eng_wb_data
 
 Defining languages:
 ```{r define_langs}
-target_langs<-c("Spanish (Mexican)", "Spanish (European)",  "German",  "English (American)","Italian", "Norwegian", "Turkish", "Swedish", "Danish", "Dutch","French (French)","French (Quebecois)", "Portuguese (European)","Hungarian")
+target_langs<-c("Spanish (Mexican)", "Spanish (European)",  "German", 
+                "English (American)", "Italian", "Norwegian", "Turkish", 
+                "Swedish", "Danish", "Dutch", "French (French)",
+                "French (Quebecois)", "Portuguese (European)", "Hungarian")
 #"Croatian" no morphology
 # Russian : transliteration of morphology
 sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
@@ -84,6 +87,13 @@ concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 ```
 
+## Morphology
+
+Creating saved morphology metrics for many languages:
+```{r create_morphs_xling, eval=TRUE}
+walk(target_langs, get_morph_data, corpus_args)
+```
+
 ## CHILDES
 
 Loading cached CHILDES metrics for English:
@@ -95,12 +105,14 @@ eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes}
-metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char, compute_length_phon,  compute_n_sfx_cat, compute_n_type, compute_verb_frame ) 
+metric_funs <- list(compute_count, compute_mlu, compute_positions, 
+                    compute_length_char, compute_length_phon, 
+                    compute_n_cats, compute_n_forms, compute_verb_frames) 
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 ```
 
-Creating saved CHILDES data for many languages:
+Creating saved CHILDES data for English:
 ```{r create_childes_english, eval=FALSE}
 eng_childes <- get_token_metrics("English (American)", metric_funs, corpus_args)
 eng_unilemmas <- get_uni_lemma_metrics("English (American)", build_uni_lemma_map(uni_lemmas))
@@ -126,8 +138,7 @@ childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |> filter(!is.
 
 Get phonology via eSpeak for tokens that didn't get it from CHILDES:
 ```{r eval=FALSE}
-#Cannot run this, "no method" error
-phonemes <- uni_lemmas |> map_phonemes()
+phonemes <- uni_lemmas |> filter(uni_lemma != "NA") |> map_phonemes()
 childes_metrics <- childes_metrics |>
   left_join(phonemes, by = c("language", "uni_lemma")) |>
   mutate(length_char = coalesce(length_char, num_chars),
@@ -147,7 +158,7 @@ childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs()
 ```
 
 ```{r prepare_morphology}
-childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
+# childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
 ```
 
 ## Combining sources
@@ -166,11 +177,11 @@ predictor_data <- predictor_data_list |>
 predictor_sources <- list(
   c("freq"),
   c("concreteness","babiness"),
-  c("length_char"), #"length_phon"
-  c("n_type",  "n_cat", "n_affix"), 
-  c("per_frame"),
+  c("length_char", "length_phon"),
+  c("n_forms",  "n_morph_categories", "n_affixes"), 
+  c("main_frame_prop"),
   c("mlu"))
-predictors<-unlist(predictor_sources)
+predictors <- unlist(predictor_sources)
 ```
 
 
@@ -179,7 +190,6 @@ predictors<-unlist(predictor_sources)
 ```{r prep_data}
 ref_cat ="nouns"
 predictor_data_lexcat <- prep_lexcat(predictor_data, uni_lemmas, ref_cat) |>
-  select(-c(item_definition)) |>
   distinct()
 ```
 
@@ -194,15 +204,16 @@ predictor_data_imputed_scaled <- do_full_imputation(predictor_data_lexcat, predi
 ## Merge with AOAs
 
 ```{r merge_aoa}
-aoa_predictor_data <- predictor_data_imputed_scaled |> left_join(aoas) |>## merge with AOAs
-  filter(!(aoa>36))
- 
+aoa_predictor_data <- predictor_data_imputed_scaled |> 
+  left_join(aoas) |>
+  filter(aoa <= 36)
 ```
 
 ## Run model 
 
 ```{r}
-run_main_model<-function(lang, aoa_predictor_data, predictors, uni_lemmas, ref_cat, lexcat_interactions = TRUE){
+run_main_model<-function(lang, aoa_predictor_data, predictors, 
+                         uni_lemmas, ref_cat, lexcat_interactions = TRUE){
   print(lang)
   df = aoa_predictor_data|>filter(language ==lang)
   

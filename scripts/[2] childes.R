@@ -46,8 +46,9 @@ compute_length_phon <- function(metric_data) {
               token_phonemes = list(token_phonemes))
 }
 
-default_metric_funs <- list(compute_count, compute_mlu, compute_positions, compute_length_char,
-                            compute_length_phon, compute_n_type, compute_n_sfx_cat, compute_verb_frame, compute_prefix)
+default_metric_funs <- list(compute_count, compute_mlu, compute_positions,
+                            compute_length_char, compute_length_phon,
+                            compute_n_cats, compute_n_forms, compute_verb_frames)
 default_corpus_args <- list(corpus = NULL, role = NULL,
                             role_exclude = "Target_Child", age = NULL,
                             sex = NULL, part_of_speech = NULL, token = "*")
@@ -90,7 +91,8 @@ get_childes_data <- function(childes_lang, corpus_args) {
 
 get_token_metrics <- function(lang, metric_funs = default_metric_funs,
                               corpus_args = default_corpus_args,
-                              write = TRUE, import_data = NULL) {
+                              write = TRUE, import_data = NULL,
+                              use_morphology = TRUE) {
 
   childes_lang <- convert_lang_childes(lang)
   print({childes_lang})
@@ -113,6 +115,12 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
     select(token_id = id, token = gloss, token_stem = stem, token_order,
            token_phonemes = actual_phonology, utterance_id, language)
  # token_stems <- tokens |> select(token, token_stem) |> distinct()
+
+  if (use_morphology) {
+    morph_data <- get_morph_data(lang, corpus_args)
+    tokens <- tokens |> left_join(morph_data,
+                                  by = c("utterance_id", "token" = "gloss"))
+  }
 
   metric_data <- tokens |> left_join(utterances)
   print("Calculating token_metrics")
@@ -192,10 +200,10 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
   }
   print("Within the get_uni_lemma_metrics function")
   tokens_mapped <- token_metrics |>
-    select(token, token_stem) |>
+    select(token) |>
     mutate(token_self = token,
-           token_stemmed =stem(token, lang)) |> # SnowballC::wordStem(token, lang)) |> #stem(token, lang)) |> #SnowballC::wordStem(token, lang)) |> #
-    pivot_longer(c(token_self, token_stemmed), names_to = "src", #token_stem,
+           token_stemmed = stem(token, lang)) |>
+    pivot_longer(c(token_self, token_stemmed), names_to = "src",
                  values_to = "option") |>
     filter(!is.na(option), option != "") |>
     select(-src) |>
