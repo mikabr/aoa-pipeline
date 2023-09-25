@@ -33,7 +33,9 @@ get_inst_data <- function(language, form, admins, items,
   message(glue("Getting data for {language} {form}..."))
 
   # temp solution:
-  items <- items |> mutate(form_type = "")
+  form_type = admins |> pull(form_type) |> unique()
+  if (length(form_type) != 1) form_type <- "WS" # default to WS if fail
+  items <- items |> mutate(form_type = form_type)
 
   inst_data <- get_instrument_data(language = language,
                                    form = form,

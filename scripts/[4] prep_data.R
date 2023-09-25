@@ -2,11 +2,18 @@
 ## Data prep -- scaling, imputation, etc
 ##...................................
 
+# drop predictors with all NAs
+
+drop_predictors <- function(predictors, data) {
+  # lapply(predictor_sources, \(y) {
+  #   pred_source <- lapply(y, \(x) {if (!all(is.na(lang_data[x]))) x})
+  #   pred_source[lengths(pred_source) > 0]
+  # })
+  predictors |> discard(\(p) all(is.na(data[[p]])))
+}
+
 # transform any column that starts with "count" by smoothing (add 1),
 # normalizing, and log transforming, then rename "count_x" to "freq_x"
-
-l_with_n_affixes = c("Spanish (Mexican)", "French (French)", "French (Quebecois)", "Spanish (European)", "German", "Swedish", "Portuguese (European)", "Hungarian")
-
 
 transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
                              log_transform = TRUE) {
@@ -30,6 +37,7 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
 }
 
 residualize_col <- function(target_column, residualizing_column) {
+  if (all(is.na(target_column))) return(NA)
   return(lm(target_column ~ residualizing_column)$residuals)
 }
 
@@ -41,36 +49,50 @@ residualize_freqs <- function(childes_metrics) {
 
 
 residualize_morph <- function(lang, childes_metrics) {
-  if (lang %in% l_with_n_affixes){
-    message(glue(" {lang} containing data for n_affixes."))
-  a<-  childes_metrics |>
+  residualized <- childes_metrics |>
+    filter(language == lang,
+           !is.na(n_forms),
+           !is.na(n_morph_categories),
+           all(is.na(n_affixes)) | !is.na(n_affixes)) |>
+    mutate(across(all_of(c("n_morph_categories", "n_affixes")),
+           partial(residualize_col, n_forms))) |>
+    select(uni_lemma, n_morph_categories, n_affixes)
+
+  childes_metrics |>
     filter(language == lang) |>
-    filter(!is.na(n_forms)) |>
-    filter(!is.na(n_affixes)) |>
-    filter(!is.na(n_morph_categories)) |>
-    mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms))) |>
-    mutate(across(starts_with("n_affixes"), partial(residualize_col, n_forms)))
-  f <- childes_metrics |>
-    filter(language == lang) |>
-    select(-n_affixes, -n_morph_categories, -n_forms) |>
-    left_join(a)
-  } else {
-    message(glue("{lang} not containing data for n_affixes."))
-  a <- childes_metrics |>
-    filter(language == lang) |>
-    filter(!is.na(n_forms)) |>
-    filter(!is.na(n_morph_categories))
-  if (!(all(is.na(a[,"n_morph_categories"])))) {
-    a<- a|>
-    mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms)))
-  }
-  f<- childes_metrics |>
-   filter(language == lang) |>
-   select(-n_morph_categories, -n_forms) |>
-    left_join(a)
-  f$n_affixes = NA
-  }
-  return(f)
+    select(-c("n_morph_categories", "n_affixes")) |>
+    left_join(residualized)
+
+  # if (lang %in% l_with_n_affixes){
+  #   message(glue(" {lang} containing data for n_affixes."))
+  # a<-  childes_metrics |>
+  #   filter(language == lang) |>
+  #   filter(!is.na(n_forms)) |>
+  #   filter(!is.na(n_affixes)) |>
+  #   filter(!is.na(n_morph_categories)) |>
+  #   mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms))) |>
+  #   mutate(across(starts_with("n_affixes"), partial(residualize_col, n_forms)))
+  # f <- childes_metrics |>
+  #   filter(language == lang) |>
+  #   select(-n_affixes, -n_morph_categories, -n_forms) |>
+  #   left_join(a)
+  # } else {
+  #   message(glue("{lang} not containing data for n_affixes."))
+  # a <- childes_metrics |>
+  #   filter(language == lang) |>
+  #   filter(!is.na(n_forms)) |>
+  #   filter(!is.na(n_morph_categories))
+  # if (!(all(is.na(a[,"n_morph_categories"])))) {
+  #   a<- a|>
+  #   mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms)))
+  # }
+  # f<- childes_metrics |>
+  #  filter(language == lang) |>
+  #  select(-n_morph_categories, -n_forms) |>
+  #   left_join(a)
+  # f$n_affixes = NA
+  # }
+  # return(f)
 }
 
 ## Imputation
@@ -139,57 +161,26 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
 }
 
 do_lang_imputation <- function(language, data, pred_sources, max_steps) {
+  pred_sources <- lapply(pred_sources, \(x) drop_predictors(x, data))
   # if all the predictors are from one source, fix the pred_sources
   if (length(pred_sources) == 1) pred_sources <- unlist(pred_sources)
-  #data[colSums(!is.na(data)) > 0]
-  data<- data |> distinct()
-  print("language")
-  print(language)
-  print("data")
-  print(data)
-  #predictors <- unlist(pred_sources)
-  #if (language %in% l_with_n_affixes){
-  #  message(glue(" {language} containing data for n_affixes."))
-  #
-  #  predictors <- unlist(pred_sources)
-  #} else{
-  #  message(glue(" {language} not containing data for n_affixes."))
-  #  pred_sources[[4]] = pred_sources[[4]][pred_sources[[4]]!="n_affixes"]
-  #  predictors <- unlist(pred_sources)
-  #  predictors = predictors[predictors!= "n_affixes"]
-  #}
-  # print("pred_sources1")
-  # print(pred_sources)
-  #
-  if (all(is.na(data[,"n_forms"]))) {    pred_sources[[4]] =
-    pred_sources[[4]][pred_sources[[4]]!="n_forms"]
-  }
-  if (all(is.na(data[,"n_affixes"]))) {    pred_sources[[4]] =
-    pred_sources[[4]][pred_sources[[4]]!="n_affixes"]
-  }
-  if (all(is.na(data[,"n_morph_categories"]))) {    pred_sources[[4]] =
-    pred_sources[[4]][pred_sources[[4]]!="n_morph_categories"]
-  }
-  if (all(is.na(data[,"main_frame_prop"]))) {    pred_sources[[5]] =
-    pred_sources[[5]][pred_sources[[5]]!="main_frame_prop"]
-  }
-  print("pred_sources2")
-  print(pred_sources)
+  data <- data |> distinct()
   predictors <- unlist(pred_sources)
+
   print(glue("Imputing {language} with {max_steps} steps..."))
   predictor_list <- get_predictor_order(data, predictors, max_steps)
-  print(glue("get predictor order."))
+  # print(glue("get predictor order."))
   missing_data <- get_missing_data(data, predictors)
-  print(glue("get missing data"))
+  # print(glue("get missing data"))
   imputed_data <- get_imputation_seed(data, predictors)
-  print(glue("get imputation seed"))
-  print(glue("pred_sources"))
-  print(glue("{pred_sources}"))
+  # print(glue("get imputation seed"))
+  # print(glue("pred_sources"))
+  # print(glue("{pred_sources}"))
   imputed_data <- do_iterate_imputation(pred_sources, imputed_data,
                                         missing_data)
-  print(glue("do iterate imputation"))
+  # print(glue("do iterate imputation"))
   scaled_data <- do_scaling(imputed_data, predictors)
-  print(glue("do scaling"))
+  # print(glue("do scaling"))
   return(imputed_data)
 }
 
@@ -204,14 +195,12 @@ do_full_imputation <- function(model_data, predictor_sources, max_steps) {
   #  imputed_data <- readRDS(file__)
   #}else{
 
-  pred_sources <- map(predictor_sources, \(ps) discard(ps, \(p) all(is.na(model_data[[p]]))))
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
            all_of(!!unlist(predictor_sources))) |>
     distinct() |>
     group_by(language) |>
     nest()
-
 
   imputed_data <- nested_data |>
     mutate(imputed = purrr::map2(language, data, function(lang, dat) {

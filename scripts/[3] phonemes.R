@@ -53,8 +53,9 @@ clean_words <- function(word_set){
     strsplit("[][,]") |> flatten_chr() |>
     # dog (animal) | (a) dog
     strsplit(" \\(.*\\)|\\(.*\\) ") |> flatten_chr() %>%
+    strsplit("（.*）") |> flatten_chr() %>%
     # dog* | dog? | dog! | ¡dog! | dog's | dog…
-    gsub("[*?!¡'…\\.]", "", .) |>
+    gsub("[*?!¡'…\\.，]", "", .) |>
     # dog(go) | (a)dog
     map_if(
       # if "dog(go)"

@@ -11,6 +11,7 @@ stem <- function(words, language) {
     lang <- convert_lang_stemmer(language, "hunspell")
     if (lang %in% hunspell::list_dictionaries()) {
       map_chr(words, \(word) {
+        if (grepl("ə", word)) return(word)
         stem <- hunspell::hunspell_stem(word, hunspell::dictionary(lang))[[1]]
         return(if (length(stem) == 0) word else stem[1])
       })

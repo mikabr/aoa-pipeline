@@ -50,33 +50,44 @@ get_morph_data <- function(lang, corpus_args = default_corpus_args) {
   childes_lang <- convert_lang_childes(lang)
   file_m <- file.path(childes_path, glue("morph_metrics_{childes_lang}.rds"))
 
+  childes_data <- get_childes_data(childes_lang, corpus_args)
+
+  unimorph_lang <- convert_lang_unimorph(lang)
+  morph_data <- extract_unimorph_data(unimorph_lang)
+
+  morph_data <- childes_data$tokens |>
+    left_join(morph_data, by = "gloss") |>
+    mutate(stem = coalesce(na_if(stem.x, ""), stem.y)) |>
+    group_by(id, utterance_id, corpus_name, gloss) |>
+    summarise(stem_m = stem |> unique() |> sort() |> paste(collapse = ", "),
+              morph_info = morph_info |> unique() |> sort() |> paste(collapse = ", "),
+              segment_info = if("segment_info" %in% colnames(morph_data)) {
+                segment_info |> unique() |> sort() |> paste(collapse = ", ")} else NA,
+              pos = pos |> unique() |> sort() |> paste(collapse = ", "),
+              n_morpheme = if("n_morpheme" %in% colnames(morph_data)) {
+                mean(n_morpheme)} else NA,
+              n_cat  = mean(n_cat),
+              is_derivation = if("is_derivation" %in% colnames(morph_data)) {
+                max(is_derivation)} else NA,
+              prefix_m = if("has_prefix" %in% colnames(morph_data)) {
+                max(has_prefix)} else NA) |>
+    distinct()
+
+  saveRDS(morph_data, file_m)
+  return(morph_data)
+}
+
+load_morph_data <- function(lang, corpus_args = default_corpus_args) {
+
+  childes_lang <- convert_lang_childes(lang)
+  file_m <- file.path(childes_path, glue("morph_metrics_{childes_lang}.rds"))
+
   if(file.exists(file_m)) {
+    message(glue("Loading cached morphology data for {lang}."))
     morph_data <- readRDS(file_m)
   } else {
-    childes_data <- get_childes_data(childes_lang, corpus_args)
-
-    unimorph_lang <- convert_lang_unimorph(lang)
-    morph_data <- extract_unimorph_data(unimorph_lang)
-
-    morph_data <- childes_data$tokens |>
-      left_join(morph_data, by = "gloss") |>
-      mutate(stem = coalesce(stem.x, stem.y)) |>
-      group_by(id, utterance_id, corpus_name, gloss) |>
-      summarise(stem_m = stem |> unique() |> sort() |> paste(collapse = ", "),
-                morph_info = morph_info |> unique() |> sort() |> paste(collapse = ", "),
-                segment_info = if("segment_info" %in% colnames(morph_data)) {
-                  segment_info |> unique() |> sort() |> paste(collapse = ", ")} else NA,
-                pos = pos |> unique() |> sort() |> paste(collapse = ", "),
-                n_morpheme = if("n_morpheme" %in% colnames(morph_data)) {
-                  mean(n_morpheme)} else NA,
-                n_cat  = mean(n_cat),
-                is_derivation = if("is_derivation" %in% colnames(morph_data)) {
-                  max(is_derivation)} else NA,
-                prefix_m = if("has_prefix" %in% colnames(morph_data)) {
-                  max(has_prefix)} else NA) |>
-      distinct()
-
-    saveRDS(morph_data, file_m)
+    message(glue("No cached morphology data for {lang}, getting and caching data."))
+    morph_data <- get_morph_data(lang, corpus_args)
   }
   return(morph_data)
 }

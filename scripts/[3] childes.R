@@ -1,9 +1,5 @@
 library(data.table)
 
-#https://github.com/mpsilfve/morphnet/tree/master/data
-
-#https://unimorph.github.io/
-
 compute_count <- function(metric_data) {
   print("Computing count...")
   metric_data |> count(token, name = "count")
@@ -44,6 +40,26 @@ compute_length_phon <- function(metric_data) {
     group_by(token) |>
     summarise(length_phon = mean(length_phon, na.rm = TRUE),
               token_phonemes = list(token_phonemes))
+}
+
+compute_form_entropy <- function(metric_data) {
+  print("Computing form entropy...")
+  metric_data |>
+    select(token, token_stem) |>
+    nest(tokens = token) |>
+    mutate(form_entropy = sapply(tokens, \(t) {
+      t |>
+        table() |>
+        as_tibble() |>
+        mutate(freq = n / sum(n),
+               ent = freq * log2(freq)) |>
+        pull(ent) |>
+        sum() |>
+        (`*`)(-1)
+    })) |>
+    select(-token_stem) |>
+    unnest(tokens) |>
+    distinct()
 }
 
 default_metric_funs <- list(compute_count, compute_mlu, compute_positions,
@@ -116,10 +132,10 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
            token_phonemes = actual_phonology, utterance_id, language)
  # token_stems <- tokens |> select(token, token_stem) |> distinct()
 
-  if (use_morphology) {
-    morph_data <- get_morph_data(lang, corpus_args)
+  if (use_morphology & childes_lang != "zho") {
+    morph_data <- load_morph_data(lang, corpus_args)
     tokens <- tokens |> left_join(morph_data,
-                                  by = c("utterance_id", "token" = "gloss"))
+                                  by = c("utterance_id", "token_id" = "id"))
   }
 
   metric_data <- tokens |> left_join(utterances)
@@ -196,9 +212,14 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
     token_metrics <- import_data
   } else {
     token_metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
-    token_metrics <- readRDS(token_metrics_file)
+    if (!file.exists(token_metrics_file)) {
+      message(glue("No cached token metrics for {lang}, getting and caching data."))
+      # note: this gets token metrics with default args
+      token_metrics <- get_token_metrics(lang)
+    } else {
+      token_metrics <- readRDS(token_metrics_file)
+    }
   }
-  print("Within the get_uni_lemma_metrics function")
   tokens_mapped <- token_metrics |>
     select(token) |>
     mutate(token_self = token,
@@ -215,7 +236,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
 
   metrics_mapped <- tokens_mapped |>
     inner_join(token_metrics) |>
-    select(uni_lemma, tokens = token, where(is_numeric)) |>
+    select(uni_lemma, tokens = token, where(is.numeric)) |>
     group_by(uni_lemma) |>
     distinct() |>
     filter(!is.na(count))
