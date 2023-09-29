@@ -35,6 +35,10 @@ convert_lang_morph_complexity <- function(lang) {
   lang_map |> filter(wordbank == lang) |> pull(`morph complexity`)
 }
 
+convert_lang_udpipe <- function(lang) {
+  lang_map |> filter(wordbank == lang) |> pull(udpipe)
+}
+
 normalize_language <- function(language) {
   language |> str_replace(" ", "_") |> str_to_lower()
 }
