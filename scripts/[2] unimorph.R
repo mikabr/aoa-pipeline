@@ -1,7 +1,7 @@
 library(tidyverse)
 
 extract_unimorph_data <- function(unimorph_lang) {
-  base_file <- glue("data/morphology/{unimorph_lang}.tsv")
+  base_file <- glue("resources/morphology/{unimorph_lang}.tsv")
   if(!file.exists(base_file)) {
     message(glue("No unimorph data for {unimorph_lang}, skipping"))
     return(NA)
@@ -16,7 +16,7 @@ extract_unimorph_data <- function(unimorph_lang) {
     separate(morph_info, c("pos", "morph_info"), sep = "-", fill = "right") |>
     mutate(n_cat = morph_info |> str_split(";") |> lengths()) # num_morph_categories
 
-  seg_file <- glue("data/morphology/{unimorph_lang}.segmentations.tsv")
+  seg_file <- glue("resources/morphology/{unimorph_lang}.segmentations.tsv")
   if(!file.exists(seg_file)) {
     message(glue("No segmentation data for {unimorph_lang}, skipping"))
   } else {
@@ -30,7 +30,7 @@ extract_unimorph_data <- function(unimorph_lang) {
       left_join(seg_data, by = c("stem", "gloss"))
   }
 
-  der_file <- glue("data/morphology/{unimorph_lang}.derivations.tsv")
+  der_file <- glue("resources/morphology/{unimorph_lang}.derivations.tsv")
   if(!file.exists(der_file)) {
     message(glue("No derivation data for {unimorph_lang}, skipping"))
   } else {
@@ -45,12 +45,17 @@ extract_unimorph_data <- function(unimorph_lang) {
   return(morph_data)
 }
 
-get_morph_data <- function(lang, corpus_args = default_corpus_args) {
+get_morph_data <- function(lang, corpus_args = default_corpus_args,
+                           import_data = NULL) {
 
   childes_lang <- convert_lang_childes(lang)
   file_m <- file.path(childes_path, glue("morph_metrics_{childes_lang}.rds"))
 
-  childes_data <- get_childes_data(childes_lang, corpus_args)
+  if (!is.null(import_data)) {
+    childes_data <- import_data
+  } else {
+    childes_data <- get_childes_data(childes_lang, corpus_args)
+  }
 
   unimorph_lang <- convert_lang_unimorph(lang)
   morph_data <- extract_unimorph_data(unimorph_lang)

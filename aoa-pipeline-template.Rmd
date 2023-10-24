@@ -14,6 +14,7 @@ library(modelr)
 library(glue)
 library(wordbankr)
 library(childesr)
+library(here)
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
 ```
@@ -37,13 +38,28 @@ eng_wb_data
 
 Defining languages:
 ```{r define_langs}
-target_langs<-c("Spanish (Mexican)", "Spanish (European)",  "German", 
-                "English (American)", "Italian", "Norwegian", "Turkish", 
-                "Swedish", "Danish", "Dutch", "French (French)",
-                "French (Quebecois)", "Portuguese (European)", "Hungarian")
-#"Croatian" no morphology
-# Russian : transliteration of morphology
+target_langs<-c("French (French)", "French (Quebecois)", 
+                "Italian",
+                "Spanish (Mexican)", "Spanish (European)",
+                "Portuguese (European)",  
+                "Dutch",
+                "English (American)", "English (Australian)", 
+                "English (British)", 
+                "German",
+                "Danish", "Norwegian", "Swedish", 
+                "Croatian", "Czech",
+                "Turkish", 
+                "Hungarian" #,
+                # difficult languages:
+                # "Russian",
+                # "Hebrew",
+                # "Mandarin (Taiwanese)", "Mandarin (Beijing)"
+                )
 sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
+
+# just for testing:
+target_langs <- c("French (French)", "Dutch", "English (American)", 
+                  "Norwegian", "Croatian", "Turkish", "Hungarian")
 ```
 
 
@@ -87,30 +103,43 @@ concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 ```
 
-## Morphology
+
+## CHILDES
+
+Get CHILDES data for many languages:
+```{r get_childes}
+corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
+                    age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
+walk(target_langs, \(x) {get_childes_data(convert_lang_childes(x), corpus_args)})
+```
+
 
 Creating saved morphology metrics for many languages:
 ```{r create_morphs_xling, eval=TRUE}
-walk(target_langs, get_morph_data, corpus_args)
+# need English (British)
+walk(target_langs, load_morph_data, corpus_args)
 ```
 
-## CHILDES
+Creating saved parsed data for many languages:
+```{r parse_data}
+walk(target_langs, get_parsed_data, corpus_args = corpus_args)
+```
+
 
 Loading cached CHILDES metrics for English:
 ```{r load_childes_eng, eval=FALSE}
 eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 ```
 
-
-
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes}
-metric_funs <- list(compute_count, compute_mlu, compute_positions, 
-                    compute_length_char, compute_length_phon, 
-                    compute_n_cats, compute_n_forms, compute_verb_frames) 
-corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
-                    age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
+metric_funs <- list(base = list(compute_count, compute_mlu, compute_positions,
+                                compute_length_char, compute_length_phon),
+                    parsed = list(compute_form_entropy, compute_subcat_entropy,
+                                  compute_n_features),
+                    morph = list(compute_n_morphemes))
 ```
+
 
 Creating saved CHILDES data for English:
 ```{r create_childes_english, eval=FALSE}
@@ -122,12 +151,13 @@ childes_metrics = eng_unilemmas
 
 Creating saved CHILDES data for many languages:
 ```{r create_childes_xling, eval=TRUE}
+# need Englishes
 walk(target_langs, get_token_metrics, metric_funs, corpus_args)
 ```
 
 Creating saved UNILEMMA data for many languages:
 ```{r create_unilemma_xling, eval=TRUE}
-walk(target_langs, get_uni_lemma_metrics, build_uni_lemma_map(uni_lemmas))
+walk(target_langs[4:7], get_uni_lemma_metrics, build_uni_lemma_map(uni_lemmas))
 ```
 
 Loading cached CHILDES data for multiple languages:
@@ -158,7 +188,7 @@ childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs()
 ```
 
 ```{r prepare_morphology}
-# childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
+childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
 ```
 
 ## Combining sources
@@ -206,46 +236,126 @@ predictor_data_imputed_scaled <- do_full_imputation(predictor_data_lexcat, predi
 ```{r merge_aoa}
 aoa_predictor_data <- predictor_data_imputed_scaled |> 
   left_join(aoas) |>
-  filter(aoa <= 36)
+  filter(aoa <= 36, 
+         lexical_category != "NA",
+         lexical_category != "unknown") |> 
+  mutate(lexical_category = lexical_category |> 
+           fct_drop() |> 
+           fct_relevel(ref_cat, after = Inf) |> 
+           `contrasts<-`(value = "contr.sum"))
 ```
 
 ## Run model 
 
 ```{r}
-run_main_model<-function(lang, aoa_predictor_data, predictors, 
+aoa_models <- fit_models(predictors, aoa_predictor_data,
+                         lexcat_interactions = FALSE)
+
+aoa_models_lexcat <- fit_models(predictors[predictors != "length_char"], aoa_predictor_data,
+                                lexcat_interactions = TRUE)
+```
+
+```{r testing}
+# library(lmerTest)
+morph_complexity <- read_csv("resources/cwals.csv") |> 
+  select(iso_codes, n_feat, morph_complexity = cwals_new)
+
+aoa_predictor_data <- aoa_predictor_data |> 
+  nest(data = -language) |> 
+  mutate(iso_codes = sapply(language, convert_lang_morph_complexity)) |> 
+  left_join(morph_complexity) |> 
+  unnest(data) |> 
+  select(-iso_codes) |> 
+  mutate(lexical_category = lexical_category |> 
+           fct_drop() |> 
+           fct_relevel(ref_cat, after = Inf) |> 
+           `contrasts<-`(value = "contr.sum"))
+
+coefs <- aoa_models |> select(language, measure, coefs) |> unnest(coefs) 
+aoa_coefs <- aoa_models_lexcat |> select(language, measure, coefs) |> unnest(coefs) 
+
+# ms_terms <- c("n_forms", "n_morph_categories", "n_affixes", 
+#               "main_frame_prop", "mlu")
+
+# swe, por, hun, ces missing morph info??
+
+ms_terms <- c("Main frame prop", "MLU-w", "N forms", "N morph categories", "N affixes")
+
+morph_coefs <- plt_lang_coefs |> filter(term %in% ms_terms) |> 
+  nest(data = -language) |> 
+  mutate(iso_codes = sapply(language, convert_lang_morph_complexity)) |> 
+  left_join(morph_complexity) |> 
+  unnest(data) |> 
+  select(-iso_codes) |> 
+  mutate(term = as.factor(term))
+
+mc_mods <- map(c("production", "comprehension"), \(y) {
+  map(ms_terms, \(x) {
+    lm(estimate ~ morph_complexity, 
+       data = morph_coefs |> filter(term == x, measure == y))
+  })
+})
+  
+
+# mc <- lme4::lmer(estimate ~ term * morph_complexity + (1|language), 
+#                  data = morph_coefs)
+
+library(broom.mixed)
+# aoa_all_lang_model <- fit_all_lang_model(predictors[predictors != "length_char"], 
+#                                          aoa_predictor_data,
+#                                          lexcat_interactions = FALSE)
+aoa_all_lang_model_2 <- fit_all_lang_model(predictors[predictors != "length_char"], 
+                                         aoa_predictor_data,
+                                         lexcat_interactions = FALSE)
+aoa_all_lang_model_2b <- fit_all_lang_model(predictors[predictors != "length_char"], 
+                                         aoa_predictor_data,
+                                         lexcat_interactions = TRUE)
+aoa_all_lang_model_3 <- fit_all_lang_model(predictors[predictors != "length_char"], 
+                                         aoa_predictor_data,
+                                         morphcomp_interactions = TRUE,
+                                         lexcat_interactions = FALSE)
+aoa_all_lang_model_3b <- fit_all_lang_model(predictors[predictors != "length_char"], 
+                                         aoa_predictor_data,
+                                         morphcomp_interactions = TRUE,
+                                         lexcat_interactions = TRUE)
+# coefs_comp <- aoa_all_lang_model |> select(measure, coefs) |> unnest(coefs) 
+coefs_comp_2 <- aoa_all_lang_model_2 |> select(measure, coefs) |> unnest(coefs) 
+coefs_comp_2b <- aoa_all_lang_model_2b |> select(measure, coefs) |> unnest(coefs) 
+coefs_comp_3 <- aoa_all_lang_model_3 |> select(measure, coefs) |> unnest(coefs)
+coefs_comp_3b <- aoa_all_lang_model_3b |> select(measure, coefs) |> unnest(coefs)
+# coefs_comp <- aoa_complexity_models |> select(language, measure, coefs) |> unnest(coefs) 
+
+predictors_old <- c("freq", "concreteness", "babiness", "length_phon", "mlu")
+aoa_all_lang_model_old <- fit_all_lang_model(predictors_old, 
+                                             aoa_predictor_data,
+                                             lexcat_interactions = TRUE)
+# aoa_all_lang_model_old <- fit_all_lang_model(predictors_old, 
+#                                              aoa_predictor_data,
+#                                              lexcat_interactions = TRUE)
+coefs_comp_old <- aoa_all_lang_model_old |> select(measure, coefs) |> unnest(coefs)
+```
+
+```{r}
+run_main_model<-function(lang, aoa_predictor_data, predictor_sources, 
                          uni_lemmas, ref_cat, lexcat_interactions = TRUE){
   print(lang)
-  df = aoa_predictor_data|>filter(language ==lang)
+  df = aoa_predictor_data |> filter(language == lang)
   
-  if (!(is.data.frame(df) && nrow(df)==0)){
-  if (all(is.na(df[,"n_type"]))) {    
-    predictors = predictors[predictors!= "n_type"]
-  }
-  if (all(is.na(df[,"n_affix"]))) {    
-    predictors = predictors[predictors!= "n_affix"]
-  }
-  if (all(is.na(df[,"n_cat"]))) {    
-    predictors = predictors[predictors!= "n_cat"]
-  }
-    if (all(is.na(df[,"per_frame"]))) {    
-    predictors = predictors[predictors!= "per_frame"]
-  }
-  if (lang %in% sinotibetan_languages){
-    predictors = predictors[predictors!= "length_char"]
-  }  
-  aoa_predictor_data <- aoa_predictor_data|> select(-lexical_category)|>
-    filter(language==lang)
-   aoa_predictor_data_lexcat  <- prep_lexcat(aoa_predictor_data, uni_lemmas |> filter(language==lang), ref_cat) ## Set again lexical category contrasts
-   m <- fit_models(predictors, aoa_predictor_data_lexcat, lexcat_interactions) |> 
-    mutate(language=lang)
+  pred_sources <- drop_predictors(predictor_sources, df)
   
-   return(m)
-  }
-  else{
-    return(NULL)
-    }
+  aoa_predictor_data <- aoa_predictor_data |> 
+    select(-lexical_category) |>
+    filter(language == lang)
+  aoa_predictor_data_lexcat <- prep_lexcat(aoa_predictor_data, uni_lemmas |> 
+                                             filter(language==lang), ref_cat) 
+  ## Set again lexical category contrasts
+  m <- fit_models(predictors, aoa_predictor_data_lexcat, lexcat_interactions) |> 
+    mutate(language = lang)
+  m
 }
-aoa_models <- map_df(target_langs, run_main_model, aoa_predictor_data, predictors, uni_lemmas, ref_cat) |>unnest(coefs)
+aoa_models <- map_df(target_langs, run_main_model, aoa_predictor_data, 
+                     predictor_sources, uni_lemmas, ref_cat) |>
+  unnest(coefs)
 target_langs <- unique(aoa_models$language)  
 #Some languages may not have enough resources to fit models, remove by target_langs
 ```
@@ -281,17 +391,17 @@ if (!(is.data.frame(aoa_models_verb) && nrow(aoa_models_verb)==0)){
 
 Coefficients:
 ```{r}
-aoa_models |> select(language, measure, coefs) |> unnest(coefs) 
+coefs <- aoa_models |> select(language, measure, coefs) |> unnest(coefs) 
 ```
 
 Summary stats:
 ```{r}
-aoa_models |> select(language, measure, stats) |> unnest(stats)
+sum_stats <- aoa_models |> select(language, measure, stats) |> unnest(stats)
 ```
 
 Variance inflation factors:
 ```{r, eval = FALSE}
-aoa_models |> select(language, measure, vifs) |> unnest(vifs)
+vifs <- aoa_models |> select(language, measure, vifs) |> unnest(vifs)
 ```
 
 
@@ -305,21 +415,7 @@ run_cross_validation_model<-function(lang, meas, aoa_predictor_data, predictors,
   
   aoa_predictor_data_lexcat <- prep_lexcat(aoa_predictor_data, uni_lemmas |> filter(language==lang), ref_cat) ## Set again lexical category contrasts
   df = aoa_predictor_data|>filter(language ==lang)
-  if (all(is.na(df[,"n_type"]))) {    
-    predictors = predictors[predictors!= "n_type"]
-  }
-  if (all(is.na(df[,"n_affix"]))) {    
-    predictors = predictors[predictors!= "n_affix"]
-  }
-  if (all(is.na(df[,"n_cat"]))) {    
-    predictors = predictors[predictors!= "n_cat"]
-  }
-    if (all(is.na(df[,"per_frame"]))) {    
-    predictors = predictors[predictors!= "per_frame"]
-  }
-  if (lang %in% sinotibetan_languages){
-    predictors = predictors[predictors!= "length_char"]
-  }  
+  predictors <- drop_predictors(df)
 loo_df <- aoa_predictor_data_lexcat |>
   group_nest(language, measure) |>
   mutate(language=lang,
@@ -375,7 +471,7 @@ lexcats <- set_names(
   paste0("lexical_category", 1:3),
   rownames(contrasts(aoa_models$group_data[[1]]$lexical_category))[1:3]
 )
-aoa_coefs <- aoa_models |>
+aoa_coefs <- aoa_models_lexcat |>
   select(language, measure, coefs) |>
   unnest(coefs) |>
   filter(term != "(Intercept)") |>
@@ -384,11 +480,11 @@ aoa_coefs <- aoa_models |>
          lexical_category = if_else(effect == "interaction",
                                     str_extract(term, "lexical_category[0-9]"),
                                     as.character(NA)),
-         lexical_category = fct_recode(lexical_category, !!!lexcats),
+         # lexical_category = fct_recode(lexical_category, !!!lexcats),
          term = if_else(effect == "interaction",
                         str_remove(term, ":?lexical_category[0-9]:?"),
                         term),
-         term = fct_recode(term, !!!lexcats),
+         # term = fct_recode(term, !!!lexcats),
          term = factor(term), #, levels = c(predictors, names(lexcats))
          language = factor(language, levels = target_langs))
 ```

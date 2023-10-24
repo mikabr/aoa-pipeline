@@ -184,3 +184,696 @@ Italian,shh,zitto/sch,,"dz_ˈi_tː_o, ʃ"
 Swedish,shh,sch /hysch,,"ʃ, h_y_ʃ"
 English (British),shh,shh / hush / shush,,"ʃ, h_ʌ_ʃ, ʃ_ʌ_ʃ"
 English (American),shh,shh/shush/hush,,"ʃ, h_ʌ_ʃ, ʃ_ʌ_ʃ"
+Hebrew,1PL,אנחנו,,"a_n_a_X_n_u, ʔ_a_n_a_X_n_u"
+Hebrew,1PL.POSS,שלנו,,"S_e_l_a_n_u, S_e_l_a_n_u"
+Hebrew,1SG,אותי,,"o_t_i, ʔ_o_t_i"
+Hebrew,1SG,אני,,"a_n_i, ʔ_a_n_i"
+Hebrew,1SG.POSS,שלי,,"S_e_l_i, S_e_l_i"
+Hebrew,2SG,אתה,,"a_t_a, ʔ_a_t_a"
+Hebrew,2SG,אתה/ את,,"a_t_a, ʔ_a_t_a, a_t, ʔ_a_t"
+Hebrew,2SG.POSS,שלך,,"S_e_l_a_X, S_e_l_X_a, S_e_l_a_X, S_e_l_X_a"
+Hebrew,3PL,הם,,h_e_m
+Hebrew,3SG,הוא,,"h_u, h_u_ʔ"
+Hebrew,3SG,הוא/ היא,,"h_u, h_u_ʔ_, h_i, h_i_ʔ"
+Hebrew,a little,מעט,,"m_e_a_t, m_e_ʔ_a_t"
+Hebrew,a lot,המון,,h_a_m_o_n
+Hebrew,above,מעל,,"m_e_a_l, m_e_ʔ_a_l"
+Hebrew,after,אח'כ,,"a_X_k_a, ʔ_a_X_k_a"
+Hebrew,after,אחרי,,"a_X_a_Q""_e_j, a_X_Q""_e_j, ʔ_a_X_a_Q""_e_j, ʔ_a_X_Q""_e_j"
+Hebrew,airplane,מטוס,,m_a_t_o_s
+Hebrew,airplane,מטוס/ אווירון,,"m_a_t_o_s, a_v_i_Q""_o_n, ʔ_a_w_i_Q""_o_n"
+Hebrew,all,הכל,,"h_a_k_o_l, k_o_l"
+Hebrew,all gone,אין,,"e_n, ʔ_e_j_n"
+Hebrew,alligator,תנין,,t_a_n_i_n
+Hebrew,also,גם,,g_a_m
+Hebrew,ambulance,אמבולנס,,"a_m_b_u_l_a_n_s, ʔ_a_m_b_u_l_a_n_s"
+Hebrew,angry,כועס,,"k_o_e_s, k_o_ʔ_e_s"
+Hebrew,animal,חיה,,X_a_j_a
+Hebrew,ant,נמלה,,n_e_m_a_l_a
+Hebrew,apple,תפוח,,t_a_p_u_a_X
+Hebrew,apron,סינר,,"s_i_n_a_Q"""
+Hebrew,armchair,כורסה,,"k_u_Q""_s_a"
+Hebrew,baa baa,מה מה,,m_a_ m_a
+Hebrew,baby,תינוק,,"t_i_n_o_k, t_i_n_o_k"
+Hebrew,baby,תינוק/ תינוקת,,"t_i_n_o_k, t_i_n_o_k, t_i_n_o_k_e_t, t_i_n_o_k_e_t"
+Hebrew,babysitter,מטפלת,,m_e_t_a_p_e_l_e_t
+Hebrew,babysitter,שמרטף/ בייביסיטר,,"S_m_a_Q""_t_a_f, S_m_a_Q""_t_a_f, b_e_i_b_i_s_i_t_e_Q"""
+Hebrew,bad,רע,,"Q""_a, Q""_a_ʔ"
+Hebrew,bag,תיק,,"t_i_k, t_i_k"
+Hebrew,ball,כדור,,"k_a_d_u_Q"""
+Hebrew,balloon,בלון,,b_a_l_o_n
+Hebrew,banana,בננה,,b_a_n_a_n_a
+Hebrew,basket,סל,,s_a_l
+Hebrew,bathe,לעשות אמבטיה,,"l_a_a_s_o_t_ a_m_b_a_t_j_a, l_a_ʔ_a_s_o_t_ ʔ_a_m_b_a_t_j_a"
+Hebrew,bathroom,שירותים,,"S_e_Q""_u_t_i_m, S_e_Q""_u_t_i_m"
+Hebrew,bathroom,שירותים/ בית שימוש,,"S_e_Q""_u_t_i_m, S_e_Q""_u_t_i_m, b_e_i_t_ S_i_m_u_S, b_e_j_t_ S_i_m_u_S"
+Hebrew,bathtub,אמבטיה,,"a_m_b_a_t_j_a, ʔ_a_m_b_a_t_j_a"
+Hebrew,beach,ים/ חוף ים,,"j_a_m, X_o_f_ j_a_m"
+Hebrew,beads,חרוזים,,"X_a_Q""_u_z, X_a_Q""_u_z_i_m"
+Hebrew,beans,שעועית,,"S_e_u_i_t, S_e_ʔ_u_ʔ_i_t"
+Hebrew,bear,דב/ דובי,,"d_o_v, d_u_b_i"
+Hebrew,bedroom,חדר שינה,,"b_e_i_t_ S_e_n_a, b_e_j_t_ S_e_n_a"
+Hebrew,bedroom,מיטה,,"m_i_t_a, m_i_t_a"
+Hebrew,bee,דבורה,,"d_v_o_Q""_a"
+Hebrew,beetle,חיפושית,,"X_i_p_u_S_i_t, X_i_p_u_S_i_t"
+Hebrew,before,לפני,,"l_i_f_n_e_i, l_i_f_n_e_j"
+Hebrew,behind,מאחורי,,"m_e_a_X_o_Q""_e_i, m_e_a_X_o_Q""_e_j, m_e_ʔ_a_X_o_Q""_e_j"
+Hebrew,belly button,פופיק,,p_u_p_i_k
+Hebrew,belly button,פופיק/ טבור,,"p_u_p_i_k, t_a_b_u_Q"", t_a_b_u_Q"""
+Hebrew,belt,חגורה,,"X_a_g_o_Q""_a"
+Hebrew,bench,ספסל,,s_a_f_s_a_l
+Hebrew,between,בין,,b_e_n
+Hebrew,bib,סינור,,"s_i_n_u_Q"""
+Hebrew,bicycle,אופניים,,"o_f_a_n_a_j_i_m, ʔ_o_f_a_n_a_j_i_m"
+Hebrew,big,גדול,,g_a_d_o_l
+Hebrew,bird,ציפור,,"ts_i_p_o_Q"""
+Hebrew,bite,לנשוך,,"l_i_n_S_a_X, l_i_n_S_a_X"
+Hebrew,blanket,שמיכה,,"s_m_i_X_a, s_m_i_X_a"
+Hebrew,blanket,סיר בישול,,"s_i_Q""_ b_i_S_u_l, s_i_Q""_ b_i_S_u_l"
+Hebrew,bless,לברך,,"l_e_v_a_Q""_e_X, l_e_v_a_Q""_e_X"
+Hebrew,blocks,קוביה,,"k_u_b_i_m, k_u_b_i_m"
+Hebrew,blow,לנשוף,,"l_i_n_S_o_f, l_i_n_S_o_f"
+Hebrew,boat,אניה,,"o_n_i_j_a, ʔ_o_n_i_j_a"
+Hebrew,boat,סירה,,"s_i_Q""_a"
+Hebrew,book,ספר,,"s_e_f_e_Q"""
+Hebrew,boots,מגפיים,,m_a_g_a_f_i_m
+Hebrew,bottle,בקבוק,,"b_a_k_b_u_k, b_a_k_b_u_k"
+Hebrew,bowl,קערה,,"k_e_a_Q""_a, k_e_ʔ_a_Q""_a"
+Hebrew,bowl,קערה/ קערית,,"k_e_a_Q""_a, k_e_ʔ_a_Q""_a, k_a_a_Q""_i_t, k_a_ʔ_a_Q""_i_t"
+Hebrew,box,קופסה,,"k_u_f_s_a, k_u_f_s_a"
+Hebrew,boy,ילד,,j_e_l_e_d
+Hebrew,bread,לחם,,l_e_X_e_m
+Hebrew,break,לשבור,,"l_i_S_b_o_Q"", l_i_S_b_o_Q"""
+Hebrew,breast,ציצי,,ts_i_ts_i
+Hebrew,bring,להביא,,l_i_h_a_v_i
+Hebrew,broken,מקולקל,,"m_e_k_u_l_k_a_l, m_e_k_u_l_k_a_l"
+Hebrew,broken,שבור,,"S_a_v_u_Q"", S_a_v_u_Q"""
+Hebrew,broom,מטאטא,,"m_a_t_a_t_e, m_a_t_ʔ_a_t_e_ʔ"
+Hebrew,brush (action),להבריש,,"l_i_h_a_v_Q""_i_S, l_i_h_a_v_Q""_i_S"
+Hebrew,brush (object),מברשת,,"m_i_v_Q""_e_S_e_t, m_i_v_Q""_e_S_e_t"
+Hebrew,bubbles,בועות,,"b_u_o_t, b_u_o_t, b_u_ʔ_o_t"
+Hebrew,bucket,דלי,,d_l_i
+Hebrew,bug,ג'וק,,"dZ_u_k, d_dZ_u_k, dZ_u_k"
+Hebrew,bug,ג'וק/ תיקן,,"dZ_u_k, d_dZ_u_k, dZ_u_k, t_i_k_a_n"
+Hebrew,build,לבנות,,l_i_v_n_o_t
+Hebrew,bun,לחמניה,,l_a_X_m_a_n_i_j_a
+Hebrew,bunny,שפן,,"S_a_f_a_n, S_a_f_a_n"
+Hebrew,bunny,שפן/ ארנבת,,"S_a_f_a_n, S_a_f_a_n, a_Q""_n_e_v_e_t"
+Hebrew,bus,אוטובוס,,"o_t_o_b_u_s, ʔ_o_t_o_b_u_s"
+Hebrew,bus station,תחנת אוטובוס,,"t_a_X_a_n_a_t_ o_t_o_b_u_s, t_a_X_a_n_a_t_ ʔ_o_t_o_b_u_s"
+Hebrew,bus station,תחנת אוטובוס,,"t_a_X_a_n_a_t_ o_t_o_b_u_s, t_a_X_a_n_a_t_ ʔ_o_t_o_b_u_s"
+Hebrew,butt,טוסיק/ישבן,,"t_u_s_i_k, t_u_s_i_k, j_a_S_v_a_n, j_a_S_v_a_n"
+Hebrew,butter,מרגרינה,,"m_a_Q""_g_a_Q""_i_n_a"
+Hebrew,butter,מרגרינה/ חמאה,,"m_a_Q""_g_a_Q""_i_n_a, X_e_m_a, X_e_m_ʔ_a"
+Hebrew,butterfly,פרפר,,"p_a_Q""_p_a_Q"""
+Hebrew,button,כפתור,,"k_a_f_t_o_Q"""
+Hebrew,buy,לקנות,,"l_i_k_n_o_t, l_i_k_n_o_t"
+Hebrew,buzz,בזז,,b_z_z
+Hebrew,buzz,בזז...,,b_z_z
+Hebrew,bye,ביי,,b_a_j
+Hebrew,bye,ביי/ להתראות,,"b_a_j, l_e_h_i_t_Q""_a_o_t"
+Hebrew,cake,עוגה,,"u_g_a, ʔ_u_g_a"
+Hebrew,cake,עוגה/ עוגיה,,"u_g_a, ʔ_u_g_a, u_g_i_j_a, ʔ_u_g_i_j_a_"
+Hebrew,camera,מצלמה,,m_a_ts_l_e_m_a
+Hebrew,can (auxiliary),אפשר,,"e_f_S_a_Q"", e_f_S_a_Q"""
+Hebrew,can (auxiliary),יכול,,"j_a_X_o_l, j_a_X_o_l"
+Hebrew,candy,ממתק,,"m_a_m_t_a_k, m_a_m_t_a_k"
+Hebrew,car,אוטו,,"o_t_o, ʔ_o_t_o"
+Hebrew,car,אוטו/ מכונית,,"o_t_o, ʔ_o_t_o, m_e_X_o_n_i_t, m_e_X_o_n_i_t"
+Hebrew,careful,זהיר,,"z_a_h_i_Q"""
+Hebrew,carpet,שטיח,,"S_a_t_i_a_X, S_a_t_i_a_X"
+Hebrew,carrot,גזר,,"g_e_z_e_Q"""
+Hebrew,cat,חתול,,X_a_t_u_l
+Hebrew,catch,לתפוס,,l_i_t_p_o_s
+Hebrew,chair,כיסא,,"k_i_s_e, k_i_s_e_ʔ"
+Hebrew,chalk,גיר,,"g_i_Q"""
+Hebrew,change,להחליף,,l_e_h_a_X_a_l_i_f
+Hebrew,chase,לרדוף,,"l_i_Q""_d_o_f"
+Hebrew,cheek,לחי,,l_e_X_i
+Hebrew,cheek,לחי/ לחיים,,"l_e_X_i, l_e_X_a_j_i_m"
+Hebrew,cheese,גבינה,,g_v_i_n_a
+Hebrew,chick,אפרוח,,"e_f_Q""_o_a_X, ʔ_e_f_Q""_o_a_X"
+Hebrew,chicken (food),עוף,,"o_f, o_f, ʔ_o_f"
+Hebrew,child,ילד/ ילדה,,"j_e_l_e_d, j_a_l_d_a"
+Hebrew,chin,סנטר,,"s_a_n_t_e_Q"""
+Hebrew,chocolate,שוקולד,,"S_o_k_o_l_a_d, S_o_k_o_l_a_d"
+Hebrew,choo choo,ציק ציק צאק,,"ts_i_k_ ts_i_k_ ts_a_k, ts_i_k_ ts_i_k_ ts_a_ʔ_k"
+Hebrew,choo choo,צ'יק צ'יק צ'אק,,"ts_i_k_ ts_i_k_ ts_a_k, ts_i_k_ ts_i_k_ ts_a_ʔ_k"
+Hebrew,choose,לבחור,,"l_i_v_X_o_Q"""
+Hebrew,church,בית כנסת,,"b_e_i_t_ k_n_e_s_e_t, b_e_j_t_ k_n_e_s_e_t"
+Hebrew,church,בית כנסת,,"b_e_i_t_ k_n_e_s_e_t, b_e_j_t_ k_n_e_s_e_t"
+Hebrew,clap,מחא כפיים,,"m_a_X_a_ k_a_p_a_i_m, m_a_X_a_ʔ_ k_a_p_a_i_m"
+Hebrew,clean (action),לנקות,,"l_e_n_a_k_o_t, l_e_n_a_k_o_t"
+Hebrew,clean (description),נקי,,"n_a_k_i, n_a_k_i"
+Hebrew,clementine,קלמנטינה,,"k_l_e_m_e_n_t_i_n_a, k_l_e_m_e_n_t_i_n_a"
+Hebrew,climb,לטפס,,"l_e_t_a_p_e_s, l_e_t_a_p_e_s"
+Hebrew,clock,שעון,,"S_a_u_n, S_a_u_n, S_a_ʔ_u_n"
+Hebrew,close,לסגור,,"l_i_s_g_o_Q"""
+Hebrew,close,לסתום,,l_i_s_t_o_m
+Hebrew,closet,ארון,,"a_Q""_o_n, ʔ_a_Q""_o_n"
+Hebrew,cloud,ענן/ עננים,,"a_n_a_n, ʔ_a_n_a_n"
+Hebrew,clown,ליצן,,"l_e_i_ts_a_n, l_e_ts_a_n"
+Hebrew,coat,מעיל,,"m_e_i_l, m_e_i_l, m_e_ʔ_i_l"
+Hebrew,cockadoodledoo,קוקוריקו,,"k_u_k_u_Q""_i_k_u, k_u_k_u_Q""_i_k_u"
+Hebrew,coffee,קפה,,"k_a_f_e, k_a_f_e"
+Hebrew,cold,קר,,"k_a_Q"", k_a_Q"""
+Hebrew,color (action),לצבוע,,"l_i_ts_b_o_a, l_i_ts_b_o_ʔ_a"
+Hebrew,comb (action),לסרק,,"l_e_s_a_Q""_e_k, l_e_s_a_Q""_e_k"
+Hebrew,comb (object),מסרק,,"m_a_s_Q""_e_k, m_a_s_Q""_e_k"
+Hebrew,corn,תירס,,"t_i_Q""_a_s"
+Hebrew,couch,ספה,,s_a_p_a
+Hebrew,cover (action),לכסות,,"l_e_k_a_s_o_t, l_e_X_a_s_o_t"
+Hebrew,cow,פרה,,"p_a_Q""_a"
+Hebrew,cracker,קרקר,,"k_Q""_a_k_e_Q"", k_Q""_a_k_e_Q"""
+Hebrew,cry,לבכות,,l_i_v_k_o_t
+Hebrew,cucumber,מלפפון,,m_e_l_a_f_e_f_o_n
+Hebrew,cup,כוס,,k_o_s
+Hebrew,cup,כוס/ ספל,,"k_o_s, s_e_f_e_l"
+Hebrew,curtain,וילון,,v_i_l_o_n
+Hebrew,cut,לגזור,,"l_i_g_z_o_Q"""
+Hebrew,cut,לחתוך,,"l_a_X_t_o_k, l_a_X_t_o_X"
+Hebrew,cute,חמוד,,X_a_m_u_d
+Hebrew,daddy,אבא,,"a_b_a, ʔ_a_b_a_ʔ"
+Hebrew,dance,לרקוד,,"l_i_Q""_k_o_d, l_i_Q""_k_o_d"
+Hebrew,dark,חושך,,"X_o_S_e_k, X_o_S_e_X"
+Hebrew,deer,אייל,,"a_j_a_l, ʔ_a_j_a_l"
+Hebrew,deer,אייל/ צבי/ במבי,,"a_j_a_l, ʔ_a_j_a_l, ts_v_i, b_a_m_b_i"
+Hebrew,descend,לרדת,,"l_a_Q""_e_d_e_t"
+Hebrew,diaper,טיטול,,"t_i_t_u_l, t_i_t_u_l"
+Hebrew,diaper,טיטול/ חיתול,,"t_i_t_u_l, t_i_t_u_l, X_i_t_u_l, X_i_t_u_l"
+Hebrew,dirty,מלוכלך,,m_e_l_u_X_l_a_X
+Hebrew,disgusting,מגעיל,,"m_a_g_i_l, m_a_g_i_l, m_a_g_ʔ_i_l"
+Hebrew,do,לעשות,,"l_a_a_s_o_t, l_a_ʔ_a_s_o_t"
+Hebrew,doctor,רופא,,"Q""_u_p_a, Q""_u_p_a_ʔ"
+Hebrew,dog,כלב,,k_e_l_e_v
+Hebrew,doll,בובה,,b_u_b_a
+Hebrew,don't,די,,d_a_i
+Hebrew,donkey,חמור,,"X_a_m_o_Q"""
+Hebrew,door,דלת,,d_e_l_e_t
+Hebrew,down,למטה,,"l_e_m_a_t_a, l_e_m_a_t_a"
+Hebrew,drawer,מגירה,,"m_e_g_e_Q""_a"
+Hebrew,dress (object),שמלה,,"s_i_m_l_a, s_i_m_l_a"
+Hebrew,drink (action),לשתות,,"l_i_S_t_o_t, l_i_S_t_o_t"
+Hebrew,drive,לנהוג,,l_i_n_h_o_g
+Hebrew,drop,להפיל,,l_e_h_a_p_i_l
+Hebrew,dry (action),ליבש,,"l_i_v_o_S, l_i_v_o_S"
+Hebrew,dry (description),יבש,,"j_a_v_e_S, j_a_v_e_S"
+Hebrew,duck,ברווז,,"b_a_Q""_v_a_z"
+Hebrew,ear,אוזן,,"o_z_e_n, ʔ_o_z_e_n"
+Hebrew,ear,אוזן/ אוזניים,,"o_z_e_n, ʔ_o_z_e_n, o_z_e_n_i_m, ʔ_o_z_e_n_i_m"
+Hebrew,eat,לאכול,,"l_e_k_o_l, l_e_ʔ_e_X_o_l"
+Hebrew,egg,ביצה,,b_e_ts_a
+Hebrew,elephant,פיל,,p_i_l
+Hebrew,empty,ריק,,"Q""_i_k, Q""_i_k"
+Hebrew,enough,די,,d_a_i
+Hebrew,every,כל,,k_o_l
+Hebrew,everyone,כולם,,k_u_l_a_m
+Hebrew,excellent,מצויין,,m_e_ts_u_j_a_n
+Hebrew,eye,עיין,,"a_j_i_n, ʔ_a_j_i_n"
+Hebrew,eye,עין/ עיניים,,"a_j_i_n, ʔ_a_j_i_n, e_i_n_a_j_i_m, ʔ_e_j_n_a_j_i_m"
+Hebrew,face,פנים,,p_a_n_i_m
+Hebrew,fall,ליפול,,l_i_p_o_l
+Hebrew,far,רחוק,,"Q""_a_X_o_k, Q""_a_X_o_k"
+Hebrew,fast,מהר,,"m_a_h_e_Q"""
+Hebrew,fat,שמן,,"S_e_m_e_n, S_e_m_e_n"
+Hebrew,faucet,ברז,,"b_e_Q""_e_z"
+Hebrew,feed,להאכיל,,"l_e_h_a_a_X_i_l, l_e_h_a_ʔ_a_X_i_l"
+Hebrew,find,למצוא,,"l_i_m_ts_o, l_i_m_ts_o_ʔ"
+Hebrew,finger,אצבעות,,"e_ts_b_a_o_t, e_ts_b_a_o_t, e_ts_b_a_ʔ_o_t"
+Hebrew,finish,לגמור,,"l_i_g_m_o_Q"""
+Hebrew,firefighter,כבאי,,"k_a_b_a_i, k_a_b_a_ʔ_i"
+Hebrew,fish (animal),דג,,d_a_g
+Hebrew,fish (food),דג,,d_a_g
+Hebrew,fish (food),דג,,d_a_g
+Hebrew,fit,להתאים,,"l_e_h_a_t_a_i_m, l_e_h_a_t_ʔ_a_i_m"
+Hebrew,fix,לתקן,,"l_e_t_a_k_e_n, l_e_t_a_k_e_n"
+Hebrew,flag,דגל,,d_e_g_e_l
+Hebrew,flower,פרח,,"p_e_Q""_a_X"
+Hebrew,flower pot,עציץ,,"a_ts_i_t_s, ʔ_a_ts_i_t_s"
+Hebrew,fly (animal),זבוב,,z_v_u_v
+Hebrew,food,אוכל,,"o_X_e_l, ʔ_o_X_e_l"
+Hebrew,forehead,מצח,,m_e_ts_a_X
+Hebrew,forest,חורשה,,"X_u_Q""_S_a, X_u_Q""_S_a"
+Hebrew,fork,מזלג,,m_a_z_l_e_g
+Hebrew,french fries,צ'יפס,,ts_i_p_s
+Hebrew,friend,חבר,,"X_a_v_e_Q"""
+Hebrew,friend,חבר/ חברה,,"X_a_v_e_Q"", X_a_v_e_Q""_a"
+Hebrew,frog,צפרדע,,"ts_f_a_Q""_d_e_a, ts_f_a_Q""_d_e_a_ʔ"
+Hebrew,full,מלא,,"m_a_l_e, m_a_l_e_ʔ"
+Hebrew,game,משחק,,"m_i_S_X_a_k, m_i_S_X_a_k"
+Hebrew,garage,חניה,,X_a_n_a_j_a
+Hebrew,garage,חניה/ מוסך,,"X_a_n_a_j_a, m_u_s_a_X, m_u_s_a_X"
+Hebrew,garden,גן,,g_a_n
+Hebrew,gas station,תחנת דלק,,"t_a_X_a_n_a_t_ d_e_l_e_k, t_a_X_a_n_a_t_ d_e_l_e_k"
+Hebrew,get up,לקום,,"l_a_k_u_m, l_a_k_u_m"
+Hebrew,giraffe,ג'ירפה,,"g_i_Q""_a_f_a, dZ_i_Q""_a_f_a"
+Hebrew,give,לתת,,l_a_t_e_t
+Hebrew,give me five,כיף/ תן כפה,,"k_e_f_ k_a_p_a_h, t_e_n_ k_a_p_a_h"
+Hebrew,glasses,משקפיים,,"m_i_S_k_a_f_a_j_i_m, m_i_S_k_a_f_a_j_i_m"
+Hebrew,glove,כפפות,,k_f_a_f_i_m
+Hebrew,glue (object),דבק,,"d_e_v_e_k, d_e_v_e_k"
+Hebrew,go eat,ללכת לאכול,,"l_a_l_e_X_e_t_ l_e_e_X_h_o_l, l_a_l_e_X_e_t_ l_e_ʔ_e_X_o_l"
+Hebrew,go for a walk,ללכת לטייל,,"l_a_l_e_X_e_t_ l_e_t_a_j_a_l, l_a_l_e_X_e_t_ l_e_t_a_j_a_l"
+Hebrew,go out,לצאת,,"l_a_ts_e_t, l_a_ts_ʔ_e_t"
+Hebrew,go potty,לעשות פיפי בסיר,,"l_a_a_s_o_t_ p_i_p_i_ b_a_s_i_Q"", l_a_ʔ_a_s_o_t_ p_i_p_ b_a_s_i_Q"""
+Hebrew,go to bed,ללכת לישון,,"l_a_l_e_X_e_t_ l_i_S_o_n, l_a_l_e_X_e_t_ l_i_S_o_n"
+Hebrew,gonna get you,לשחק תופסת,,"l_e_S_a_X_e_k_ t_o_f_e_s_e_t, l_e_S_a_X_e_k_ t_o_f_e_s_e_t"
+Hebrew,good,טוב,,t_o_v
+Hebrew,good morning,בוקר טוב,,"b_o_k_e_Q""_ t_o_v, b_o_k_e_Q""_ t_o_v"
+Hebrew,good night,לילה טוב,,l_a_j_l_a_ t_o_v
+Hebrew,goose,אווז,,"a_v_a_z, ʔ_a_v_a_z"
+Hebrew,grandma,סבתא,,"s_a_v_t_a, s_a_v_t_a_ʔ"
+Hebrew,grandpa,סבא,,"s_a_b_a, s_a_b_a_ʔ"
+Hebrew,grapes,ענבים,,"a_n_a_v_i_m, ʔ_a_n_a_v_i_m"
+Hebrew,grass,דשא,,"d_e_S_e, d_e_S_e_ʔ"
+Hebrew,ground,אדמה,,"a_d_a_m_a, ʔ_a_d_a_m_a"
+Hebrew,gum,מסטיק,,"m_a_s_t_i_k, m_a_s_t_i_k"
+Hebrew,hair,שערות,,"s_e_a_Q""_o_t, s_e_ʔ_a_Q""_o_t"
+Hebrew,ham,נקניק,,"n_a_k_n_i_k, n_a_k_n_i_k"
+Hebrew,hammer,פטיש,,"p_a_t_i_S, p_a_t_i_S"
+Hebrew,hand,ידיים,,j_a_d_a_j_i_m
+Hebrew,hand,יד/ ידיים,,"j_a_d, j_a_d_a_j_i_m"
+Hebrew,happy,שמח,,"s_a_m_e_a_X, s_a_m_e_a_X"
+Hebrew,hard,קשה,,"k_a_S_e, k_a_S_e"
+Hebrew,hat,כובע,,"k_o_v_a, k_o_v_a_ʔ"
+Hebrew,hate,לשנוא,,"l_i_s_n_o, l_i_s_n_o_ʔ"
+Hebrew,have,יש לי,,"j_e_S_ l_i, j_e_S_ l_i"
+Hebrew,head,ראש,,"Q""_o_S, Q""_o_ʔ_S"
+Hebrew,hear,לשמוע,,"l_i_S_m_o_a, l_i_šm_o_a_ʔ"
+Hebrew,heavy,כבד,,k_a_v_e_d
+Hebrew,hedgehog,קיפוד,,"k_i_p_o_d, k_i_p_o_d"
+Hebrew,hee haw,אי אה,,"i_ a, ʔ_i_ ʔ_a"
+Hebrew,hee haw,אי-אה,,"i_ a, ʔ_i_ ʔ_a"
+Hebrew,helicopter,הליקופטר,,"h_e_l_i_k_o_p_t_e_Q"", h_e_l_i_k_o_p_t_e_Q"""
+Hebrew,help,לעזור,,"l_a_a_z_o_Q"", l_a_ʔ_a_z_o_Q"""
+Hebrew,here,הינה,,h_i_n_e
+Hebrew,here,הנה,,h_i_n_e
+Hebrew,here,כאן/ פה,,"k_a_n, k_a_ʔ_n, p_o"
+Hebrew,hi,היי,,h_e_j
+Hebrew,hi,היי/ שלום/ אהלן,,"h_e_j, S_a_l_o_m, S_a_l_o_m, a_h_l_a_n, ʔ_a_h_l_a_n"
+Hebrew,hide,להחביא,,"l_e_h_a_X_v_i, l_e_h_a_X_v_i_ʔ"
+Hebrew,hide,להתחבא,,"l_e_h_i_t_X_a_b_e, l_e_h_i_t_X_a_b_e_ʔ"
+Hebrew,high,גבוה,,g_a_v_o_a_h
+Hebrew,hippopotamus,היפופוטם,,"h_i_p_o_p_o_t_a_m, h_i_p_o_p_o_t_a_m"
+Hebrew,hit,להכות,,l_e_h_a_b_o_t
+Hebrew,hit,להכות/ להרביץ,,"l_e_h_a_b_o_t, l_e_h_a_Q""_v_i_t_s"
+Hebrew,hold,להחזיק,,"l_e_h_a_X_a_z_i_k, l_e_h_a_X_a_z_i_k"
+Hebrew,honey,דבש,,"d_v_a_S, d_v_a_S"
+Hebrew,horse,סוס,,s_u_s
+Hebrew,hose,צינור,,"ts_i_n_o_Q"""
+Hebrew,hot,חם,,X_a_m
+Hebrew,hot chocolate,שוקו,,"S_o_k_o, S_o_k_o"
+Hebrew,house,בית,,b_a_j_i_t
+Hebrew,house,מעון,,"m_a_o_n, m_a_ʔ_o_n"
+Hebrew,house,בית/ הביתה,,"b_a_j_i_t, h_a_b_a_j_t_a"
+Hebrew,how,איך,,"e_j_X, ʔ_e_j_X"
+Hebrew,how much,כמה,,k_a_m_a
+Hebrew,hug,לחבק,,"l_e_X_a_b_e_k, l_e_X_a_b_e_k"
+Hebrew,hungry,רעב,,"Q""_a_e_v, Q""_a_ʔ_e_v"
+Hebrew,hurry,למהר,,"l_e_m_a_h_e_Q"""
+Hebrew,ice cream,ארטיק,,"a_Q""_t_i_k, ʔ_a_Q""_t_i_k"
+Hebrew,ice cream,ארטיק/ גלידה,,"a_Q""_t_i_k, ʔ_a_Q""_t_i_k, g_l_i_d_a"
+Hebrew,in,בפנים/ בתוך,,"b_i_f_n_i_m, b_e_t_o_X, b_e_t_o_X"
+Hebrew,inside,בפנים,,b_i_f_n_i_m
+Hebrew,jam,ריבה,,"Q""_i_b_a"
+Hebrew,jeans,ג'ינס,,"g_i_n_s, dZ_i_j_n_s"
+Hebrew,jeep,ג'יפ,,"g_i_p, dZ_i_j_p"
+Hebrew,juice,מיץ,,m_i_t_s
+Hebrew,jump,לקפוץ,,"l_i_k_p_o_t_s, l_i_k_p_o_t_s"
+Hebrew,keep,לשמור,,"l_i_S_m_o_Q"", l_i_S_m_o_Q"""
+Hebrew,key,מפתחות,,m_a_f_t_e_X_o_t
+Hebrew,kick,לבעוט,,"l_i_v_o_t, l_i_v_o_t, l_i_v_ʔ_o_t"
+Hebrew,kindergarten,גן (משפחתון/ פעוטון/ מעון/ גנון),,"g_a_n, m_i_S_p_a_X_t_o_n, p_a_o_t_o_n, p_a_ʔ_o_t_o_n, m_a_o_n, m_a_ʔ_o_n, g_i_n_u_n"
+Hebrew,kiss,לנשק,,"l_i_n_S_o_k, l_i_n_S_o_k"
+Hebrew,kitchen,מטבח,,"m_i_t_b_a_X, m_i_t_b_a_X"
+Hebrew,knee,ברך,,"b_e_Q""_e_X, b_e_Q""_e_X"
+Hebrew,knee,ברך/ ברכיים,,"b_e_Q""_e_X, b_e_Q""_e_X, b_i_Q""_k_a_j_i_m"
+Hebrew,knife,סכין,,s_a_k_i_n
+Hebrew,knock,לדפוק,,"l_i_d_p_o_k, l_i_d_p_o_k"
+Hebrew,ladder,סולם,,s_u_l_a_m
+Hebrew,lamb,טלה,,t_a_l_e
+Hebrew,lamp,מנורה,,"m_e_n_o_Q""_a"
+Hebrew,last,אחרון,,"a_X_a_Q""_o_n, ʔ_a_X_a_Q""_o_n"
+Hebrew,later,אחר כך,,"a_X_a_Q""_ k_a_X, ʔ_a_X_a_Q""_ k_a_X"
+Hebrew,leg,רגליים,,"Q""_a_g_l_a_j_i_m"
+Hebrew,leg,רגל/ רגליים,,"Q""_e_g_e_l, Q""_a_g_l_a_j_i_m"
+Hebrew,lick,ללקק,,"l_e_l_a_k_e_k, l_e_l_a_k_e_k"
+Hebrew,light (action),להדליק,,"l_e_h_a_d_l_i_k, l_e_h_a_d_l_i_k"
+Hebrew,light (object),אור,,"o_Q"", ʔ_o_Q"""
+Hebrew,like,לחבב,,l_e_X_a_b_e_v
+Hebrew,lion,אריה,,"a_Q""_j_e, ʔ_a_Q""_j_e"
+Hebrew,lip,שפתיים,,"s_f_a_t_a_j_i_m, s_f_a_t_a_j_i_m"
+Hebrew,listen,להקשיב,,"l_e_h_a_k_S_i_v, l_e_h_a_k_S_i_v"
+Hebrew,little (amount),מעט/ קצת,,"m_a_t, m_a_t, m_ʔ_a_t, k_ts_a_t, k_ts_a_t"
+Hebrew,little (description),קטן,,"k_a_t_a_n, k_a_t_a_n"
+Hebrew,living room,סלון,,s_a_l_o_n
+Hebrew,lock (action),לנעול,,"l_i_n_o_l, l_i_n_o_l, l_i_n_ʔ_o_l"
+Hebrew,lollipop,סוכריה,,"s_u_k_a_Q""_i_a_h, s_u_k_a_Q""_i_j_a_h"
+Hebrew,long,ארוך,,"a_Q""_o_X, ʔ_a_Q""_o_X"
+Hebrew,look,לחפש,,"l_e_X_a_p_e_s, l_e_X_a_p_e_s"
+Hebrew,love,לאהוב,,"l_e_e_h_o_v, l_e_ʔ_e_h_o_v"
+Hebrew,mailman,דוור,,"d_i_v_u_Q"""
+Hebrew,many,הרבה,,"h_a_Q""_b_e"
+Hebrew,marker,טוש,,"t_u_S, t_u_S"
+Hebrew,market,סופרמרקט/ סופר/ מכולת,,"s_u_p_e_Q""_m_a_Q""_k_e_t, s_u_p_e_Q""_m_a_Q""_k_e_t, s_u_p_e_Q"", m_a_k_o_l_e_t"
+Hebrew,meat,בשר,,"b_a_s_a_Q"", b_a_s_a_Q"""
+Hebrew,meatball,קציצה,,"k_ts_i_ts_a, k_ts_i_ts_a"
+Hebrew,medicine,תרופה,,"t_Q""_u_f_a"
+Hebrew,melon,מלון,,m_e_l_o_n
+Hebrew,meow,מיאו,,"m_i_a_o, m_i_a_ʔ_o"
+Hebrew,milk,חלב,,X_a_l_a_v
+Hebrew,moment,רגע,,"Q""_e_g_a, Q""_e_g_a_ʔ"
+Hebrew,mommy,אמא,,"i_m_a, ʔ_i_m_a_ʔ"
+Hebrew,money,כסף,,k_e_s_e_f
+Hebrew,monkey,קוף,,"k_o_f, k_o_f"
+Hebrew,moo,מו,,m_u
+Hebrew,moon,ירח,,"j_a_Q""_e_a_X"
+Hebrew,mop (object),מגב,,m_a_g_e_v
+Hebrew,more,עוד,,"o_d, ʔ_o_d"
+Hebrew,more,עוד,,"o_d, ʔ_o_d"
+Hebrew,morning,בוקר,,"b_o_k_e_Q"", b_o_k_e_Q"""
+Hebrew,motorcycle,אופנוע,,"o_f_a_n_o_a, ʔ_o_f_a_n_o_ʔ_a"
+Hebrew,mountain,הר,,"h_a_Q"""
+Hebrew,mouse,עכבר,,"a_X_b_a_Q"", ʔ_a_X_b_a_Q"""
+Hebrew,mouth,פה,,p_e
+Hebrew,movie,סרט,,"s_e_Q""_e_t, s_e_Q""_e_t"
+Hebrew,NA,קטר,,"k_a_t_a_Q"", k_a_t_a_Q"""
+Hebrew,NA,סביבון,,"s_v_i_v_o_n, s_e_v_i_v_o_n"
+Hebrew,NA,במבה,,b_a_m_b_a
+Hebrew,NA,חביתה,,X_a_v_i_t_a
+Hebrew,NA,פתיתים,,p_e_t_i_t_i_m
+Hebrew,NA,גופיה,,g_u_f_i_j_a
+Hebrew,NA,טריינינג,,"t_Q""_e_j_n_i_n_g, t_Q""_e_j_n_i_n_g"
+Hebrew,NA,צריך,,"ts_a_Q""_i_X, ts_a_Q""_i_X"
+Hebrew,NA,שבת,,"S_a_b_a_t, S_a_b_a_t"
+Hebrew,NA,מה זה,,m_a_ z_e
+Hebrew,NA,מי זה,,m_i_ z_e
+Hebrew,NA,רעשן/ קשקשן,,"Q""_a_a_S_a_n, Q""_a_ʔ_a_S_a_n, k_a_S_k_e_S_a_n, k_a_S_k_e_S_a_n"
+Hebrew,NA,מחבת,,m_a_X_a_v_a_t
+Hebrew,NA,אפשר/ מותר,,"e_f_S_a_Q"", ʔ_e_f_S_a_Q"", m_u_t_a_Q"""
+Hebrew,NA,כואב לי/ כואב לך,,"k_o_e_v_ l_i, k_o_ʔ_e_v_ l_i, k_o_e_v_ l_X_a, k_o_e_v_ l_a_X, k_o_ʔ_e_v_ l_a_X, k_o_ʔ_e_v_ l_X_a"
+Hebrew,NA,כועס/ כועסת,,"k_o_e_s, k_o_ʔ_e_s, k_o_e_s_e_t, k_o_ʔ_e_s_e_t"
+Hebrew,NA,לדבר בטלפון,,"l_e_d_a_b_e_Q""_ b_a_t_e_l_e_f_o_n"
+Hebrew,NA,עשר אצבעות לי יש,,"e_s_e_Q""_ e_ts_b_a_o_t_ l_i_ j_e_S, ʔ_e_s_e_Q""_ ʔ_e_ts_b_a_ʔ_o_t_ l_i_ j_e_S"
+Hebrew,NA,תן לי,,t_e_n_ l_i
+Hebrew,NA,לספר (סיפור),,"l_e_s_a_p_e_Q"", l_e_s_a_p_e_Q""_ s_i_p_u_Q"""
+Hebrew,NA,יש לי/שלי,,"j_e_S_ l_i, j_e_S_ l_i, S_e_l_i, S_e_l_i"
+Hebrew,nail (body part),ציפורניים,,"ts_i_p_o_Q""_n_a_j_i_m"
+Hebrew,nail (object),מסמר,,"m_a_s_m_e_Q"""
+Hebrew,napkin,מפית,,m_a_p_i_t
+Hebrew,naughty,שובב,,"S_o_v_a_v, S_o_v_a_v"
+Hebrew,neck,צואר,,"ts_a_v_a_Q"", ts_a_v_a_ʔ_Q"""
+Hebrew,necklace,שרשרת,,"S_a_Q""_S_e_Q""_e_t, S_a_Q""_S_e_Q""_e_t"
+Hebrew,necklace,שרשרת/ מחרוזת,,"S_a_Q""_S_e_Q""_e_t, S_a_Q""_S_e_Q""_e_t, m_a_X_Q""_o_z_e_t, m_a_X_Q""_o_z_e_t"
+Hebrew,neighbor,שכן,,"S_a_X_e_n, S_a_X_e_n"
+Hebrew,neighbor,שכן/ שכנה,,"S_a_X_e_n, S_a_X_e_n, S_e_X_e_n_a, S_e_X_e_n_a"
+Hebrew,new,חדש,,"X_a_d_a_S, X_a_d_a_S"
+Hebrew,next to,ליד/ על יד,,"l_j_a_d, a_l_ j_a_d, ʔ_a_l_ j_a_d"
+Hebrew,nice,נחמד,,n_e_X_m_a_d
+Hebrew,night,לילה,,l_a_j_l_a
+Hebrew,no,לא,,"l_o, l_o_ʔ"
+Hebrew,no one,אף אחד,,"a_f_ e_X_a_d, ʔ_a_f_ ʔ_e_X_a_d"
+Hebrew,noon,צהריים,,"ts_o_h_o_Q""_a_j_i_m"
+Hebrew,nose,אף,,"a_f, ʔ_a_f"
+Hebrew,nothing,כלום,,k_l_u_m
+Hebrew,now,עכשיו,,"a_X_S_a_v, ʔ_a_X_S_a_v"
+Hebrew,nut,אגוזים,,"e_g_o_z_i_m, ʔ_e_g_o_z_i_m"
+Hebrew,old,זקן,,"z_a_k_e_n, z_a_k_e_n"
+Hebrew,old,ישן,,"j_a_S_a_n, j_a_S_a_n"
+Hebrew,olive,זיתים,,z_e_t_i_m
+Hebrew,on,על,,"a_l, ʔ_a_l"
+Hebrew,once,פעם,,"p_a_a_m, p_a_ʔ_a_m"
+Hebrew,one,אחד,,"e_X_a_d, ʔ_e_X_a_d"
+Hebrew,open (action),לפתוח,,l_i_f_t_o_a_X
+Hebrew,orange (food),תפוז,,t_a_p_u_z
+Hebrew,ouch,אוי,,"o_j, ʔ_o_j"
+Hebrew,ouch,אוי/ איה,,"o_j, ʔ_o_j, a_j, ʔ_a_j, a_j_a, ʔ_a_j_a"
+Hebrew,oven,תנור,,"t_a_n_u_Q"""
+Hebrew,owie,כואב לי,,"k_o_e_v_ l_i, k_o_ʔ_e_v_ l_i"
+Hebrew,owl,ינשוף,,"j_a_n_S_u_f, j_a_n_S_u_f"
+Hebrew,pacifier,מוצץ,,m_o_ts_e_t_s
+Hebrew,paint (action),לצייר,,"l_e_ts_a_j_e_Q"""
+Hebrew,pajamas,פיג'מה,,"p_i_g_a_m_a, p_i_dZ_a_m_a, p_i_dZ_a_m_a"
+Hebrew,pancake,ופלה,,v_a_f_l_a
+Hebrew,pants,מכנסיים,,m_i_X_n_a_s_a_j_i_m
+Hebrew,paper,נייר,,"n_j_a_Q"""
+Hebrew,park,גינה/ פארק,,"g_i_n_a, p_a_Q""_k, p_ʔ_a_Q""_k"
+Hebrew,parrot,תוכי,,t_u_k_i
+Hebrew,party,מסיבה,,m_e_s_i_b_a
+Hebrew,party,מסיבה,,m_e_s_i_b_a
+Hebrew,pasta,ספגטי/ אטריות/ פסטה,,"s_p_a_g_e_t_i, s_p_a_g_e_t_i, i_t_Q""_i_j_o_t, ʔ_i_t_Q""_i_j_o_t, p_a_s_t_a, p_a_s_t_a"
+Hebrew,peach,אפרסק,,"a_f_a_Q""_s_e_k, ʔ_a_f_a_Q""_s_e_k"
+Hebrew,peacock,טווס,,t_a_v_a_s
+Hebrew,pear,אגס,,"a_g_a_s, ʔ_a_g_a_s"
+Hebrew,peas,אפונה,,"a_f_u_n_a, ʔ_a_f_u_n_a"
+Hebrew,peekaboo,לשחק בקוקו,,"l_e_s_a_X_e_k_ b_a_k_u_k_u, l_e_s_a_X_e_k_ b_a_k_u_k_u"
+Hebrew,peekaboo,"לשחק ב""קוקו""",,"l_e_s_a_X_e_k_ b_a_k_u_k_u, l_e_s_a_X_e_k_ b_a_k_u_k_u"
+Hebrew,pen,עט,,"e_t, ʔ_e_t"
+Hebrew,pencil,עפרון,,"i_p_a_Q""_o_n, ʔ_i_p_a_Q""_o_n"
+Hebrew,penguin,פינגווין,,p_i_n_g_v_i_n
+Hebrew,penis,בולבול/פיפי,,"b_u_l_b_u_l, p_i_p_i"
+Hebrew,people,איש/ אנשים,,"i_S, ʔ_i_S, a_n_a_S_i_m, ʔ_a_n_a_S_i_m"
+Hebrew,pepper,פילפל,,p_i_l_p_e_l
+Hebrew,person,איש,,"i_S, ʔ_i_S"
+Hebrew,pickle,חמוצים/ מלפפון חמוץ,,"X_a_m_u_ts_i_m, m_e_l_a_f_e_f_o_n_ X_a_m_u_t_s"
+Hebrew,picnic,פיקניק,,"p_i_k_n_i_k, p_i_k_n_i_k"
+Hebrew,picture,תמונה,,t_m_u_n_a
+Hebrew,pig,חזיר,,"X_a_z_i_Q"""
+Hebrew,pigeon,יונה,,j_o_n_a
+Hebrew,pillow,כרית,,"k_a_Q""_i_t"
+Hebrew,pita,פיתה,,p_i_t_a
+Hebrew,pizza,פיצה,,p_i_ts_a
+Hebrew,plant,צמח,,ts_a_m_a_X
+Hebrew,plate,צלחת,,ts_a_l_a_X_a_t
+Hebrew,play,לשחק,,"l_e_s_a_X_e_k, l_e_s_a_X_e_k"
+Hebrew,play dough,בצק/ פלסטלינה,,"b_a_ts_e_k, b_a_ts_e_k, p_l_a_s_t_e_l_i_n_a, p_l_a_s_t_e_l_i_n_a"
+Hebrew,play pen,לול,,l_u_l
+Hebrew,playground,גן שעשועים/ מגרש משחקים,,"g_a_n_ S_a_a_S_u_i_m, g_a_n_ S_a_ʔ_a_S_u_ʔ_i_m, m_i_g_Q""_a_S_ m_i_S_X_a_k_i_m, m_i_g_Q""_a_S_ m_i_S_X_a_k_i_m"
+Hebrew,please,בבקשה,,"b_e_v_a_k_a_S_a, b_e_v_a_k_a_S_a"
+Hebrew,police,שוטר,,"S_o_t_e_Q"", S_o_t_e_Q"""
+Hebrew,pool,בריכה,,"b_Q""_e_X_a"
+Hebrew,porch,מרפסת,,"m_i_Q""_p_e_s_e_t"
+Hebrew,porridge,דייסה,,d_a_j_s_a
+Hebrew,pot,סיר,,"s_i_Q"""
+Hebrew,potato,תפוח אדמה,,"t_a_p_u_a_X_ a_d_a_m_a, t_a_p_u_a_X_ ʔ_a_d_a_m_a"
+Hebrew,potty,סיר,,"s_i_Q"""
+Hebrew,potty,ישבנון/ סיר,,"j_e_S_v_a_n_u_n, j_e_S_v_a_n_u_n, s_i_Q"""
+Hebrew,pour,למזוג,,l_i_m_z_o_g
+Hebrew,present,מתנה,,m_a_t_a_n_a
+Hebrew,pretend,לעשות כאילו,,"l_a_a_s_o_t_ k_i_l_u, l_a_ʔ_a_s_o_t_ k_ʔ_i_l_u"
+Hebrew,pretty,יפה,,j_a_f_e
+Hebrew,pretzel,בייגלה,,b_e_i_g_a_l_e
+Hebrew,pull,למשוך,,"l_i_m_S_o_X, l_i_m_S_o_X"
+Hebrew,puppy,גור,,"g_u_Q"""
+Hebrew,purse,ארנק,,"a_Q""_n_a_k, ʔ_a_Q""_n_a_k"
+Hebrew,push,לדחוף,,l_i_d_X_o_f
+Hebrew,put,לשים,,"l_a_S_i_m, l_a_s_i_m"
+Hebrew,puzzle,פאזל/ הרכבה,,"p_a_z_e_l, p_a_ʔ_z_e_l, h_a_Q""_k_a_v_a"
+Hebrew,quack quack,געגע,,g_a_g_a
+Hebrew,quack quack,גע גע,,g_a_ g_a
+Hebrew,quiet,שקט,,"S_a_k_e_t, S_a_k_e_t"
+Hebrew,radio,רדיו,,"Q""_a_d_j_o"
+Hebrew,rain,גשם,,"g_e_S_e_m, g_e_S_e_m"
+Hebrew,raisin,צימוקים,,"ts_i_m_u_k_i_m, ts_i_m_u_k_i_m"
+Hebrew,rattle (object),רעשן,,"Q""_a_a_S_a_n, Q""_a_ʔ_a_S_a_n"
+Hebrew,read,לקרוא,,"l_i_k_Q""_o, l_i_k_Q""_o_ʔ"
+Hebrew,refrigerator,מקרר,,"m_e_k_a_Q""_e_Q"", m_e_k_a_Q""_e_Q"""
+Hebrew,remove,להוריד,,"l_e_h_o_Q""_i_d"
+Hebrew,rest,לנוח,,l_a_n_u_a_X
+Hebrew,rice,אורז,,"o_Q""_e_z, ʔ_o_Q""_e_z"
+Hebrew,ride,לרכב,,"l_i_Q""_k_a_v"
+Hebrew,road,כביש,,"k_v_i_S, k_v_i_S"
+Hebrew,roof,גג,,g_a_g
+Hebrew,room,חדר,,"X_e_d_e_Q"""
+Hebrew,rooster,תרנגול,,"t_a_Q""_n_g_o_l"
+Hebrew,run,לרוץ,,"l_a_Q""_u_t_s"
+Hebrew,sad,עצוב,,"a_ts_u_v, ʔ_a_ts_u_v"
+Hebrew,salt,מלח,,m_e_l_a_X
+Hebrew,salty,מלוח,,m_e_l_u_X_a
+Hebrew,sand,חול,,X_o_l
+Hebrew,sandal,סנדלים,,s_a_n_d_a_l_i_m
+Hebrew,sandbox,ארגז חול,,"a_Q""_g_a_z_ X_o_l, ʔ_a_Q""_g_a_z_ X_o_l"
+Hebrew,sandwich,סנדוויץ/ כריך,,"s_e_n_d_v_i_t_s, k_a_Q""_i_X, k_a_Q""_i_X"
+Hebrew,sauce,טחינה,,"t_X_i_n_a, t_X_i_n_a"
+Hebrew,say,להגיד,,l_e_h_a_g_i_d
+Hebrew,scarf,צעיף,,"ts_a_i_f, ts_a_ʔ_i_f"
+Hebrew,schnitzel,שניצל,,"S_n_i_ts_e_l, S_n_i_ts_e_l"
+Hebrew,scissors,מספריים,,"m_i_s_p_a_Q""_a_j_i_m"
+Hebrew,sea,ים,,j_a_m
+Hebrew,see,לראות,,"l_i_Q""_o_t, l_i_Q""_ʔ_o_t"
+Hebrew,see,לראות/ להראות,,"l_i_Q""_o_t, l_i_Q""_ʔ_o_t, l_e_h_a_Q""_o_t, l_e_h_a_Q""_ʔ_o_t"
+Hebrew,shed,רפת,,"Q""_e_f_e_t"
+Hebrew,shed,רפת,,"Q""_e_f_e_t"
+Hebrew,sheep,כבשה,,"k_i_v_s_a, k_i_v_s_a"
+Hebrew,shh,ששש,,"S_S_S, S_S_S"
+Hebrew,shh,שש...ש,,"S_S_S, S_S_S"
+Hebrew,shirt,חולצה,,X_u_l_ts_a
+Hebrew,shoe,נעליים,,"n_a_a_l_a_j_i_m, n_a_ʔ_a_l_a_j_i_m"
+Hebrew,shoe,נעל/ נעליים,,"n_a_a_l, n_a_ʔ_a_l, n_a_a_l_a_j_i_m, n_a_ʔ_a_l_a_j_i_m"
+Hebrew,short,נמוך,,"n_a_m_u_X, n_a_m_u_X"
+Hebrew,short,קצר,,"k_a_ts_a_Q"", k_a_ts_a_Q"""
+Hebrew,shoulder,כתף/ כתפיים,,"k_a_t_e_f, k_e_t_e_f_a_j_i_m"
+Hebrew,shovel,את,,"e_t, ʔ_e_t"
+Hebrew,shovel,את/ מעדר,,"e_t, ʔ_e_t, m_a_d_e_Q"", m_a_a_d_e_Q"", m_a_ʔ_d_e_Q"", m_a_ʔ_a_d_e_Q"""
+Hebrew,shower,טוש/ מקלחת,,"d_u_S, d_u_S, m_i_k_l_a_X_a_t, m_i_k_l_a_k_a_t"
+Hebrew,shutter,תריס,,"t_Q""_i_s"
+Hebrew,sibling,אח/ אחות,,"a_X, ʔ_a_X, a_X_o_t, ʔ_a_X_o_t"
+Hebrew,sick,חולה,,X_o_l_e
+Hebrew,sidewalk,מדרכה,,"m_i_d_Q""_a_X_a, m_i_d_Q""_a_X_a"
+Hebrew,sing,לשיר,,"l_e_S_i_Q"", l_e_S_i_Q"""
+Hebrew,sink,כיור,,"k_i_j_o_Q"""
+Hebrew,sit,לשבת,,"l_a_S_e_v_e_t, l_a_S_e_v_e_t"
+Hebrew,skirt,חצאית,,"X_a_ts_a_i_t, X_a_ts_a_ʔ_i_t"
+Hebrew,sky,שמיים,,"S_a_m_a_j_i_m, S_a_m_a_j_i_m"
+Hebrew,sleep,ללכת לישון,,"l_a_l_e_X_e_t_ l_i_S_o_n, l_a_l_e_X_e_t_ l_i_S_o_n"
+Hebrew,slide (object),מגלשה,,"m_a_g_l_e_S_a, m_a_g_l_e_S_a"
+Hebrew,slipper,נעלי בית,,"n_a_a_l_e_j_ b_a_j_i_t, n_a_ʔ_a_l_e_j_ b_a_j_i_t"
+Hebrew,smart,חכם,,"X_a_X_a_m, X_a_X_a_m"
+Hebrew,smile,לחייך,,"l_e_X_a_j_e_X, l_e_X_a_j_e_X"
+Hebrew,snake,נחש,,"n_a_X_a_S, n_a_X_a_S"
+Hebrew,sneaker,נעלי ספורט/ התעמלות,,"n_a_a_l_e_j_ s_p_o_Q""_t, n_a_ʔ_a_l_e_j_ s_p_o_Q""_t, n_a_a_l_e_j_ h_i_t_a_m_l_u_t, n_a_ʔ_a_l_e_j_ h_i_t_ʔ_a_m_l_u_t"
+Hebrew,soap,סבון,,s_a_b_o_n
+Hebrew,sock,גרביים,,"g_a_Q""_b_a_j_i_m"
+Hebrew,soda,קולה,,"k_o_l_a, k_o_l_a"
+Hebrew,soft,רך,,"Q""_a_X, Q""_a_X"
+Hebrew,soup,מרק,,"m_a_Q""_a_k, m_a_Q""_a_k"
+Hebrew,spaghetti,ספגטי,,"s_p_a_g_e_t_i, s_p_a_g_e_t_i"
+Hebrew,spill,לשפוך,,"l_i_S_p_o_X, l_i_S_p_o_X"
+Hebrew,splash,להתיז,,l_e_h_a_t_i_z
+Hebrew,spoon,כף,,k_a_f
+Hebrew,spoon,כפית,,k_a_p_i_t
+Hebrew,spray,להתיז/ להשפריץ,,"l_e_h_a_t_i_z, l_e_h_a_S_p_a_Q""_i_t_s, l_e_h_a_S_p_a_Q""_i_t_s"
+Hebrew,sprinkler,ממטרה,,"m_a_m_t_e_Q""_a"
+Hebrew,squirrel,סנאי,,"s_n_a_i, s_n_a_ʔ_i"
+Hebrew,stairs,מדרגות,,"m_a_d_Q""_e_g_o_t"
+Hebrew,stand,לעמוד,,"l_a_a_m_o_d, l_a_ʔ_a_m_o_d"
+Hebrew,star,כוכב,,"k_o_X_a_v, k_o_X_a_v"
+Hebrew,star,כוכב/ כוכבים,,"k_o_X_a_v, k_o_X_a_v, k_o_X_a_v_i_m, k_o_X_a_v_i_m"
+Hebrew,stay,להשאר,,"l_e_h_i_S_a_e_Q"", l_e_h_i_S_a_ʔ_e_Q"""
+Hebrew,stick,מקל,,"m_a_k_e_l, m_a_k_e_l"
+Hebrew,stone,אבן,,"e_v_e_n, ʔ_e_v_e_n"
+Hebrew,stop,לעצור,,"l_a_a_ts_o_Q"", l_a_ʔ_a_ts_o_Q"""
+Hebrew,store,חנות,,X_a_n_u_t
+Hebrew,store,סופר,,"s_u_p_e_Q"""
+Hebrew,store,חנות,,X_a_n_u_t
+Hebrew,story,סיפור,,"s_i_p_u_Q"""
+Hebrew,strawberry,תות,,t_u_t
+Hebrew,street,רחוב,,"Q""_e_X_o_v"
+Hebrew,stroller,עגלה,,"a_g_a_l_a, ʔ_a_g_a_l_a"
+Hebrew,strong,חזק,,"X_a_z_a_k, X_a_z_a_k"
+Hebrew,sun,שמש,,"S_e_m_e_S, S_e_m_e_S"
+Hebrew,sweater,סוודר,,"s_v_e_d_e_Q"""
+Hebrew,sweep,לטאטא,,"l_e_t_a_t_e, l_e_t_a_ʔ_t_e_ʔ"
+Hebrew,sweet,מתוק,,"m_a_t_o_k, m_a_t_o_k"
+Hebrew,swim,לשחות,,"l_i_S_X_o_t, l_i_S_X_o_t"
+Hebrew,swimsuit,בגד ים,,b_e_g_e_d_ j_a_m
+Hebrew,swing (action),להתנדנד,,l_e_h_i_t_n_a_d_n_e_d
+Hebrew,swing (object),נדנדה,,n_a_d_n_e_d_a
+Hebrew,table,שולחן,,"S_u_l_X_a_n, S_u_l_X_a_n"
+Hebrew,tablecloth,מפה,,m_a_p_a
+Hebrew,take,לקחת,,"l_a_k_a_X_a_t, l_a_k_a_X_a_t"
+Hebrew,talk,לדבר,,"l_e_d_a_b_e_Q"""
+Hebrew,tape,טייפ/קלטת,,"t_e_j_p, k_a_l_e_t_e_t, k_a_l_e_t_e_t"
+Hebrew,taste,לטעום,,"l_i_t_o_m, l_i_t_o_m, l_i_t_ʔ_o_m"
+Hebrew,tea,תה,,t_e
+Hebrew,teacher,גננת,,g_a_n_e_n_e_t
+Hebrew,teacher,גננת/ מורה,,"m_o_Q""_e, g_a_n_e_n_e_t"
+Hebrew,tear,לקרוע,,"l_i_k_Q""_o_a"
+Hebrew,teddybear,דובי,,d_u_b_i
+Hebrew,telephone,טלפון,,t_e_l_e_f_o_n
+Hebrew,tell,לספר,,"l_e_s_a_p_e_Q"""
+Hebrew,ten fingers,עשר אצבעות,,"e_s_e_Q""_ e_ts_b_a_o_t, ʔ_e_s_e_Q""_ ʔ_e_ts_b_a_ʔ_o_t"
+Hebrew,thank you,תודה,,t_o_d_a
+Hebrew,there,שם,,"S_a_m, S_a_m"
+Hebrew,they,הם,,h_e_m
+Hebrew,thin,רזה,,"Q""_a_z_e"
+Hebrew,thirsty,צמא,,"ts_a_m_e, ts_a_m_e_ʔ"
+Hebrew,this,זה,,z_e
+Hebrew,those,אלה,,"e_l_e, ʔ_e_l_e"
+Hebrew,throw,לזרוק,,"l_i_z_Q""_o_k, l_i_z_Q""_o_k"
+Hebrew,thumb,אגודל,,"a_g_u_d_a_l, ʔ_a_g_u_d_a_l"
+Hebrew,tickle,לדגדג,,l_e_d_a_g_d_e_g
+Hebrew,tiger,נמר,,"n_a_m_e_Q"""
+Hebrew,tights,גרביונים/ טייטס,,"g_a_Q""_b_i_j_o_n_i_m, t_a_j_i_t_s, t_a_j_i_t_s"
+Hebrew,tired,עייף,,"i_j_e_f, ʔ_i_j_e_f"
+Hebrew,tissue,טישיו/ ממחטה,,"t_i_S_a_v, t_i_S_a_v, m_i_m_X_a_t_a, m_i_m_X_a_t_a"
+Hebrew,toast,טוסט,,"t_o_s_e_t, t_o_s_e_t"
+Hebrew,today,היום,,h_a_j_o_m
+Hebrew,toe,אגודל/ בוהן,,"a_g_u_d_a_l, ʔ_a_g_u_d_a_l, b_o_h_e_n"
+Hebrew,tomato,עגבניה,,"a_g_v_a_n_i_j_a, ʔ_a_g_v_a_n_i_j_a"
+Hebrew,tomorrow,מחר,,"m_a_X_a_Q"""
+Hebrew,tongue,לשון,,"l_a_S_o_n, l_a_S_o_n"
+Hebrew,tooth,שיניים,,"S_i_n_a_j_i_m, S_i_n_a_j_i_m"
+Hebrew,tooth,שן/ שיניים,,"S_e_n, S_e_n, S_i_n_a_j_i_m, S_i_n_a_j_i_m"
+Hebrew,toothbrush,מברשת שיניים,,"m_i_v_Q""_e_S_e_t_ S_i_n_a_j_i_m, m_i_v_Q""_e_S_e_t_ S_i_n_a_j_i_m"
+Hebrew,touch,לגעת,,"l_a_g_a_a_t, l_a_g_a_ʔ_a_t"
+Hebrew,towel,מגבת,,m_a_g_e_v_e_t
+Hebrew,tower,מגדל,,m_i_g_d_a_l
+Hebrew,toy (object),צעצוע,,"ts_a_a_ts_u_a, ts_a_ʔ_a_ts_u_a"
+Hebrew,tractor,טרקטור,,"t_Q""_a_k_t_o_Q"", t_Q""_a_k_t_o_Q"""
+Hebrew,train,רכבת,,"Q""_a_k_e_v_e_t"
+Hebrew,trash,אשפה,,"a_S_p_a, ʔ_a_S_p_a"
+Hebrew,trash,אשפה/ זבל/ פח,,"a_S_p_a, ʔ_a_S_p_a, z_e_v_e_l, p_a_X"
+Hebrew,tray,מגש,,"m_a_g_a_S, m_a_g_a_S"
+Hebrew,tree,עץ,,"e_t_s, ʔ_e_t_s"
+Hebrew,truck,משאית,,"m_a_s_a_i_t, m_a_s_a_ʔ_i_t"
+Hebrew,tummy,בטן,,"b_e_t_e_n, b_e_t_e_n"
+Hebrew,tuna,טונה,,"t_u_n_a, t_u_n_a"
+Hebrew,turkey,תרנגול הודו,,"t_a_Q""_n_g_o_l_ h_o_d_u"
+Hebrew,turn around,להסתובב,,l_e_h_i_s_t_o_v_e_v
+Hebrew,turn off,לכבות,,l_e_X_a_b_o_t
+Hebrew,turtle,צב,,ts_a_v
+Hebrew,tv,טלויזיה,,"t_e_l_e_v_i_z_j_a, t_e_l_e_v_i_z_j_a"
+Hebrew,tweet tweet,ציף ציף,,ts_i_p_ ts_i_p
+Hebrew,ugly,מכוער,,"m_e_X_o_a_Q"", m_e_X_o_ʔ_a_Q"""
+Hebrew,uncle,דוד,,d_o_d
+Hebrew,uncle,דוד/ דודה,,"d_o_d, d_o_d_a"
+Hebrew,under,מתחת,,m_i_t_a_X_a_t
+Hebrew,underpants,תחתונים,,t_a_X_t_o_n_i_m
+Hebrew,up,למעלה,,l_e_m_a_l_a
+Hebrew,vacuum,שואב אבק,,"S_o_e_v_ a_v_a_k, S_o_ʔ_e_v_ ʔ_a_v_a_k"
+Hebrew,vest,אפודה,,"a_f_u_d_a, ʔ_a_f_u_d_a"
+Hebrew,vroom,וון וון,,v_u_n_ v_u_n
+Hebrew,vroom,וון וון/ הנ/ ברר,,"v_u_n_ v_u_n, h_a_n, b_Q""_Q"""
+Hebrew,wait,לחכות,,l_e_X_a_k_o_t
+Hebrew,wake,להעיר,,"l_e_h_a_i_Q"", l_e_h_a_ʔ_i_Q"""
+Hebrew,walk,ללכת,,l_a_l_e_X_e_t
+Hebrew,wanna,אני רוצה,,"a_n_i_ Q""_o_ts_e, ʔ_a_n_i_ Q""_o_ts_e"
+Hebrew,was,היה,,h_a_j_a
+Hebrew,wash,לרחוץ,,"l_i_Q""_X_o_t_s"
+Hebrew,wash,לרחוץ/ לשטוף,,"l_i_Q""_X_o_t_s, l_i_S_t_o_f, l_i_S_t_o_f"
+Hebrew,washing machine,מכונת כביסה,,m_e_X_o_n_a_t_ k_v_i_s_a
+Hebrew,watch (action),להסתכל,,l_e_h_i_s_t_a_k_e_l
+Hebrew,water (beverage),מים,,m_a_j_i_m
+Hebrew,watermelon,אבטיח,,"a_v_a_t_i_a_X, ʔ_a_v_a_t_i_a_X"
+Hebrew,wet (description),רטוב,,"Q""_a_t_o_v, Q""_a_t_o_v"
+Hebrew,what,מה,,m_a
+Hebrew,when (question),מתי,,m_a_t_a_i
+Hebrew,where (question),איפה,,"e_f_o, ʔ_e_f_o"
+Hebrew,which (question),איזה,,"e_i_z_e, e_i_z_ʔ_e"
+Hebrew,who,מי,,m_i
+Hebrew,why,למה,,l_a_m_a
+Hebrew,wind,רוח,,"Q""_u_a_X"
+Hebrew,window,חלון,,X_a_l_o_n
+Hebrew,wipe,לנגב,,l_e_n_a_g_e_v
+Hebrew,with,עם,,"a_m, ʔ_a_m"
+Hebrew,wolf,זאב,,"z_e_v, z_ʔ_e_v"
+Hebrew,woof woof,הב הב,,h_a_v_ h_a_v
+Hebrew,woof woof,האו/ הב הב,,"h_a_u, h_a_ʔ_u, h_a_v_ h_a_v"
+Hebrew,work (action),לעבוד,,"l_a_a_v_o_d, l_a_ʔ_a_v_o_d"
+Hebrew,work (place),עבודה,,"a_v_o_d_a, ʔ_a_v_o_d_a"
+Hebrew,work (place),עבודה,,"a_v_o_d_a, ʔ_a_v_o_d_a"
+Hebrew,wow,הופה,,h_o_p_a
+Hebrew,write,לכתוב,,"l_i_X_t_o_v, l_i_X_t_o_v"
+Hebrew,yard,גינה,,g_i_n_a
+Hebrew,yard,חצר,,"X_a_ts_e_Q"""
+Hebrew,yes,כן,,k_e_n
+Hebrew,yesterday,אתמול,,"e_t_m_o_l, ʔ_e_t_m_o_l"
+Hebrew,yogurt,לבן/ יוגורט/ מעדן,,"l_a_v_a_n, j_o_g_u_Q""_t, j_o_g_u_Q""_t, m_a_a_d_a_n, m_a_ʔ_a_d_a_n"
+Hebrew,yum yum,הם/ מ מ...מ,,"h_a_m, m_m_m"
+Hebrew,yummy,טעים,,"t_a_i_m, t_a_ʔ_i_m"
+Hebrew,zebra,זברה,,"z_e_b_Q""_a"
+Hebrew,zipper,רוכסן,,"Q""_o_X_a_n, Q""_o_X_a_n"
+Hebrew,zipper,רוכסן/ ריצ'רץ,,"Q""_o_X_a_n, Q""_o_X_a_n, Q""_i_ts_Q""_e_t_s, Q""_i_çQ""_e_"
+Hebrew,zoo,גן חיות,,g_a_n_ X_a_j_o_t
+Hebrew,zoo,גן חיות,,g_a_n_ X_a_j_o_t

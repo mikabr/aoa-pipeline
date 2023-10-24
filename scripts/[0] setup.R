@@ -6,9 +6,11 @@ childes_path <- "data/childes"
 get_lang_map <- function() {
   googlesheets4::gs4_deauth()
   lang_map <- googlesheets4::read_sheet("1YXanYR8RWbihg4DWSCvMCDbdLRiz1Z8n4afpcO26ZIA") |>
-    select("iso_name", "wordbank", "childes", "snowball", "hunspell", "unimorph",
-           "unimorph segmentation", "unimorph derivation", "morph complexity",
-           "udpipe")
+    select("iso_name", "wordbank", "childes",
+           "snowball", "hunspell",
+           "espeak", "espeak-ng",
+           "unimorph", "unimorph segmentation", "unimorph derivation",
+           "morph complexity", "udpipe")
   write_csv(lang_map, "resources/language_map.csv")
   lang_map
 }

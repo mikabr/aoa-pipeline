@@ -1,4 +1,3 @@
-
 # Gets stems for a list of words in a given language.
 # Uses Snowball by default, no stemming for Chinese languages, and hunspell otherwise
 
@@ -27,4 +26,14 @@ stem <- function(words, language) {
       message(glue("Language {language} has no Snowball stemmer"))
     }
   }
+}
+
+# Somehow lemmatizes all pronouns to il/son/se?
+lemmatize <- function(words, language) {
+  udmodel <- get_udpipe_model(language)
+  udpipe(words, udmodel, parser = "none") |>
+    mutate(doc_id = as.numeric(str_sub(doc_id, 4))) |>
+    group_by(doc_id) |>
+    summarise(lemma = paste(lemma, collapse = "+")) |>
+    pull(lemma)
 }

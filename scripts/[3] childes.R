@@ -1,4 +1,4 @@
-library(data.table)
+# library(data.table)
 
 compute_count <- function(metric_data) {
   print("Computing count...")
@@ -42,29 +42,11 @@ compute_length_phon <- function(metric_data) {
               token_phonemes = list(token_phonemes))
 }
 
-compute_form_entropy <- function(metric_data) {
-  print("Computing form entropy...")
-  metric_data |>
-    select(token, token_stem) |>
-    nest(tokens = token) |>
-    mutate(form_entropy = sapply(tokens, \(t) {
-      t |>
-        table() |>
-        as_tibble() |>
-        mutate(freq = n / sum(n),
-               ent = freq * log2(freq)) |>
-        pull(ent) |>
-        sum() |>
-        (`*`)(-1)
-    })) |>
-    select(-token_stem) |>
-    unnest(tokens) |>
-    distinct()
-}
-
-default_metric_funs <- list(compute_count, compute_mlu, compute_positions,
-                            compute_length_char, compute_length_phon,
-                            compute_n_cats, compute_n_forms, compute_verb_frames)
+default_metric_funs <- list(base = list(compute_count, compute_mlu, compute_positions,
+                                        compute_length_char, compute_length_phon),
+                            parsed = list(compute_form_entropy, compute_subcat_entropy,
+                                          compute_n_features),
+                            morph = list(compute_n_morphemes))
 default_corpus_args <- list(corpus = NULL, role = NULL,
                             role_exclude = "Target_Child", age = NULL,
                             sex = NULL, part_of_speech = NULL, token = "*")
@@ -132,19 +114,35 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
            token_phonemes = actual_phonology, utterance_id, language)
  # token_stems <- tokens |> select(token, token_stem) |> distinct()
 
-  if (use_morphology & childes_lang != "zho") {
-    morph_data <- load_morph_data(lang, corpus_args)
-    tokens <- tokens |> left_join(morph_data,
-                                  by = c("utterance_id", "token_id" = "id"))
+  # if (use_morphology & childes_lang != "zho") {
+  #   morph_data <- load_morph_data(lang, corpus_args)
+  #   tokens <- tokens |> left_join(morph_data,
+  #                                 by = c("utterance_id", "token_id" = "id"))
+  # }
+
+  complete_data <- list()
+  complete_data$base <- tokens |> left_join(utterances, by = "utterance_id")
+  if (!is.null(metric_funs$parsed)) {
+    complete_data$parsed <- get_parsed_data(lang, corpus_args = corpus_args)
+  }
+  if (!is.null(metric_funs$morph)) {
+    complete_data$morph <- load_morph_data(lang, corpus_args)
   }
 
-  metric_data <- tokens |> left_join(utterances)
   print("Calculating token_metrics")
-  token_metrics <- map(metric_funs, \(fun) fun(metric_data)) |>
-    reduce(partial(full_join, by = c("token"))) |>
+  token_metrics <- map(names(metric_funs), \(class) {
+    map(metric_funs[[class]], \(fun) fun(complete_data[[class]]))
+  }) |>
+    unlist(recursive = FALSE) |>
+    reduce(full_join) |>
     mutate(language = lang) |>
     mutate(freq_raw = count / sum(count))
   # across(starts_with("count"), sum, .names = "sum{.col}"))
+
+  # joining entropies needs help---sometimes generates multiple rows ->
+  # because the same token can belong to different lemmas. easiest soln
+  # is to just average over tokens and merge in; hard but correct soln
+  # is to merge in by lemma also where present
 
   if (write) {
     norm_lang <- normalize_language(lang)
@@ -155,10 +153,12 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
 }
 
 transforms <- list(
-  \(s) str_replace_all(s, "(.*) \\(.*\\)", "\\1"), # foo (bar) -> foo
+  \(s) str_replace_all(s, "(.*) ?[\\(（].*[\\)）]", "\\1"), # foo (bar) -> foo
+  \(s) str_replace_all(s, "[\\(（].*[\\)）] ?(.+)", "\\1"), # (foo) bar -> bar
   \(s) str_replace_all(s, " ", "_"), # foo bar -> foo_bar
   \(s) str_replace_all(s, " ", "+"), # foo bar -> foo+bar
-  \(s) str_replace_all(s, "(.+) \\1", "\\1") # (foo) bar -> bar
+  \(s) str_replace_all(s, "(.*)[\\(（](.*)[\\)）]", "\\1\\2"), # foo(bar) -> foobar
+  \(s) str_replace_all(s, "[\\(（](.*)[\\)）](.*)", "\\1\\2") # (foo)bar -> foobar
 )
 
 build_special_case_map <- function(lang) {
@@ -181,10 +181,10 @@ build_special_case_map <- function(lang) {
 
 build_options <- function(language, word, special_cases) {
   opts <- c(word, special_cases)
-  opts <- c(opts, word |> str_split("[,/]") |> unlist()) # "foo, bar", "foo/bar"
+  opts <- c(opts, word |> str_split("[,/、]") |> unlist()) # "foo, bar", "foo/bar"
   opts <- c(opts, map(transforms, \(t) t(opts)))
   opts <- opts |> unlist() |> unique() |> str_trim()
-  opts <- c(opts, stem(opts, language))
+  opts <- c(opts, lemmatize(opts, language))
   return(unique(opts))
 }
 
@@ -221,9 +221,10 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
     }
   }
   tokens_mapped <- token_metrics |>
+    filter(token != "") |> # bad edge case in English (American)
     select(token) |>
     mutate(token_self = token,
-           token_stemmed = stem(token, lang)) |>
+           token_stemmed = lemmatize(token, lang)) |>
     pivot_longer(c(token_self, token_stemmed), names_to = "src",
                  values_to = "option") |>
     filter(!is.na(option), option != "") |>

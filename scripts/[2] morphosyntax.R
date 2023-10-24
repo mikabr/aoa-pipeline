@@ -41,11 +41,32 @@ annotate_text <- function(text, language, # by_utterance = TRUE,
 
   if (childes_lang == "kor") {
     # fix nonstandard parsing
+    #
+    # We consider the following to be verbs:
+    # - pvg+ef
+    # - pvg+ec*
+    # - pvg+ep+ef
+    # - pvg+ep+ec*
+    # This explicitly excludes:
+    # - Verb stems with denominal / deadjectival / adverbial endings
+    # - Auxiliary verbs
+    # - Copulas
+    #
+    # We also consider the lemma to be the first morpheme in the word
+    # (first segment before any "+" chars)
+    #
+    # See:
+    # https://arxiv.org/pdf/1309.1649.pdf (original convention)
+    # https://aclanthology.org/W18-6013.pdf (proposed change)
     annotated <- annotated |>
       mutate(upos = ifelse(upos == "VERB", "VORIG", upos),
              upos = ifelse(grepl("^pvg\\+(ep\\+)?e[cf]", xpos), "VERB", upos),
              lemma = str_replace_all(lemma, "\\+.*", ""))
   }
+
+  # fix pronouns
+  annotated <- annotated |>
+    mutate(lemma = ifelse(upos == "PRON", token, lemma))
 
   if (write) {
     file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
@@ -56,7 +77,8 @@ annotate_text <- function(text, language, # by_utterance = TRUE,
 }
 
 get_parsed_data <- function(lang, num_cores = 4,
-                            corpus_args = default_corpus_args) {
+                            corpus_args = default_corpus_args,
+                            import_data = NULL) {
   childes_lang <- convert_lang_childes(lang)
   file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
 
@@ -65,11 +87,26 @@ get_parsed_data <- function(lang, num_cores = 4,
     annotated <- readRDS(file_p)
   } else {
     message(glue("No cached parsed data for {lang}, getting and caching data."))
-    childes_data <- get_childes_data(childes_lang, corpus_args)
+    if (!is.null(import_data)) {
+      childes_data <- import_data
+    } else {
+      childes_data <- get_childes_data(childes_lang, corpus_args)
+    }
     annotated <- annotate_text(childes_data$utterances$gloss, lang,
                                num_cores = num_cores)
   }
   annotated
+}
+
+calculate_entropy <- function(counts) {
+  counts |>
+    table() |>
+    as.data.frame() |>
+    mutate(freq = Freq / sum(Freq),
+           ent = freq * log2(freq)) |>
+    pull(ent) |>
+    sum() |>
+    (`*`)(-1)
 }
 
 compute_form_entropy <- function(parsed_data) {
@@ -77,23 +114,15 @@ compute_form_entropy <- function(parsed_data) {
   parsed_data |>
     select(token, lemma) |>
     nest(tokens = token) |>
-    mutate(form_entropy = sapply(tokens, \(t) {
-      t |>
-        table() |>
-        as_tibble() |>
-        mutate(freq = n / sum(n),
-               ent = freq * log2(freq)) |>
-        pull(ent) |>
-        sum() |>
-        (`*`)(-1)
-    })) |>
+    mutate(form_entropy = sapply(tokens, calculate_entropy)) |>
     select(-lemma) |>
     unnest(tokens) |>
     distinct()
 }
 
 compute_subcat_entropy <- function(parsed_data) {
-  verbs <- parsed_data |> filter(upos == "VERB")
+  print("Computing subcategorization frame entropy...")
+
   frames <- parsed_data |>
     select(doc_id, head_token_id, dep_rel) |>
     mutate(dep_rel = dep_rel |>
@@ -103,26 +132,41 @@ compute_subcat_entropy <- function(parsed_data) {
       unlist(d, use.names= FALSE) |>
         intersect(c("obj", "iobj", "ccomp", "xcomp", "obl")) |>
         paste(collapse = "_")}))
-  verbs <- verbs |>
+  verbs <- parsed_data |>
+    filter(upos == "VERB") |>
     left_join(frames, by = c("doc_id", "token_id" = "head_token_id")) |>
     # removes character(0) and NULL, both of which indicate no dependents under consideration
     mutate(subcat = ifelse(lengths(subcat) == 0, NA, subcat)) |>
     select(lemma, subcat) |>
     nest(subcats = subcat) |>
-    mutate(subcat_entropy = sapply(subcats, \(s) {
-      s |>
-        table() |>
-        as.data.frame() |>
-        mutate(freq = Freq / sum(Freq),
-               ent = freq * log2(freq)) |>
-        pull(ent) |>
-        sum() |>
-        (`*`)(-1)
-    })) |>
+    mutate(subcat_entropy = sapply(subcats, calculate_entropy)) |>
     select(-subcats)
   parsed_data |>
     select(token, lemma) |>
     distinct() |>
     left_join(verbs, by = "lemma") |>
     select(-lemma)
+}
+
+compute_n_features <- function(parsed_data) {
+  print("Computing number of morphosyntactic features")
+
+  parsed_data |>
+    mutate(n_features = feats |> str_split("\\|") |> lengths()) |>
+    group_by(token) |>
+    summarise(n_features = mean(n_features, na.rm = TRUE)) |>
+    distinct()
+}
+
+compute_n_morphemes <- function(morph_data) {
+  print("Computing number of morphemes")
+
+  morph_data |>
+    rename(token = gloss) |>
+    group_by(token) |>
+    summarise(n_morphemes = mean(n_morpheme, na.rm = TRUE),
+              # n_features = mean(n_cat, na.rm = TRUE),
+              # pos = pos
+              ) |>
+    distinct()
 }
