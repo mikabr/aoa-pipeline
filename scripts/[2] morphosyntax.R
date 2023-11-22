@@ -8,6 +8,17 @@ get_udpipe_model <- function(language, overwrite = FALSE) {
   dl$file_model
 }
 
+untransliterate <- function(text, schema, corpus) {
+  schema_sorted <- schema |>
+    rename(translit = !!corpus) |>
+    arrange(desc(str_length(translit))) |>
+    filter(complete.cases(translit)) |>
+    mutate(original = replace_na(original, ""))
+  str_replace_all(text |> tolower(),
+                  setNames(schema_sorted$original,
+                           schema_sorted$translit))
+}
+
 annotate_text <- function(text, language, # by_utterance = TRUE,
                           write = TRUE, num_cores = 4) {
   childes_lang <- convert_lang_childes(language)

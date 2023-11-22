@@ -62,7 +62,7 @@ get_morph_data <- function(lang, corpus_args = default_corpus_args,
 
   morph_data <- childes_data$tokens |>
     left_join(morph_data, by = "gloss") |>
-    mutate(stem = coalesce(na_if(stem.x, ""), stem.y)) |>
+    mutate(stem = if (childes_lang == "zho") stem.y else coalesce(na_if(stem.x, ""), stem.y)) |>
     group_by(id, utterance_id, corpus_name, gloss) |>
     summarise(stem_m = stem |> unique() |> sort() |> paste(collapse = ", "),
               morph_info = morph_info |> unique() |> sort() |> paste(collapse = ", "),

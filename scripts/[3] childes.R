@@ -89,8 +89,7 @@ get_childes_data <- function(childes_lang, corpus_args) {
 
 get_token_metrics <- function(lang, metric_funs = default_metric_funs,
                               corpus_args = default_corpus_args,
-                              write = TRUE, import_data = NULL,
-                              use_morphology = TRUE) {
+                              write = TRUE, import_data = NULL) {
 
   childes_lang <- convert_lang_childes(lang)
   print({childes_lang})
@@ -138,11 +137,6 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
     mutate(language = lang) |>
     mutate(freq_raw = count / sum(count))
   # across(starts_with("count"), sum, .names = "sum{.col}"))
-
-  # joining entropies needs help---sometimes generates multiple rows ->
-  # because the same token can belong to different lemmas. easiest soln
-  # is to just average over tokens and merge in; hard but correct soln
-  # is to merge in by lemma also where present
 
   if (write) {
     norm_lang <- normalize_language(lang)
@@ -290,3 +284,127 @@ load_childes_metrics <- function(languages, uni_lemmas, cache = TRUE) {
   })
   return(uni_metrics)
 }
+
+get_schema <- function(lang) {
+  childes_lang <- convert_lang_childes(lang)
+  read_csv(here("resources", glue("{childes_lang}_schemata.csv")))
+}
+
+process_rus <- function(childes_data) {
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_rus_orig.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_rus_orig.rds"))
+  schema <- get_schema("Russian")
+  exceptions <- read_csv(here("resources", "rus_exceptions.csv")) |>
+    mutate(rus_orig = glue("\\b{rus_orig}\\b"))
+
+  childes_data <- childes_data |>
+    lapply(\(text) {
+      text_new <- text |>
+        nest(data = -corpus_name) |>
+        mutate(data = map2(data, corpus_name, \(d, c) {
+          d |> mutate(gloss = untransliterate(d$gloss, schema, c))
+        })) |>
+        unnest(data) |>
+        mutate(gloss = str_replace_all(gloss,
+                                       setNames(exceptions$rus_fix,
+                                                exceptions$rus_orig)))
+
+      text_new
+    })
+  childes_data$tokens <- childes_data$tokens |> select(id:utterance_type, everything())
+  childes_data$utterances <- childes_data$utterances |> select(id:utterance_order, everything())
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_rus.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_rus.rds"))
+  childes_data
+}
+
+process_heb <- function(childes_data) {
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_heb_orig.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_heb_orig.rds"))
+  schema <- get_schema("Hebrew")
+  # note: in one-to-many mappings, we chose the most disambiguating option:
+  # - t -> tav (vs tet)
+  # - k -> qof (vs kaf)
+  # - x -> xet (vs kaf)
+  # - s -> samekh (vs sin)
+
+  tokens <- childes_data$tokens |>
+    mutate(gloss = ifelse(corpus_name != "Ravid",
+                          str_replace_all(gloss, c("(?<=^|\\s|[aeiou])([aeiou])" = "ʔ\\1",
+                                                   "([ae])(?=\\s|$)" = "\\1h",
+                                                   "yi" = "y")),
+                          gloss))
+
+  heb_char_fix <- c(
+    "\u200E" = "", # remove LTR mark
+    "(?<=[\u05D0-\u05EA])כ$" = "ך",
+    "(?<=[\u05D0-\u05EA])מ$" = "ם",
+    "(?<=[\u05D0-\u05EA])נ$" = "ן",
+    "(?<=[\u05D0-\u05EA])פ$" = "ף",
+    "(?<=[\u05D0-\u05EA])צ$" = "ץ")
+
+  tokens_new <- tokens |>
+    nest(data = -corpus_name) |>
+    mutate(data = map2(data, corpus_name, \(d, c) {
+      d |> mutate(gloss = untransliterate(d$gloss, schema, c))
+    })) |>
+    unnest(data) |>
+    mutate(gloss = str_replace_all(gloss, heb_char_fix))
+
+  heb_dict <- convert_lang_stemmer("Hebrew", "hunspell")
+
+  # get closest legal word using hunspell---very lossy but passable
+  tokens_new <- tokens_new |>
+    mutate(gloss_correct = hunspell_check(gloss, dict = dictionary(heb_dict)))
+  tokens_wrong <- tokens_new |>
+    filter(!gloss_correct)
+  tokens_suggested <- hunspell_suggest(tokens_wrong$gloss,
+                                       dict = dictionary(heb_dict)) |>
+    lapply(as_tibble)
+
+  schema_verify <- schema |>
+    select(original, verify) |>
+    filter(!is.na(verify)) |>
+    mutate(verify = str_remove_all(verify, "ʔ"),
+           original = str_remove_all(original, "\u200E"))
+
+  retransliterate <- function(text) {
+    text |> str_remove_all("\u200E") |>
+      str_replace_all("^[אע]", "ʔ") |>
+      str_replace_all(setNames(schema_verify$verify,
+                               schema_verify$original))
+  }
+
+  tokens_retranslit <- tokens_wrong |>
+    select(id, gloss) |>
+    mutate(gloss_translit = retransliterate(gloss))
+
+  tokens_out <- tokens_retranslit |>
+    mutate(suggested = tokens_suggested) |>
+    unnest(cols = suggested) |>
+    mutate(sug_translit = retransliterate(value)) |>
+    filter(gloss_translit == sug_translit)
+  tokens_choice <- tokens_out |>
+    group_by(id) |>
+    slice(1) |>
+    select(id, value)
+  tokens_final <- tokens_new |>
+    left_join(tokens_choice, by = "id") |>
+    mutate(gloss = coalesce(value, gloss)) |>
+    select(-value, -gloss_correct)
+
+  utterances_new <- childes_data$utterances |>
+    left_join(tokens_new |>
+                group_by(utterance_id) |>
+                summarise(utterance = paste(gloss, collapse = " ")),
+              by = c("id" = "utterance_id")) |>
+    mutate(gloss = utterance) |>
+    select(-utterance)
+
+  childes_data$tokens <- tokens_new |> select(id:utterance_type, everything())
+  childes_data$utterances <- utterances_new |> select(id:utterance_order, everything())
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_heb.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_heb.rds"))
+  childes_data
+}
+
