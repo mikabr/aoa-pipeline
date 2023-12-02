@@ -5,10 +5,6 @@
 # drop predictors with all NAs
 
 drop_predictors <- function(predictors, data) {
-  # lapply(predictor_sources, \(y) {
-  #   pred_source <- lapply(y, \(x) {if (!all(is.na(lang_data[x]))) x})
-  #   pred_source[lengths(pred_source) > 0]
-  # })
   predictors |> discard(\(p) all(is.na(data[[p]])))
 }
 
@@ -51,48 +47,15 @@ residualize_freqs <- function(childes_metrics) {
 residualize_morph <- function(lang, childes_metrics) {
   residualized <- childes_metrics |>
     filter(language == lang,
-           !is.na(n_forms),
-           !is.na(n_morph_categories),
-           all(is.na(n_affixes)) | !is.na(n_affixes)) |>
-    mutate(across(all_of(c("n_morph_categories", "n_affixes")),
-           partial(residualize_col, n_forms))) |>
-    select(uni_lemma, n_morph_categories, n_affixes)
+           !is.na(form_entropy),
+           !is.na(n_features)) |>
+    mutate(n_features = residualize_col(n_features, form_entropy)) |>
+    select(uni_lemma, n_features)
 
   childes_metrics |>
     filter(language == lang) |>
-    select(-c("n_morph_categories", "n_affixes")) |>
-    left_join(residualized)
-
-  # if (lang %in% l_with_n_affixes){
-  #   message(glue(" {lang} containing data for n_affixes."))
-  # a<-  childes_metrics |>
-  #   filter(language == lang) |>
-  #   filter(!is.na(n_forms)) |>
-  #   filter(!is.na(n_affixes)) |>
-  #   filter(!is.na(n_morph_categories)) |>
-  #   mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms))) |>
-  #   mutate(across(starts_with("n_affixes"), partial(residualize_col, n_forms)))
-  # f <- childes_metrics |>
-  #   filter(language == lang) |>
-  #   select(-n_affixes, -n_morph_categories, -n_forms) |>
-  #   left_join(a)
-  # } else {
-  #   message(glue("{lang} not containing data for n_affixes."))
-  # a <- childes_metrics |>
-  #   filter(language == lang) |>
-  #   filter(!is.na(n_forms)) |>
-  #   filter(!is.na(n_morph_categories))
-  # if (!(all(is.na(a[,"n_morph_categories"])))) {
-  #   a<- a|>
-  #   mutate(across(starts_with("n_morph_categories"), partial(residualize_col, n_forms)))
-  # }
-  # f<- childes_metrics |>
-  #  filter(language == lang) |>
-  #  select(-n_morph_categories, -n_forms) |>
-  #   left_join(a)
-  # f$n_affixes = NA
-  # }
-  # return(f)
+    select(-n_features) |>
+    left_join(residualized, by = "uni_lemma")
 }
 
 ## Imputation
@@ -132,8 +95,8 @@ get_predictor_order <- function(lang_data, predictors, max_steps) {
 
 get_imputation_seed <- function(lang_data, predictors) {
   imputation_data <- lang_data |>
-    mutate_at(vars(!!predictors),
-              funs(as.numeric(Hmisc::impute(., fun = "random"))))
+    mutate(across(all_of(predictors),
+                  ~ as.numeric(Hmisc::impute(.x, fun = "random"))))
   return(imputation_data)
 }
 
@@ -154,20 +117,20 @@ do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
       left_join(imputation_fits,
                 by = c("uni_lemma", "lexical_category", "category")) |>
       # if the value is missing, replace it with the new value
-      mutate_at(vars(pred), funs(if_else(is.na(missing), .fitted, .))) |>
+      mutate(across(all_of(pred), ~ ifelse(is.na(missing), .fitted, .x))) |>
       select(-.fitted, -missing)
   }
   return(imputation_data)
 }
 
-do_lang_imputation <- function(language, data, pred_sources, max_steps) {
+do_lang_imputation <- function(lang, data, pred_sources, max_steps) {
   pred_sources <- lapply(pred_sources, \(x) drop_predictors(x, data))
   # if all the predictors are from one source, fix the pred_sources
   if (length(pred_sources) == 1) pred_sources <- unlist(pred_sources)
   data <- data |> distinct()
   predictors <- unlist(pred_sources)
 
-  print(glue("Imputing {language} with {max_steps} steps..."))
+  print(glue("Imputing {lang} with {max_steps} steps..."))
   predictor_list <- get_predictor_order(data, predictors, max_steps)
   # print(glue("get predictor order."))
   missing_data <- get_missing_data(data, predictors)
@@ -188,13 +151,6 @@ do_full_imputation <- function(model_data, predictor_sources, max_steps) {
   # restrict to the sources in pred_sources
   # catch cases where a predictor in the predictor set isn't in the data
 
-  #language = model_data$language[1][1]
-  #l = normalize_language(language)
-  #file__ <-  glue("{childes_path}/imputed_scaled_{l}.rds")
-  #if (file.exists(file__)) {
-  #  imputed_data <- readRDS(file__)
-  #}else{
-
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
            all_of(!!unlist(predictor_sources))) |>
@@ -212,8 +168,7 @@ do_full_imputation <- function(model_data, predictor_sources, max_steps) {
     select(language, imputed) |>
     unnest(imputed) |>
     distinct()
-#  saveRDS(imputed_data, file__)
- # }
+
   return(imputed_data)
 }
 
@@ -235,11 +190,11 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
     #   if(length(lc) > 1) return("other") else lc
     # })) |>
     # uni_lemmas with item in multiple different classes treated as "other"
-    filter(!lexical_category=="other") |>
+    filter(!lexical_category == "other") |>
            # collapse v, adj, adv into one category
     mutate(lexical_category = lexical_category |> as_factor() |>
              # fct_collapse("predicates" = c("verbs", "adjectives")) |>
-             fct_relevel("nouns","predicates","function_words") |>
+             fct_relevel("nouns", "predicates", "function_words") |>
              fct_relevel(ref_cat))
 
   contrasts(lexical_categories$lexical_category) <- contr.sum

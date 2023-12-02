@@ -173,12 +173,12 @@ build_special_case_map <- function(lang) {
   return(special_case_map)
 }
 
-build_options <- function(language, word, special_cases) {
+build_options <- function(lang, word, special_cases) {
   opts <- c(word, special_cases)
   opts <- c(opts, word |> str_split("[,/、]") |> unlist()) # "foo, bar", "foo/bar"
   opts <- c(opts, map(transforms, \(t) t(opts)))
   opts <- opts |> unlist() |> unique() |> str_trim()
-  opts <- c(opts, lemmatize(opts, language))
+  opts <- c(opts, lemmatize(opts, lang))
   return(unique(opts))
 }
 
@@ -238,7 +238,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
 
   uni_lemma_tokens <- tokens_mapped |>
     select(uni_lemma, token) |>
-    nest(options = c(token))# removed stem from realizations n_types
+    nest(options = c(token))
 
   metrics_summaries <- list(
     metrics_mapped |>
@@ -260,8 +260,8 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
   return(uni_metrics)
 }
 
-load_childes_metrics <- function(languages, uni_lemmas, cache = TRUE) {
-  uni_metrics <- map_df(languages, function(lang) {
+load_childes_metrics <- function(langs, uni_lemmas, cache = TRUE) {
+  uni_metrics <- map_df(langs, function(lang) {
     norm_lang <- normalize_language(lang)
     lang_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
     if (file.exists(lang_file)) {
@@ -330,8 +330,8 @@ process_heb <- function(childes_data) {
 
   tokens <- childes_data$tokens |>
     mutate(gloss = ifelse(corpus_name != "Ravid",
-                          str_replace_all(gloss, c("(?<=^|\\s|[aeiou])([aeiou])" = "ʔ\\1",
-                                                   "([ae])(?=\\s|$)" = "\\1h",
+                          str_replace_all(gloss, c("(?<=\\b[aeiou])([aeiou])" = "ʔ\\1",
+                                                   "([ae])(?=\\b)" = "\\1h",
                                                    "yi" = "y")),
                           gloss))
 

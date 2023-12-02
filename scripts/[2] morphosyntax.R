@@ -19,7 +19,7 @@ untransliterate <- function(text, schema, corpus) {
                            schema_sorted$translit))
 }
 
-annotate_text <- function(text, language, # by_utterance = TRUE,
+annotate_text <- function(text, language,
                           write = TRUE, num_cores = 4) {
   childes_lang <- convert_lang_childes(language)
   udmodel <- get_udpipe_model(language) |>
@@ -36,15 +36,6 @@ annotate_text <- function(text, language, # by_utterance = TRUE,
     text <- gsub(" ", "\n", text)
     tokenizer = "vertical"
   }
-
-  # if (!by_utterance) {
-  #   text <- text |>
-  #     nest(data = -utterance_id) |>
-  #     mutate(text = sapply(data, \(x) {
-  #       paste(x$gloss, collapse = "\n")
-  #     }))
-  #   tokenizer = "vertical"
-  # }
 
   annotated <- text |>
     udpipe(udmodel, parallel.cores = num_cores,

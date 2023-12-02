@@ -72,17 +72,21 @@ get_vifs <- function(model) {
 
 fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
                        model_formula = NULL) {
+  sinotibetan_langs <- c("Mandarin (Beijing)", "Mandarin (Taiwanese)")
   predictor_data |>
     nest(group_data = -c(language, measure)) |>
-    mutate(model = group_data |>
-             map(\(gd) fit_group_model(predictors, gd, lexcat_interactions,
-                                       morphcomp_interactions = FALSE,
-                                       all_lang = FALSE, model_formula)),
+    mutate(predictors = ifelse(language %in% sinotibetan_langs,
+                               list(setdiff(predictors, c("n_features", "form_entropy"))),
+                               list(predictors)),
+           model = map2(group_data, predictors,
+                        \(gd, preds) fit_group_model(preds, gd, lexcat_interactions,
+                                                     morphcomp_interactions = FALSE,
+                                                     all_lang = FALSE, model_formula)),
            coefs = map(model, broom::tidy),
            stats = map(model, broom::glance),
-           alias = map(model, alias)
-           # vifs = map(model, get_vifs)
-           )
+           alias = map(model, alias),
+           vifs = map(model, get_vifs)
+    )
 }
 
 fit_all_lang_model <- function(predictors, predictor_data,

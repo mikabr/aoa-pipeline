@@ -31,35 +31,28 @@ The general steps are:
 # Load Wordbank data
 
 Loading cached Wordbank data for English:
-```{r load_wordbank_eng}
+```{r load_wordbank_eng, eval=FALSE}
 eng_wb_data <- load_wb_data("English (American)")
 eng_wb_data
 ```
 
 Defining languages:
 ```{r define_langs}
-target_langs<-c("French (French)", "French (Quebecois)", 
-                "Italian",
-                "Spanish (Mexican)", "Spanish (European)",
-                "Portuguese (European)",  
-                "Dutch",
-                "English (American)", "English (Australian)", 
-                "English (British)", 
-                "German",
-                "Danish", "Norwegian", "Swedish", 
-                "Croatian", "Czech",
-                "Turkish", 
-                "Hungarian" #,
-                # difficult languages:
-                # "Russian",
-                # "Hebrew",
-                # "Mandarin (Taiwanese)", "Mandarin (Beijing)"
-                )
-sinotibetan_languages <- c("Mandarin (Taiwanese)", "Mandarin (Beijing)")
-
-# just for testing:
-target_langs <- c("French (French)", "Dutch", "English (American)", 
-                  "Norwegian", "Croatian", "Turkish", "Hungarian")
+target_langs <- c("French (French)", "French (Quebecois)", 
+                  "Italian",
+                  "Spanish (Mexican)", "Spanish (European)",
+                  "Portuguese (European)",  
+                  "Dutch",
+                  "English (American)", "English (Australian)", 
+                  "English (British)", 
+                  "German",
+                  "Danish", "Norwegian", "Swedish", 
+                  "Croatian", "Czech",
+                  "Turkish", 
+                  "Hungarian",
+                  "Mandarin (Taiwanese)", "Mandarin (Beijing)",
+                  "Russian",
+                  "Hebrew")
 ```
 
 
@@ -107,7 +100,7 @@ concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
 ## CHILDES
 
 Get CHILDES data for many languages:
-```{r get_childes}
+```{r get_childes, eval=FALSE}
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
 walk(target_langs, \(x) {get_childes_data(convert_lang_childes(x), corpus_args)})
@@ -115,13 +108,12 @@ walk(target_langs, \(x) {get_childes_data(convert_lang_childes(x), corpus_args)}
 
 
 Creating saved morphology metrics for many languages:
-```{r create_morphs_xling, eval=TRUE}
-# need English (British)
+```{r create_morphs_xling, eval=FALSE}
 walk(target_langs, load_morph_data, corpus_args)
 ```
 
 Creating saved parsed data for many languages:
-```{r parse_data}
+```{r parse_data, eval=FALSE}
 walk(target_langs, get_parsed_data, corpus_args = corpus_args)
 ```
 
@@ -151,13 +143,12 @@ childes_metrics = eng_unilemmas
 
 Creating saved CHILDES data for many languages:
 ```{r create_childes_xling, eval=TRUE}
-# need Englishes
 walk(target_langs, get_token_metrics, metric_funs, corpus_args)
 ```
 
 Creating saved UNILEMMA data for many languages:
 ```{r create_unilemma_xling, eval=TRUE}
-walk(target_langs[4:7], get_uni_lemma_metrics, build_uni_lemma_map(uni_lemmas))
+walk(target_langs, get_uni_lemma_metrics, build_uni_lemma_map(uni_lemmas))
 ```
 
 Loading cached CHILDES data for multiple languages:
@@ -208,8 +199,8 @@ predictor_sources <- list(
   c("freq"),
   c("concreteness","babiness"),
   c("length_char", "length_phon"),
-  c("n_forms",  "n_morph_categories", "n_affixes"), 
-  c("main_frame_prop"),
+  c("n_features",  "form_entropy", "subcat_entropy"), 
+  c("n_morphemes"),
   c("mlu"))
 predictors <- unlist(predictor_sources)
 ```
@@ -222,8 +213,6 @@ ref_cat ="nouns"
 predictor_data_lexcat <- prep_lexcat(predictor_data, uni_lemmas, ref_cat) |>
   distinct()
 ```
-
-
 
 ```{r prep_data2}
 max_steps = 20
@@ -251,9 +240,42 @@ aoa_predictor_data <- predictor_data_imputed_scaled |>
 aoa_models <- fit_models(predictors, aoa_predictor_data,
                          lexcat_interactions = FALSE)
 
-aoa_models_lexcat <- fit_models(predictors[predictors != "length_char"], aoa_predictor_data,
+aoa_models_lexcat <- fit_models(predictors, aoa_predictor_data,
                                 lexcat_interactions = TRUE)
 ```
+
+## Model outputs
+
+Coefficients:
+```{r}
+coefs <- aoa_models |> select(language, measure, coefs) |> unnest(coefs) 
+```
+
+Summary stats:
+```{r}
+sum_stats <- aoa_models |> select(language, measure, stats) |> unnest(stats)
+```
+
+Variance inflation factors:
+```{r}
+vifs <- aoa_models |> select(language, measure, vifs) |> unnest(vifs)
+```
+
+
+Everything above here has been verified. 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r testing}
 # library(lmerTest)
@@ -387,22 +409,6 @@ if (!(is.data.frame(aoa_models_verb) && nrow(aoa_models_verb)==0)){
 }  
 ```
 
-## Model outputs
-
-Coefficients:
-```{r}
-coefs <- aoa_models |> select(language, measure, coefs) |> unnest(coefs) 
-```
-
-Summary stats:
-```{r}
-sum_stats <- aoa_models |> select(language, measure, stats) |> unnest(stats)
-```
-
-Variance inflation factors:
-```{r, eval = FALSE}
-vifs <- aoa_models |> select(language, measure, vifs) |> unnest(vifs)
-```
 
 
 ## Cross-validation

@@ -17,8 +17,8 @@ Swedish,Swedish,swe,swedish,sv_SE,sv,sv,swe,swe,swe,swe,swedish-talbanken
 Turkish,Turkish,tur,turkish,tr,tr,tr,tur,NA,tur,tur,turkish-imst
 Croatian,Croatian,hrv,NA,hr_HR,hr,hr,hbs,NA,hbs,hrv,croatian-set
 Czech,Czech,ces,NA,cs_CZ,cs,cs,ces,ces,ces,ces,czech-cac
-Mandarin Chinese,Mandarin (Beijing),zho,no need,no need,zh,cmn-Latn-pinyin,NA,NA,NA,cmn,chinese-gsdsimp
-Mandarin Chinese,Mandarin (Taiwanese),zho,no need,no need,zh,cmn-Latn-pinyin,NA,NA,NA,cmn,chinese-gsdsimp
+Mandarin Chinese,Mandarin (Beijing),zho,no need,no need,zh,cmn-Latn-pinyin,zho,zho,NA,cmn,chinese-gsdsimp
+Mandarin Chinese,Mandarin (Taiwanese),zho,no need,no need,zh,cmn-Latn-pinyin,zho,zho,NA,cmn,chinese-gsdsimp
 Yue Chinese,Cantonese,yue,no need,no need,zh-yue,yue,NA,NA,NA,yue,chinese-gsd
 Hebrew,Hebrew,heb,NA,he_IL,NA,he,heb,NA,NA,heb,hebrew-htb
 Korean,Korean,kor,NA,ko,NA,ko,kor,NA,NA,kor,korean-kaist
