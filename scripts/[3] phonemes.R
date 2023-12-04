@@ -24,6 +24,8 @@ str_phons <- function(phon_words) {
                 str_replace("r", "_r") |>
                 str_replace("l", "_l") |>
                 str_replace("ɹ", "_ɹ") |>
+                str_replace("Q\"", "Q") |>
+                str_replace("Q\\\"", "Q") |>
                 str_split("[_ \\-]+") |>
                 unlist() %>%
                 keep(nchar(.) > 0 & !grepl("\\(.*\\)", .x)) |>
@@ -72,34 +74,49 @@ clean_words <- function(word_set){
     unique()
 }
 
-map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
-  fixed_words <- read_csv("data/predictors/fixed_words.csv") |>
-    select(language, uni_lemma, item_definition, fixed_word) |>
-    filter(!is.na(uni_lemma), !is.na(fixed_word))
+map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
+                         write = TRUE) {
+  phon_path <- here("data", "predictors", "phonology.rds")
+  if (file.exists(phon_path)) {
+    message("Loading cached phonology data...")
+    uni_phons_fixed <- readRDS(phon_path)
+  } else {
+    fixed_words <- read_csv("data/predictors/fixed_words.csv") |>
+      select(language, uni_lemma, item_definition, fixed_word) |>
+      filter(!is.na(uni_lemma), !is.na(fixed_word))
 
-  uni_cleaned <- uni_lemmas |>
-    unnest(cols = "items") |>
-    # distinct(language, uni_lemma, definition) %>%
-    left_join(fixed_words) |>
-    mutate(fixed_definition = ifelse(is.na(fixed_word), item_definition, fixed_word),
-           cleaned_words = map(fixed_definition, clean_words)) |>
-    select(-fixed_word) |>
-    group_by(language) |>
-    #for each language, get the phonemes for each word
-    mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, method)))
+    uni_cleaned <- uni_lemmas |>
+      unnest(cols = "items") |>
+      # distinct(language, uni_lemma, definition) %>%
+      left_join(fixed_words) |>
+      mutate(fixed_definition = ifelse(is.na(fixed_word), item_definition, fixed_word),
+             cleaned_words = map(fixed_definition, clean_words)) |>
+      select(-fixed_word) |>
+      group_by(language) |>
+      #for each language, get the phonemes for each word
+      mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, method)))
 
-  fixed_phons <- read_csv("data/predictors/fixed_phons.csv") |>
-    select(language, uni_lemma, item_definition, fixed_phon) |>
-    filter(!is.na(uni_lemma), !is.na(fixed_phon)) |>
-    mutate(fixed_phon = strsplit(fixed_phon, ", "))
+    fixed_phons <- read_csv("data/predictors/fixed_phons.csv") |>
+      select(language, uni_lemma, item_definition, fixed_phon) |>
+      filter(!is.na(uni_lemma), !is.na(fixed_phon)) |>
+      mutate(fixed_phon = strsplit(fixed_phon, ", "))
 
-  uni_phons_fixed <- uni_cleaned |>
-    left_join(fixed_phons) |>
-    mutate(phons = if_else(map_lgl(fixed_phon, is.null), phons, fixed_phon),
-           str_phons = str_phons(phons)) |>
-    select(-fixed_phon)
+    uni_phons_fixed <- uni_cleaned |>
+      left_join(fixed_phons) |>
+      mutate(phons = if_else(map_lgl(fixed_phon, is.null), phons, fixed_phon),
+             str_phons = str_phons(phons)) |>
+      select(-fixed_phon)
 
-  uni_phons_fixed <- uni_phons_fixed |>
+    if (write) {
+      saveRDS(uni_phons_fixed, phon_path)
+    }
+  }
+  uni_phons_fixed
+}
+
+compute_phon_metrics <- function(phon_data) {
+  # compute phonological neighborhood
+  phon_data <- phon_data |>
     nest(items = -language) |>
     mutate(items = lapply(items, \(w) {
       w |> mutate(phon_neighborhood = sapply(str_phons, \(x) {
@@ -113,12 +130,12 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2) {
     unnest(cols = items)
 
   # get lengths
-  uni_lengths <- uni_phons_fixed |>
+  uni_lengths <- phon_data |>
     mutate(num_char = num_chars(cleaned_words),
            num_phon = num_chars(str_phons)) |>
     group_by(language, uni_lemma) |>
-    summarize(num_chars = mean(num_char),
-              num_phons = mean(num_phon),
-              phon_neighbors = mean(phon_neighborhood))
+    summarize(num_chars = mean(num_char, na.rm = TRUE),
+              num_phons = mean(num_phon, na.rm = TRUE),
+              phon_neighbors = mean(phon_neighborhood, na.rm = TRUE))
   return(uni_lengths)
 }

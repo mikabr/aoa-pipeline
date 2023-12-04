@@ -241,7 +241,7 @@ coef_order <- mean_term_coefs %>% pull(term)
 plt_lang_coefs <- aoa_coefs %>%
   mutate(term = term %>% #factor(levels = rev(coef_order)) %>%
            fct_relabel(display_predictors),
-         signif = if_else(signif, "significant", "non-significant") %>%
+         signif = if_else(p.value < .05, "significant", "non-significant") %>%
            fct_rev(),
          language1 = language %>% str_remove(" \\(.*\\)") %>% as_factor(),
          measure = fct_recode(measure, "comprehension" = "understands",
@@ -289,9 +289,10 @@ ggplot(ref_coefs, aes(x = estimate, y = term, colour = signif)) +
 ```{r langcoefs,  fig.width=14, fig.height=7, fig.cap="Estimates of coefficients in predicting words' developmental trajectories for all languages and measures. Each point represents a predictor's coefficient in one language, with the bar showing the mean across languages. Only coefficients for which $p < 0.05$ are presented."}
 library(ggh4x)
 
-term_fct <- c("Freq", "Concreteness", "Babiness", "Length phon",
-              "MLU-w", "Main frame prop", 
-              "N forms", "N morph categories", "N affixes" #, "Length char" 
+term_fct <- c("Freq", "Concreteness", "Babiness", "Length char",
+              "N features", "Form entropy", "Subcat entropy", "MLU-w"
+              # "MLU-w", "Main frame prop", 
+              # "N forms", "N morph categories", "N affixes" #, "Length char" 
               )
 
 plt_lang_coefs$term <- factor(plt_lang_coefs$term, levels = term_fct) |> 
@@ -323,11 +324,15 @@ plt_coefs_comp2 <- coefs_comp_3b |>
 ggplot(plt_lang_coefs |> filter(!is.na(estimate), !is.na(term), effect == "main") |> 
          mutate(language = factor(language, levels = target_langs),
                 term_cat = fct_collapse(term,
-                                        Morphological = c("N forms", "N morph categories", 
-                                                          "N affixes"),
-                                        Syntactic = c("MLU-w", "Main frame prop"),
-                                        Other = c("Frequency", "Concreteness", 
-                                                  "Babiness", "Length phon")) |> 
+                                        Morphological = c("N features", "Form entropy"),
+                                        Syntactic = c("MLU-w", "Subcat entropy"),
+                                        Other = c("Frequency", "Concreteness",
+                                                  "Babiness", "Length char")) |> 
+                                        # Morphological = c("N forms", "N morph categories", 
+                                        #                   "N affixes"),
+                                        # Syntactic = c("MLU-w", "Main frame prop"),
+                                        # Other = c("Frequency", "Concreteness", 
+                                        #           "Babiness", "Length phon")) |> 
                   fct_rev()) |> 
          filter(measure == "production"), 
        aes(x = estimate, y = term)) +
@@ -345,19 +350,20 @@ ggplot(plt_lang_coefs |> filter(!is.na(estimate), !is.na(term), effect == "main"
   labs(x = "Coefficient estimate", y = "", 
        shape = "Significance", color = "Language")+
   theme(legend.position="none") +
-  theme_mikabr() +
+  theme_classic()+
+  #theme_mikabr() +
   # ggtitle("Main predictor coefficients across languages ") +
-  coord_cartesian(xlim = c(-2, 1)) +
-  geom_crossbar(data = plt_coefs_comp |> 
-                  mutate(term_cat = fct_collapse(term,
-                                                 Morphological = c("N forms", "N morph categories", 
-                                                                   "N affixes"),
-                                                 Syntactic = c("MLU-w", "Main frame prop"),
-                                                 Other = c("Frequency", "Concreteness", 
-                                                           "Babiness", "Length phon"))) |> 
-                  filter(measure == "production"),
-                aes(xmin = estimate, xmax = estimate, y = term), 
-                col = "grey", fatten = 2, width = 0.5) # +
+  coord_cartesian(xlim = c(-2, 2)) # +
+  # geom_crossbar(data = plt_coefs_comp |> 
+  #                 mutate(term_cat = fct_collapse(term,
+  #                                                Morphological = c("N forms", "N morph categories", 
+  #                                                                  "N affixes"),
+  #                                                Syntactic = c("MLU-w", "Main frame prop"),
+  #                                                Other = c("Frequency", "Concreteness", 
+  #                                                          "Babiness", "Length phon"))) |> 
+  #                 filter(measure == "production"),
+  #               aes(xmin = estimate, xmax = estimate, y = term), 
+  #               col = "grey", fatten = 2, width = 0.5) # +
   # geom_crossbar(data = plt_coefs_comp2,
   #               aes(xmin = estimate, xmax = estimate, y = term), 
   #               col = "blue", fatten = 2)

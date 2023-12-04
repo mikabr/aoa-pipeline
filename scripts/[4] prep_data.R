@@ -71,7 +71,7 @@ get_missing_data <- function(lang_data, predictors) {
   missing <- lang_data |>
     pivot_longer(cols = !!predictors, names_to = "predictor",
                  values_to = "value") |>
-    mutate(missing = is.na(value)) |>
+    mutate(missing = is.na(value) | is.nan(value)) |>
     select(-value) |>
     pivot_wider(names_from = predictor, values_from = missing)
   return(missing)

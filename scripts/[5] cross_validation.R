@@ -1,4 +1,4 @@
-fit_cv_models <- function(predictor_data, formulae, loo_df = NULL) {
+fit_cv_models <- function(predictor_data, pred_lists, loo_df = NULL) {
   if (is.null(loo_df)) {
     loo_df <- crossv_loo(ungroup(predictor_data))
   }
@@ -7,7 +7,11 @@ fit_cv_models <- function(predictor_data, formulae, loo_df = NULL) {
     models <- "no model"
     train_idx <- loo_df[id,1][[1]][[1]]$idx
     test_idx <- loo_df[id,2][[1]][[1]]$idx
-    train_df <- predictor_data[train_idx,]
+    train_df <- predictor_data[train_idx,] |>
+      mutate(lexical_category = lexical_category |> fct_drop())
+
+    pl <- map(pred_lists, drop_predictors, train_df)
+    formulae <- map(pl, make_predictor_formula)
 
     try(models <- fit_with(train_df, lm, formulae))
 
