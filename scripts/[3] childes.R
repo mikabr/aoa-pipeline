@@ -52,6 +52,7 @@ default_corpus_args <- list(corpus = NULL, role = NULL,
                             sex = NULL, part_of_speech = NULL, token = "*")
 
 get_childes_data <- function(childes_lang, corpus_args) {
+  if (childes_lang == "jpn") return(get_childes_data_jpn(corpus_args))
 
   file_t <- file.path(childes_path, glue("tokens_{childes_lang}.rds"))
   file_u <- file.path(childes_path, glue("utterances_{childes_lang}.rds"))
