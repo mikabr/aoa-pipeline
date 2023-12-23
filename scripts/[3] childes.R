@@ -147,8 +147,7 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
     # across(starts_with("count"), sum, .names = "sum{.col}"))
 
   if (write) {
-    norm_lang <- normalize_language(lang)
-    metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
+    metrics_file <- glue("{childes_path}/token_metrics_{childes_lang}.rds")
     saveRDS(token_metrics, metrics_file)
   }
   return(token_metrics)
@@ -199,7 +198,8 @@ build_uni_lemma_map <- function(uni_lemmas) {
     summarise(special_cases = list(option))
   uni_lemmas |>
     unnest(items) |>
-    left_join(special_case_map) |>
+    left_join(special_case_map,
+              by = c("language", "uni_lemma", "item_definition")) |>
     mutate(option = pmap(list(language, item_definition, special_cases),
                          build_options)) |>
     select(language, uni_lemma, option) |>
@@ -208,12 +208,13 @@ build_uni_lemma_map <- function(uni_lemmas) {
 }
 
 get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
+  childes_lang <- convert_lang_childes(lang)
   norm_lang <- normalize_language(lang)
   print({norm_lang})
   if (!is.null(import_data)) {
     token_metrics <- import_data
   } else {
-    token_metrics_file <- glue("{childes_path}/token_metrics_{norm_lang}.rds")
+    token_metrics_file <- glue("{childes_path}/token_metrics_{childes_lang}.rds")
     if (!file.exists(token_metrics_file)) {
       message(glue("No cached token metrics for {lang}, getting and caching data."))
       # note: this gets token metrics with default args
@@ -232,7 +233,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
     filter(!is.na(option), option != "") |>
     select(-src) |>
     distinct() |>
-    inner_join(uni_lemma_map, by = "option") |>
+    inner_join(uni_lemma_map, by = "option", relationship = "many-to-many") |>
     group_by(uni_lemma, token) |>
     summarise(options = list(option)) |>
     ungroup()
@@ -277,7 +278,7 @@ load_childes_metrics <- function(langs, uni_lemmas, cache = TRUE) {
       lang_metrics <- readRDS(lang_file)
       lang_metrics <- tryCatch({lang_metrics <- lang_metrics %>%
         rename(n_types_old = n_tokens)
-      }, error= function(e){lang_metrics})
+      }, error = function(e){lang_metrics})
     } else {
       if (cache) {
         message(glue("No cached CHILDES metrics for {lang}, getting and caching data."))
