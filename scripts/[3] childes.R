@@ -232,13 +232,13 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
     filter(!is.na(option), option != "") |>
     select(-src) |>
     distinct() |>
-    inner_join(uni_lemma_map) |>
+    inner_join(uni_lemma_map, by = "option") |>
     group_by(uni_lemma, token) |>
     summarise(options = list(option)) |>
     ungroup()
 
   metrics_mapped <- tokens_mapped |>
-    inner_join(token_metrics) |>
+    inner_join(token_metrics, by = "token") |>
     select(uni_lemma, tokens = token, where(is.numeric)) |>
     group_by(uni_lemma) |>
     distinct() |>
@@ -260,7 +260,7 @@ get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {
 
   uni_metrics <- metrics_summaries |>
     reduce(partial(left_join, by = "uni_lemma")) |>
-    inner_join(uni_lemma_tokens) |>
+    inner_join(uni_lemma_tokens, by = "uni_lemma") |>
     mutate(n_types_old = map_int(tokens, length), language = lang)
 
   uni_metrics_file <- glue("{childes_path}/uni_metrics_{norm_lang}.rds")
