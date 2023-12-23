@@ -20,7 +20,6 @@ get_childes_data_jpn <- function(corpus_args) {
 
 
   # Get Japanese collection from childes-db
-  jpn_transcripts <- get_transcripts(collection = "Japanese")
   utt_orig_fp <- here("data", "childes", "utterances_jpn_orig.rds")
   if (file.exists(utt_orig_fp)) {
     jpn_utterances <- readRDS(utt_orig_fp)
@@ -40,6 +39,7 @@ get_childes_data_jpn <- function(corpus_args) {
   if (file.exists(utt_fp)) {
     utterances_df <- readRDS(utt_fp)
   } else {
+    jpn_transcripts <- get_transcripts(collection = "Japanese")
     ortho_utterances <- jpn_transcripts |>
       mutate(ortho = lapply(filename, \(f) {
         transcript <- read_lines(here("data", "childes", str_replace(f, "\\.xml", "\\.cha")))

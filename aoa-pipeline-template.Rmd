@@ -47,12 +47,12 @@ target_langs <- c("French (French)", "French (Quebecois)",
                   "English (British)", 
                   "German",
                   "Danish", "Norwegian", "Swedish", 
-                  "Croatian", "Czech",
+                  "Croatian", "Czech", "Russian",
                   "Turkish", 
                   "Hungarian",
                   "Mandarin (Taiwanese)", "Mandarin (Beijing)",
-                  "Russian",
-                  "Hebrew")
+                  "Hebrew",
+                  "Korean")
 ```
 
 
@@ -126,7 +126,8 @@ eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes}
-metric_funs <- list(base = list(compute_count, compute_mlu, compute_positions,
+metric_funs <- list(base = list(compute_count, compute_cd, 
+                                compute_mlu, compute_positions,
                                 compute_length_char, compute_length_phon),
                     parsed = list(compute_form_entropy, compute_subcat_entropy,
                                   compute_n_features),
@@ -180,8 +181,19 @@ By default, `transform_counts()` transforms any column that starts with "count" 
 childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs() 
 ```
 
-```{r prepare_morphology}
-childes_metrics <- map_df(target_langs, residualize_morph, childes_metrics)
+```{r residualize}
+semantic_preds <- c("concreteness", "babiness")
+distrib_preds <- c("freq", "cd")
+phon_preds <- c("length_phon", "phon_neighbors")
+morph_preds <- c("form_entropy", "n_features", "n_morphemes")
+syntax_preds <- c("mlu", "subcat_entropy")
+
+for (preds in list(distrib_preds, phon_preds, morph_preds, syntax_preds)) {
+  childes_metrics <- childes_metrics |> 
+    mutate(across(all_of(preds[-1]), 
+                  partial(residualize_col, 
+                          residualizing_column = childes_metrics |> pull(preds[1]))))
+}
 ```
 
 ## Combining sources
@@ -286,11 +298,23 @@ display_predictors <- function(predictors) {
     str_replace("Freq", "Frequency")
 }
 
-term_fct <- c("Freq", "Concreteness", "Babiness", 
+term_fct <- c("Frequency", "Concreteness", "Babiness", 
               "Length in phonemes", "Phon neighbors",
               "N features", "Form entropy", "N morphemes",
               "Subcat entropy", "MLU-w"
               )
+
+plot_coefs <- coefs |> 
+  mutate(term = term |> 
+           fct_relabel(display_predictors) |> 
+           fct_relevel(term_fct) |> 
+           fct_rev(),
+         measure = fct_recode(measure, 
+                              "comprehension" = "understands",
+                              "production" = "produces"),
+         signif = ifelse(p.value < .05, "significant", "non-significant") |> 
+           fct_rev()) |> 
+  filter(!is.na(term))
 
 lc_plot <- aoa_coefs |> 
   select(language, measure, term, estimate, lexical_category) |> 
@@ -332,8 +356,8 @@ vifs <- aoa_models |> select(language, measure, vifs) |> unnest(vifs)
 ```{r}
 baseline_preds <- c("freq", "concreteness", "babiness")
 phon_preds <- c("length_phon", "phon_neighbors")
-morph_preds <- c("n_features", "form_entropy", "n_morphemes")
-syntax_preds <- c("subcat_entropy", "mlu")
+morph_preds <- c("form_entropy", "n_features", "n_morphemes")
+syntax_preds <- c("mlu", "subcat_entropy")
 
 pred_lists <- list(baseline_preds,
                    c(baseline_preds, phon_preds),
@@ -406,6 +430,121 @@ mc_vals <- expand_grid(measure = c("production", "comprehension"),
 
 
 Everything above here has been verified. 
+
+
+Temporary: plots
+```{r}
+theme_mikabr <- function(base_size = 14, base_family = "Open Sans") {
+  ggplot2::`%+replace%`(
+    ggplot2::theme_bw(base_size = base_size, base_family = base_family),
+    ggplot2::theme(panel.grid = ggplot2::element_blank(),
+                   strip.background = ggplot2::element_blank(),
+                   legend.key = ggplot2::element_blank())
+  )
+}
+```
+
+
+```{r}
+ggplot(plot_coefs |> filter(!is.na(estimate), !is.na(term), term != "(Intercept)") |> 
+         mutate(language = factor(language, levels = target_langs),
+                term_cat = fct_collapse(term,
+                                        Morphological = c("N features", "Form entropy", "N morphemes"),
+                                        Syntactic = c("MLU-w", "Subcat entropy"),
+                                        Phonological = c("Length in phonemes", "Phon neighbors"),
+                                        Other = c("Frequency", "Concreteness",
+                                                  "Babiness")) |> 
+                  fct_rev()) |> 
+         filter(measure == "production"), 
+       aes(x = estimate, y = term)) +
+  facet_grid(term_cat ~ ., scales = "free", space = "free") +
+  geom_point(aes(shape=signif, color = language),  alpha = 0.7) +
+  scale_shape_manual(values = c(16, 21)) +
+  stat_summary(geom = "crossbar", fun = mean, fun.min = mean,
+               fun.max = mean, fatten = 2, width = 0.5) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+  labs(x = "Coefficient estimate", y = "", 
+       shape = "Significance", color = "Language")+
+  theme(legend.position="none") +
+  theme_mikabr() +
+  coord_cartesian(xlim = c(-2, 2))
+```
+
+```{r}
+label_caps <- function(value) {
+  value |> 
+    str_to_sentence() |> 
+    str_replace_all("_", " ")
+}
+
+ggplot(lc_plot |> 
+         mutate(language = factor(language, levels = target_langs),
+                lexical_category = factor(lexical_category, levels = 
+                                            c("nouns", "predicates", "function_words")) |> 
+                  fct_relabel(label_caps),
+                term_cat = fct_collapse(term,
+                                        Morphological = c("N features", "Form entropy", "N morphemes"),
+                                        Syntactic = c("MLU-w", "Subcat entropy"),
+                                        Phonological = c("Length in phonemes", "Phon neighbors"),
+                                        Other = c("Frequency", "Concreteness",
+                                                  "Babiness")) |> 
+                  fct_rev() |> 
+                  fct_shift(-3),
+                term = term |> fct_relevel("Babiness", "Concreteness", "Frequency")) |> 
+         filter(measure == "production"), 
+       aes(x = estimate, y = term)) +
+  facet_grid(term_cat ~ lexical_category, scales = "free", space = "free") +
+  geom_point(aes(color = language),  alpha = 0.7) +
+  # scale_shape_manual(values = c(16, 21)) +
+  stat_summary(geom = "crossbar", fun = mean, fun.min = mean,
+               fun.max = mean, fatten = 2, width = 0.5) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+  labs(x = "Coefficient estimate", y = "") +
+  theme_mikabr() +
+  theme(legend.position = "none") +
+  coord_cartesian(xlim = c(-2.5, 2.5))
+```
+
+```{r}
+cv_plot <- cv_results |> 
+  filter(measure == "produces") |> 
+  select(language, name, mean_abs_dev, ci_mad) |> 
+  pivot_wider(names_from = name,
+              values_from = c(mean_abs_dev, ci_mad)) |> 
+  mutate(across(starts_with("mean_abs_dev_"), \(v) {v - mean_abs_dev_baseline})) |> 
+  pivot_longer(cols = -language,
+               names_to = c(".value", "name"),
+               names_pattern = "(mean_abs_dev|ci_mad)_(.*)") |> 
+  mutate(Model = name |> 
+           fct_relevel("phon", "morph", "syntax",
+                       "phon_morph", "phon_syntax", "morph_syntax",
+                       "full") |> 
+           fct_relabel(\(v) str_replace_all(v, "_", "+")))
+
+ggplot(cv_plot |> filter(name != "baseline"), 
+       aes(x = mean_abs_dev, y = language, col = Model)) +
+  geom_point() +
+  geom_vline(xintercept = 0, color = "grey", lty = "dotted") +
+  labs(x = "Mean absolute deviation (mo)", y = "Language") +
+  theme_mikabr()
+```
+
+
+```{r}
+mlu_pred <- morph_coefs |> 
+  filter(measure == "production",
+         term == "MLU-w",
+         lexical_category == "predicates")
+ggplot(mlu_pred, aes(x = morph_complexity, y = estimate)) +
+  geom_point(aes(col = language)) + 
+  geom_smooth(method = "lm", col = "black") +
+  geom_hline(yintercept = 0, color = "grey", lty = "dotted") +
+  labs(x = "Estimated morphological complexity", 
+       y = "Coefficient estimate",
+       col = "Language") +
+  theme_mikabr()
+```
+
 
 
 

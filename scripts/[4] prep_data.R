@@ -34,7 +34,10 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
 
 residualize_col <- function(target_column, residualizing_column) {
   if (all(is.na(target_column))) return(NA)
-  return(lm(target_column ~ residualizing_column)$residuals)
+  residuals <- lm(target_column ~ residualizing_column,
+                  na.action = na.exclude) |>
+    residuals()
+  return(residuals)
 }
 
 # residualize all columns that starts with "freq_" from the column "freq"

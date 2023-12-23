@@ -1,5 +1,10 @@
 library(tidyverse)
 
+# NOTES:
+# - zho morphology data is artificially constructed from CHILDES tokens,
+#   mainly to reduce the complexity of the processing pipeline.
+# - jpn morphology data is adapted from the SIGMORPHON 2023 shared task
+
 extract_unimorph_data <- function(unimorph_lang) {
   base_file <- glue("resources/morphology/{unimorph_lang}.tsv")
   if(!file.exists(base_file)) {

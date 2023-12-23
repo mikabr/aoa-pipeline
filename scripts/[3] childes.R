@@ -5,6 +5,11 @@ compute_count <- function(metric_data) {
   metric_data |> count(token, name = "count")
 }
 
+compute_cd <- function(metric_data) {
+  print("Computing contextual diversity...")
+  metric_data |> group_by(token) |> summarise(cd = n_distinct(transcript_id))
+}
+
 compute_mlu <- function(metric_data) {
   print("Computing mean utterance length...")
   metric_data |> group_by(token) |> summarise(mlu = mean(utterance_length))
@@ -42,7 +47,8 @@ compute_length_phon <- function(metric_data) {
               token_phonemes = list(token_phonemes))
 }
 
-default_metric_funs <- list(base = list(compute_count, compute_mlu, compute_positions,
+default_metric_funs <- list(base = list(compute_count, compute_cd,
+                                        compute_mlu, compute_positions,
                                         compute_length_char, compute_length_phon),
                             parsed = list(compute_form_entropy, compute_subcat_entropy,
                                           compute_n_features),
@@ -110,8 +116,9 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
   tokens <- childes_data$tokens |>
     filter(gloss != "") |>
     mutate(gloss = tolower(gloss), stem = tolower(stem))|>
-    select(token_id = id, token = gloss, token_stem = stem, token_order,
-           token_phonemes = actual_phonology, utterance_id, language)
+    select(token_id = id, token = gloss, token_stem = stem,
+           token_order, token_phonemes = actual_phonology,
+           utterance_id, transcript_id, language)
  # token_stems <- tokens |> select(token, token_stem) |> distinct()
 
   # if (use_morphology & childes_lang != "zho") {
@@ -134,10 +141,10 @@ get_token_metrics <- function(lang, metric_funs = default_metric_funs,
     map(metric_funs[[class]], \(fun) fun(complete_data[[class]]))
   }) |>
     unlist(recursive = FALSE) |>
-    reduce(full_join) |>
-    mutate(language = lang) |>
-    mutate(freq_raw = count / sum(count))
-  # across(starts_with("count"), sum, .names = "sum{.col}"))
+    reduce(partial(left_join, by = "token", relationship = "one-to-one")) |>
+    mutate(language = lang)
+    # mutate(freq_raw = count / sum(count, na.rm = TRUE))
+    # across(starts_with("count"), sum, .names = "sum{.col}"))
 
   if (write) {
     norm_lang <- normalize_language(lang)

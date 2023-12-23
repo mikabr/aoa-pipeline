@@ -119,7 +119,8 @@ compute_form_entropy <- function(parsed_data) {
     mutate(form_entropy = sapply(tokens, calculate_entropy)) |>
     select(-lemma) |>
     unnest(tokens) |>
-    distinct()
+    group_by(token) |>
+    summarise(form_entropy = mean(form_entropy))
 }
 
 compute_subcat_entropy <- function(parsed_data) {
@@ -147,7 +148,9 @@ compute_subcat_entropy <- function(parsed_data) {
     select(token, lemma) |>
     distinct() |>
     left_join(verbs, by = "lemma") |>
-    select(-lemma)
+    select(-lemma) |>
+    group_by(token) |>
+    summarise(subcat_entropy = mean(subcat_entropy))
 }
 
 compute_n_features <- function(parsed_data) {
