@@ -125,3 +125,119 @@ get_childes_data_jpn <- function(corpus_args) {
 
   return(list("utterances" = utterances_df, "tokens" = tokens_df))
 }
+
+get_schema <- function(lang) {
+  childes_lang <- convert_lang_childes(lang)
+  read_csv(here("resources", glue("{childes_lang}_schemata.csv")))
+}
+
+process_childes_rus <- function(childes_data) {
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_rus_orig.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_rus_orig.rds"))
+  schema <- get_schema("Russian")
+  exceptions <- read_csv(here("resources", "rus_exceptions.csv")) |>
+    mutate(rus_orig = glue("\\b{rus_orig}\\b"))
+
+  childes_data <- childes_data |>
+    lapply(\(text) {
+      text_new <- text |>
+        nest(data = -corpus_name) |>
+        mutate(data = map2(data, corpus_name, \(d, c) {
+          d |> mutate(gloss = untransliterate(d$gloss, schema, c))
+        })) |>
+        unnest(data) |>
+        mutate(gloss = str_replace_all(gloss,
+                                       setNames(exceptions$rus_fix,
+                                                exceptions$rus_orig)))
+
+      text_new
+    })
+  childes_data$tokens <- childes_data$tokens |> select(id:utterance_type, everything())
+  childes_data$utterances <- childes_data$utterances |> select(id:utterance_order, everything())
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_rus.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_rus.rds"))
+  childes_data
+}
+
+process_childes_heb <- function(childes_data) {
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_heb_orig.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_heb_orig.rds"))
+  schema <- get_schema("Hebrew")
+  # for homophonous consonants, we construct all possible options and choose
+  # the one with the highest corpus frequency
+
+  tokens <- childes_data$tokens |>
+    mutate(gloss = ifelse(!corpus_name %in% c("Ravid", "BermanLong"),
+                          str_replace_all(gloss, c("(?<=\\b[aeiou])([aeiou])" = "ʔ\\1",
+                                                   "([ae])(?=\\b)" = "\\1h",
+                                                   "yi" = "y")),
+                          gloss))
+
+  heb_char_fix <- c(
+    "\u200E" = "", # remove LTR mark
+    "̄" = "", # remove long vowel mark
+    "(?<=[\u05D0-\u05EA])כ$" = "ך",
+    "(?<=[\u05D0-\u05EA])מ$" = "ם",
+    "(?<=[\u05D0-\u05EA])נ$" = "ן",
+    "(?<=[\u05D0-\u05EA])פ$" = "ף",
+    "(?<=[\u05D0-\u05EA])צ$" = "ץ")
+
+  exceptions <- read_csv(here("resources", "heb_exceptions.csv"))
+
+  tokens_untrans <- tokens |>
+    mutate(gloss = str_replace_all(gloss, setNames(exceptions$heb_fix,
+                                                   exceptions$gloss))) |>
+    nest(data = -corpus_name) |>
+    mutate(data = map2(data, corpus_name, \(d, c) {
+      d |> mutate(gloss = untransliterate(d$gloss, schema, c))
+    })) |>
+    unnest(data) |>
+    mutate(gloss = str_replace_all(gloss, heb_char_fix))
+
+  make_opts <- function(num_opts, gloss) {
+    g <- gloss
+    for (i in seq_len(num_opts)) {
+      g <- sapply(g, str_replace, "\\[(.?)/(.?)\\]", c("\\1", "\\2")) |>
+        as.vector()
+    }
+    g
+  }
+
+  tokens_opts <- tokens_untrans |>
+    mutate(num_opts = str_count(gloss, "\\["),
+           gloss = map2(num_opts, gloss, make_opts))
+
+  # Hebrew frequencies from OpenSubtitles2018
+  # via https://github.com/hermitdave/FrequencyWords/tree/master
+  heb_freq <- read_delim(here("resources", "he_full.txt"),
+                         delim = " ",
+                         col_names = c("gloss", "freq"))
+
+  tokens_final <- tokens_opts |>
+    filter(num_opts > 0) |>
+    unnest(gloss) |>
+    left_join(heb_freq, by = "gloss") |>
+    group_by(id) |>
+    arrange(id, desc(freq)) |>
+    slice(1) |>
+    select(-freq)
+
+  tokens_new <- tokens_opts |>
+    left_join(tokens_final |> select(id, "final" = "gloss"), by = "id") |>
+    mutate(gloss = ifelse(num_opts == 0, gloss, final) |> unlist()) |>
+    select(-final, -num_opts)
+
+  utterances_new <- childes_data$utterances |>
+    left_join(tokens_new |>
+                group_by(utterance_id) |>
+                summarise(utterance = paste(gloss, collapse = " ")),
+              by = c("id" = "utterance_id")) |>
+    mutate(gloss = utterance) |>
+    select(-utterance)
+
+  childes_data$tokens <- tokens_new |> select(id:utterance_type, everything())
+  childes_data$utterances <- utterances_new |> select(id:utterance_order, everything())
+  saveRDS(childes_data$tokens, here("data", "childes", "tokens_heb.rds"))
+  saveRDS(childes_data$utterances, here("data", "childes", "utterances_heb.rds"))
+  childes_data
+}
