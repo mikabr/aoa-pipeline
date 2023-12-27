@@ -41,10 +41,8 @@ count_phon_neighbors <- function(ipa, ipa_list, radius) {
   (adist(ipa, ipa_list |> unlist()) <= 2) |> sum() - 1
 }
 
-#some predictors are sensitive to the word, not the uni-lemma. Eg pronounciation
-#For these cases, we get the predictor by word and then average by uni-lemma (eg a vs an)
-
-# https://github.com/mikabr/aoa-prediction/blob/67764a7a4dfdd743278b8a56d042d25723dbdec7/aoa_unified/aoa_loading/aoa_loading.Rmd#L339
+# some predictors are sensitive to the word, not the uni-lemma, e.g. pronunciation
+# for these cases, we get the predictor by word and then average by uni-lemma (e.g. a vs an)
 
 # clean_words(c("dog", "dog / cat", "dog (animal)", "(a) dog", "dog*", "dog(go)", "(a)dog", " dog ", "Cat"))
 clean_words <- function(word_set){
@@ -87,7 +85,6 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
 
     uni_cleaned <- uni_lemmas |>
       unnest(cols = "items") |>
-      # distinct(language, uni_lemma, definition) %>%
       left_join(fixed_words) |>
       mutate(fixed_definition = ifelse(is.na(fixed_word), item_definition, fixed_word),
              cleaned_words = map(fixed_definition, clean_words)) |>

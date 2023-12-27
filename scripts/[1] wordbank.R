@@ -20,6 +20,7 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
     admins <- admins |>
       mutate(is_multilingual = sapply(language_exposures, \(exp) {
         if (is.null(exp)) return(FALSE)
+        if (all(is.na(exp$exposure_proportion))) return(sum(is.na(exp$language)) > 1)
         max(exp$exposure_proportion, na.rm = TRUE) <= 90
       })) |>
       filter(!is_multilingual)
@@ -34,6 +35,12 @@ get_inst_words <- function(language, form, db_args = NULL) {
                 form = form,
                 db_args = db_args) |>
     filter(item_kind == "word") |>
+    # split predicates into adjectives and verbs
+    mutate(lexical_category = case_when(
+      category == "descriptive_words" ~ "adjectives",
+      category == "action_words" ~ "verbs",
+      .default = lexical_category
+    )) |>
     select(language, form, item_kind, lexical_category, category,
            uni_lemma, item_definition, item_id)
 }
@@ -43,7 +50,10 @@ get_inst_data <- function(language, form, admins, items, db_args = NULL) {
 
   # temp solution:
   form_type = admins |> pull(form_type) |> unique()
-  if (length(form_type) != 1) form_type <- "WS" # default to WS if fail
+  if (length(form_type) != 1) {
+    message(glue("form_type failure for {language} {form}"))
+    form_type <- "WS" # default to WS if fail
+  }
   items <- items |> mutate(form_type = form_type)
 
   inst_data <- get_instrument_data(language = language,
@@ -55,7 +65,7 @@ get_inst_data <- function(language, form, admins, items, db_args = NULL) {
     select(-value) |>
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
-    filter(measure == "produces" | form == "WG")
+    filter(measure == "produces" | form_type == "WG")
 
   inst_data |>
     filter(!is.na(uni_lemma))
@@ -78,7 +88,7 @@ collapse_inst_data <- function(inst_data) {
     group_by(language, form, measure, uni_lemma, age) |>
     summarise(num_true = sum(uni_value), total = n()) |>
     ungroup() |>
-    left_join(inst_uni_lemmas)
+    left_join(inst_uni_lemmas, by = c("measure", "uni_lemma"))
 }
 
 combine_form_data <- function(inst_summaries) {

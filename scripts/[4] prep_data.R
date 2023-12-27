@@ -1,16 +1,10 @@
-##...................................
-## Data prep -- scaling, imputation, etc
-##...................................
-
 # drop predictors with all NAs
-
 drop_predictors <- function(predictors, data) {
   predictors |> discard(\(p) all(is.na(data[[p]])))
 }
 
 # transform any column that starts with "count" by smoothing (add 1),
 # normalizing, and log transforming, then rename "count_x" to "freq_x"
-
 transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
                              log_transform = TRUE) {
   trans_metrics <- childes_metrics |> group_by(language)
@@ -19,15 +13,9 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
   if (normalize) trans_funs <- c(trans_funs, \(count) count / sum(count))
   if (log_transform) trans_funs <- c(trans_funs, \(count) log(count))
 
-  #morph_funs <-c()
-  #if (log_transform) morph_funs <- c(morph_funs, \(count) log(count))
-
   for (fun in trans_funs) {
     trans_metrics <- trans_metrics |> mutate(across(starts_with("count"), fun))
   }
-  #for (fun in morph_funs) {
-  #  trans_metrics <- trans_metrics |> mutate(across(starts_with("n_"), fun))
-  #}
   trans_metrics |> ungroup() |>
     rename_with(\(col) str_replace(col, "count", "freq"), starts_with("count"))
 }
@@ -105,7 +93,6 @@ get_imputation_seed <- function(lang_data, predictors) {
 
 # takes in a predictor from the list of predictors, pulls the imputation data at
 # current status, returns a new imputation data
-
 do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
   prediction_list <- unlist(pred_sources)
   # iterates through the predictor list for that language
@@ -135,25 +122,17 @@ do_lang_imputation <- function(lang, data, pred_sources, max_steps) {
 
   print(glue("Imputing {lang} with {max_steps} steps..."))
   predictor_list <- get_predictor_order(data, predictors, max_steps)
-  # print(glue("get predictor order."))
   missing_data <- get_missing_data(data, predictors)
-  # print(glue("get missing data"))
   imputed_data <- get_imputation_seed(data, predictors)
-  # print(glue("get imputation seed"))
-  # print(glue("pred_sources"))
-  # print(glue("{pred_sources}"))
   imputed_data <- do_iterate_imputation(pred_sources, imputed_data,
                                         missing_data)
-  # print(glue("do iterate imputation"))
   scaled_data <- do_scaling(imputed_data, predictors)
-  # print(glue("do scaling"))
   return(imputed_data)
 }
 
 do_full_imputation <- function(model_data, predictor_sources, max_steps) {
   # restrict to the sources in pred_sources
   # catch cases where a predictor in the predictor set isn't in the data
-
   nested_data <- model_data |>
     select(language, uni_lemma, lexical_category, category,
            all_of(!!unlist(predictor_sources))) |>
@@ -188,16 +167,10 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
   lexical_categories <- uni_lemmas |>
     unnest(items) |>
     distinct() |>
-    # mutate(lexical_category = sapply(items, \(x) {
-    #   lc <- x |> pull(lexical_category) |> unique()
-    #   if(length(lc) > 1) return("other") else lc
-    # })) |>
     # uni_lemmas with item in multiple different classes treated as "other"
     filter(!lexical_category == "other") |>
-           # collapse v, adj, adv into one category
     mutate(lexical_category = lexical_category |> as_factor() |>
-             # fct_collapse("predicates" = c("verbs", "adjectives")) |>
-             fct_relevel("nouns", "predicates", "function_words") |>
+             fct_relevel("nouns", "verbs", "adjectives", "function_words") |>
              fct_relevel(ref_cat))
 
   contrasts(lexical_categories$lexical_category) <- contr.sum

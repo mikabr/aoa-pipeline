@@ -15,6 +15,7 @@ library(glue)
 library(wordbankr)
 library(childesr)
 library(here)
+library(quanteda)
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
 ```

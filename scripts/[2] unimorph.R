@@ -1,5 +1,3 @@
-library(tidyverse)
-
 # NOTES:
 # - zho morphology data is artificially constructed from CHILDES tokens,
 #   mainly to reduce the complexity of the processing pipeline.
@@ -15,7 +13,6 @@ extract_unimorph_data <- function(unimorph_lang) {
                          col_names = c("stem", "gloss", "morph_info")) |>
     mutate(morph_info = morph_info |>
              str_replace("^(N|V|ADJ)[;|]", "\\1-") |>
-             # str_replace("^ADP\\+DET", "ADP+DET-") |> # not sure what the fxn of this is
              str_replace_all("[ |]", ";") |>
              str_replace(";$", "")) |>
     separate(morph_info, c("pos", "morph_info"), sep = "-", fill = "right") |>

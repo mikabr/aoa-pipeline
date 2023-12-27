@@ -1,9 +1,3 @@
-library(tidyverse)
-library(here)
-library(glue)
-library(childesr)
-library(quanteda)
-
 get_childes_data_jpn <- function(corpus_args) {
   # Get and unzip CHAT files from CHILDES
   jpn_path <- here("data", "childes", "Japanese")
@@ -18,7 +12,6 @@ get_childes_data_jpn <- function(corpus_args) {
     system("cd data/childes/Japanese/; unzip '*.zip'; rm *.zip")
   }
 
-
   # Get Japanese collection from childes-db
   utt_orig_fp <- here("data", "childes", "utterances_jpn_orig.rds")
   if (file.exists(utt_orig_fp)) {
@@ -32,7 +25,6 @@ get_childes_data_jpn <- function(corpus_args) {
                                      sex = corpus_args$sex)
     saveRDS(jpn_utterances, utt_orig_fp)
   }
-
 
   # Match orthographic representation to CHILDES
   utt_fp <- here("data", "childes", "utterances_jpn.rds")
@@ -62,7 +54,6 @@ get_childes_data_jpn <- function(corpus_args) {
 
     saveRDS(utterances_df, utt_fp)
   }
-
 
   # Generate tokens dataframe
   # NOTE: We don't match with tokens from `get_tokens` because the gloss
