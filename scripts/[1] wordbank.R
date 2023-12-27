@@ -1,9 +1,10 @@
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
-                            db_args = NULL) {
+                            exclude_multilingual = TRUE, db_args = NULL) {
   message(glue("Getting administrations for {language} {form}..."))
 
   admins <- get_administration_data(language = language,
                                     form = form,
+                                    include_language_exposure = TRUE,
                                     db_args = db_args)
 
   if (exclude_longitudinal) {
@@ -12,7 +13,16 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
       group_by(dataset_origin_name, child_id) |>
       slice_min(age, with_ties = FALSE) |>
       ungroup()
+  }
 
+  if (exclude_multilingual) {
+    # exclude admins which have >=10% exposure to another language
+    admins <- admins |>
+      mutate(is_multilingual = sapply(language_exposures, \(exp) {
+        if (is.null(exp)) return(FALSE)
+        max(exp$exposure_proportion, na.rm = TRUE) <= 90
+      })) |>
+      filter(!is_multilingual)
   }
 
   admins |> select(language, form, form_type, age, data_id)
@@ -28,8 +38,7 @@ get_inst_words <- function(language, form, db_args = NULL) {
            uni_lemma, item_definition, item_id)
 }
 
-get_inst_data <- function(language, form, admins, items,
-                          custom_unilemmas = TRUE, db_args = NULL) {
+get_inst_data <- function(language, form, admins, items, db_args = NULL) {
   message(glue("Getting data for {language} {form}..."))
 
   # temp solution:
@@ -48,18 +57,6 @@ get_inst_data <- function(language, form, admins, items,
                  cols = c(produces, understands)) |>
     filter(measure == "produces" | form == "WG")
 
-  if (custom_unilemmas) {
-    norm_lang <- normalize_language(language)
-    unilemma_loc <- glue("{wb_path}/unilemmas/{norm_lang}_unilemmas.csv")
-    if (file.exists(unilemma_loc)) {
-      unilemma_data <- read_csv(unilemma_loc) |>
-        select(definition, category, uni_lemma)
-      inst_data <- inst_data |>
-        select(-uni_lemma) |>
-        left_join(unilemma_data,
-                  by = c("item_definition" = "definition", "category"))
-    }
-  }
   inst_data |>
     filter(!is.na(uni_lemma))
 }
@@ -95,14 +92,13 @@ combine_form_data <- function(inst_summaries) {
     ungroup()
 }
 
-create_inst_data <- function(language, form, custom_unilemmas = TRUE) {
+create_inst_data <- function(language, form) {
   inst_admins <- get_inst_admins(language, form)
   inst_words <- get_inst_words(language, form)
-  get_inst_data(language, form, inst_admins, inst_words, custom_unilemmas)
+  get_inst_data(language, form, inst_admins, inst_words)
 }
 
-create_wb_data <- function(language, write = TRUE,
-                           custom_unilemmas = TRUE, db_args = NULL) {
+create_wb_data <- function(language, write = TRUE, db_args = NULL) {
   lang <- language # for filter name scope issues
   insts <- get_instruments(db_args = db_args)
   forms <- insts |> filter(language == lang) |> pull(form)
@@ -112,8 +108,7 @@ create_wb_data <- function(language, write = TRUE,
   }
 
   lang_datas <- map(forms, partial(create_inst_data,
-                                   language = language,
-                                   custom_unilemmas = custom_unilemmas))
+                                   language = language))
   lang_summaries <- map(lang_datas, collapse_inst_data)
   lang_summary <- combine_form_data(lang_summaries)
 
