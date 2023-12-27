@@ -104,19 +104,17 @@ Get CHILDES data for many languages:
 ```{r get_childes, eval=FALSE}
 corpus_args <- list(corpus = NULL, role = NULL, role_exclude = "Target_Child",
                     age = NULL, sex = NULL, part_of_speech = NULL, token = "*")
-# FIXME: maybe get rid of this:
-walk(target_langs, \(x) {get_childes_data(convert_lang_childes(x), corpus_args)})
 ```
 
 
-Creating saved morphology metrics for many languages:
+Loading saved morphology metrics for many languages:
 ```{r create_morphs_xling, eval=FALSE}
 walk(target_langs, load_morph_data, corpus_args)
 ```
 
-Creating saved parsed data for many languages:
+Loading saved parsed data for many languages:
 ```{r parse_data, eval=FALSE}
-walk(target_langs, get_parsed_data, corpus_args = corpus_args)
+walk(target_langs, load_parsed_data, corpus_args = corpus_args)
 ```
 
 

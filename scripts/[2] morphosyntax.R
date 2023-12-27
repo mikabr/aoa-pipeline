@@ -84,18 +84,23 @@ get_parsed_data <- function(lang, num_cores = 4,
   childes_lang <- convert_lang_childes(lang)
   file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
 
+  if (!is.null(import_data)) {
+    childes_data <- import_data
+  } else {
+    childes_data <- get_childes_data(childes_lang, corpus_args)
+  }
+  annotate_text(childes_data$utterances$gloss, lang, num_cores = num_cores)
+}
+
+load_parsed_data <- function(lang, corpus_args = default_corpus_args) {
+  childes_lang <- convert_lang_childes(lang)
+  file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
   if(file.exists(file_p)) {
     message(glue("Loading cached parsed data for {lang}."))
     annotated <- readRDS(file_p)
   } else {
     message(glue("No cached parsed data for {lang}, getting and caching data."))
-    if (!is.null(import_data)) {
-      childes_data <- import_data
-    } else {
-      childes_data <- get_childes_data(childes_lang, corpus_args)
-    }
-    annotated <- annotate_text(childes_data$utterances$gloss, lang,
-                               num_cores = num_cores)
+    annotated <- get_parsed_data(lang, corpus_args = default_corpus_args)
   }
   annotated
 }
