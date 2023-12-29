@@ -2,6 +2,9 @@ library(udpipe)
 
 get_udpipe_model <- function(language, overwrite = FALSE) {
   ud_lang <- convert_lang_udpipe(language)
+  if (ud_lang == "cantonese-hk") {
+    return(here("resources", "udpipe", "cantonese-hk-ud-2.12-231227.udpipe"))
+  }
   dl <- udpipe_download_model(ud_lang,
                               model_dir = here("resources", "udpipe"),
                               overwrite = overwrite)
@@ -20,10 +23,13 @@ untransliterate <- function(text, schema, corpus) {
 }
 
 annotate_text <- function(text, language,
-                          write = TRUE, num_cores = 4) {
+                          write = TRUE, num_cores = 4,
+                          udmodel = NULL) {
   childes_lang <- convert_lang_childes(language)
-  udmodel <- get_udpipe_model(language) |>
-    udpipe_load_model()
+  if (is.null(udmodel)) {
+    udmodel <- get_udpipe_model(language) |>
+      udpipe_load_model()
+  }
 
   if (childes_lang == "swe") {
     # remove morpheme spacing symbols
@@ -31,7 +37,7 @@ annotate_text <- function(text, language,
   }
 
   tokenizer = "tokenizer"
-  if (childes_lang == "zho") {
+  if (childes_lang %in% c("zho", "yue eng")) {
     # use existing tokenization
     text <- gsub(" ", "\n", text)
     tokenizer = "vertical"

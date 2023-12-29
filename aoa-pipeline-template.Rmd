@@ -52,6 +52,7 @@ target_langs <- c("French (French)", "French (Quebecois)",
                   "Turkish", 
                   "Hungarian",
                   "Mandarin (Taiwanese)", "Mandarin (Beijing)",
+                  "Cantonese",
                   "Hebrew",
                   "Korean")
 ```
@@ -85,7 +86,8 @@ eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 Merge in the by-concept predictors (babiness, concreteness, etc) to the unilemmas and the by word predictors (phonemes) to the words/definitions.
 
 ```{r merge_unilemmas}
-uni_lemmas <- map_df(target_langs, extract_uni_lemmas, wb_data)
+uni_lemmas <- map_df(target_langs, extract_uni_lemmas, wb_data) |> 
+  filter(uni_lemma != "NA")
 ```
 
 ```{r load_predictors}
@@ -154,7 +156,8 @@ walk(target_langs, get_uni_lemma_metrics, build_uni_lemma_map(uni_lemmas))
 
 Loading cached CHILDES data for multiple languages:
 ```{r load_unilemma_xling, eval=TRUE}
-childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |> filter(!is.na(uni_lemma))
+childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |> 
+  filter(!is.na(uni_lemma), uni_lemma != "NA")
 ```
 
 
@@ -237,7 +240,7 @@ predictor_data_imputed_scaled <- do_full_imputation(predictor_data_lexcat, predi
 
 ```{r merge_aoa}
 aoa_predictor_data <- predictor_data_imputed_scaled |> 
-  left_join(aoas) |>
+  left_join(aoas, by = c("language", "uni_lemma"), relationship = "many-to-many") |>
   filter(aoa <= 36, 
          lexical_category != "NA",
          lexical_category != "unknown") |> 
