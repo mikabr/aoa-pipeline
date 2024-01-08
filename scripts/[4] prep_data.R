@@ -164,16 +164,39 @@ do_scaling <- function(model_data, predictors) {
 
 
 prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
-  lexical_categories <- uni_lemmas |>
-    unnest(items) |>
+  uni_lemmas_items <- uni_lemmas |>
+    unnest(items)
+
+  # ad-hoc lexical categories for English (British)
+  if ("English (British)" %in% uni_lemmas$language) {
+    en_gb_cats <- read_csv(here("data", "predictors", "english_british_categories.csv"))
+    uni_lemmas_items <- uni_lemmas_items |>
+      left_join(en_gb_cats |>
+                  select(language, item_definition, lexical_category) |>
+                  distinct(),
+                by = c("language", "item_definition")) |>
+      mutate(lexical_category = coalesce(lexical_category.y, lexical_category.x)) |>
+      select(language, uni_lemma, lexical_category, category, item_definition)
+  }
+
+  lexical_categories <- uni_lemmas_items |>
     distinct() |>
-    # uni_lemmas with item in multiple different classes treated as "other"
-    filter(!lexical_category == "other") |>
+    filter(!lexical_category == "other") # loss of 407 items
+
+  # uni_lemmas with items in multiple categories are discarded
+  lc_count <- lexical_categories |>
+    group_by(language, uni_lemma) |>
+    summarise(n_lexcat = n_distinct(lexical_category)) |>
+    filter(n_lexcat == 1) # loss of 331 items
+
+  lexical_categories <- lexical_categories |>
+    left_join(lc_count, by = c("language", "uni_lemma")) |>
+    filter(!is.na(n_lexcat)) |>
+    select(-n_lexcat) |>
     mutate(lexical_category = lexical_category |> as_factor() |>
              fct_relevel("nouns", "verbs", "adjectives", "function_words") |>
-             fct_relevel(ref_cat))
-
-  contrasts(lexical_categories$lexical_category) <- contr.sum
+             fct_relevel(ref_cat, after = Inf) |>
+             `contrasts<-`(value = contr.sum))
 
   predictor_data |>
     left_join(lexical_categories) |>

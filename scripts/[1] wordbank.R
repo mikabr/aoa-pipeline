@@ -37,7 +37,7 @@ get_inst_words <- function(language, form, db_args = NULL) {
     filter(item_kind == "word") |>
     # split predicates into adjectives and verbs
     mutate(lexical_category = case_when(
-      category == "descriptive_words" ~ "adjectives",
+      str_detect(category, "descriptive_words") ~ "adjectives", # also catches Russian adverbs
       category == "action_words" ~ "verbs",
       .default = lexical_category
     )) |>
@@ -169,5 +169,6 @@ extract_uni_lemmas <- function(lang, wb_data) {
       rename(item_definition = definition)
   }
   uni_lemmas |>
-    nest(items = -c(language, uni_lemma))
+    nest(items = -c(language, uni_lemma)) |>
+    filter(uni_lemma != "NA")
 }

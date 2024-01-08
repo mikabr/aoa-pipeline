@@ -84,8 +84,8 @@ fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
                                                      all_lang = FALSE, model_formula)),
            coefs = map(model, broom::tidy),
            stats = map(model, broom::glance),
-           alias = map(model, alias),
-           vifs = map(model, get_vifs)
+           alias = map(model, alias)# ,
+           # vifs = map(model, get_vifs)
     )
 }
 

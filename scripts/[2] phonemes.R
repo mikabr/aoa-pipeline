@@ -66,6 +66,7 @@ clean_words <- function(word_set){
     ) |>
     flatten_chr() %>%
     # trim
+    gsub("^-+", "", .) %>%
     gsub("^ +| +$", "", .) %>%
     keep(nchar(.) > 0) |>
     tolower() |>
@@ -77,37 +78,54 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
   phon_path <- here("data", "predictors", "phonology.rds")
   if (file.exists(phon_path)) {
     message("Loading cached phonology data...")
-    uni_phons_fixed <- readRDS(phon_path)
-  } else {
-    fixed_words <- read_csv("data/predictors/fixed_words.csv") |>
-      select(language, uni_lemma, item_definition, fixed_word) |>
-      filter(!is.na(uni_lemma), !is.na(fixed_word))
-
-    uni_cleaned <- uni_lemmas |>
+    uni_phons_cached <- readRDS(phon_path)
+    uni_cols <- colnames(uni_phons_cached)[1:5]
+    uni_lemmas_new <- uni_lemmas |>
       unnest(cols = "items") |>
-      left_join(fixed_words) |>
-      mutate(fixed_definition = ifelse(is.na(fixed_word), item_definition, fixed_word),
-             cleaned_words = map(fixed_definition, clean_words)) |>
-      select(-fixed_word) |>
-      group_by(language) |>
-      #for each language, get the phonemes for each word
-      mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, method)))
+      left_join(uni_phons_cached,
+                by = uni_cols) |>
+      filter(sapply(phons, is.null)) |>
+      select(all_of(uni_cols))
 
-    fixed_phons <- read_csv("data/predictors/fixed_phons.csv") |>
-      select(language, uni_lemma, item_definition, fixed_phon) |>
-      filter(!is.na(uni_lemma), !is.na(fixed_phon)) |>
-      mutate(fixed_phon = strsplit(fixed_phon, ", "))
-
-    uni_phons_fixed <- uni_cleaned |>
-      left_join(fixed_phons) |>
-      mutate(phons = if_else(map_lgl(fixed_phon, is.null), phons, fixed_phon),
-             str_phons = str_phons(phons)) |>
-      select(-fixed_phon)
-
-    if (write) {
-      saveRDS(uni_phons_fixed, phon_path)
-    }
+    if (nrow(uni_lemmas_new) == 0) return(uni_phons_cached)
+  } else {
+    uni_lemmas_new <- uni_lemmas |>
+      unnest(cols = "items")
   }
+
+  fixed_words <- read_csv("data/predictors/fixed_words.csv") |>
+    select(language, uni_lemma, item_definition, fixed_word) |>
+    filter(!is.na(uni_lemma), !is.na(fixed_word))
+
+  uni_cleaned <- uni_lemmas_new |>
+    left_join(fixed_words) |>
+    mutate(fixed_definition = ifelse(is.na(fixed_word), item_definition, fixed_word),
+           cleaned_words = map(fixed_definition, clean_words)) |>
+    select(-fixed_word) |>
+    group_by(language) |>
+    #for each language, get the phonemes for each word
+    mutate(phons = map2(cleaned_words, language, ~get_phons(.x, .y, method)))
+
+  fixed_phons <- read_csv("data/predictors/fixed_phons.csv") |>
+    select(language, uni_lemma, item_definition, fixed_phon) |>
+    filter(!is.na(uni_lemma), !is.na(fixed_phon)) |>
+    mutate(fixed_phon = strsplit(fixed_phon, ", "))
+
+  uni_phons_fixed <- uni_cleaned |>
+    left_join(fixed_phons) |>
+    mutate(phons = if_else(map_lgl(fixed_phon, is.null), phons, fixed_phon),
+           str_phons = str_phons(phons)) |>
+    select(-fixed_phon)
+
+  if (file.exists(phon_path)) {
+    uni_phons_fixed <- uni_phons_fixed |>
+      bind_rows(uni_phons_cached)
+  }
+
+  if (write) {
+    saveRDS(uni_phons_fixed, phon_path)
+  }
+
   uni_phons_fixed
 }
 

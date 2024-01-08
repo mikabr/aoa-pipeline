@@ -326,8 +326,9 @@ ggplot(plt_lang_coefs |> filter(!is.na(estimate), !is.na(term), effect == "main"
                 term_cat = fct_collapse(term,
                                         Morphological = c("N features", "Form entropy"),
                                         Syntactic = c("MLU-w", "Subcat entropy"),
+                                        Phonological = c("Length in phonemes", "Phon neighbors"),
                                         Other = c("Frequency", "Concreteness",
-                                                  "Babiness", "Length char")) |> 
+                                                  "Babiness")) |> 
                                         # Morphological = c("N forms", "N morph categories", 
                                         #                   "N affixes"),
                                         # Syntactic = c("MLU-w", "Main frame prop"),

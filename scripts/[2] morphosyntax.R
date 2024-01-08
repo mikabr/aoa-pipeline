@@ -146,8 +146,8 @@ compute_subcat_entropy <- function(parsed_data) {
       unlist(d, use.names= FALSE) |>
         intersect(c("obj", "iobj", "ccomp", "xcomp", "obl")) |>
         paste(collapse = "_")}))
-  verbs <- parsed_data |>
-    filter(upos == "VERB") |>
+  items <- parsed_data |>
+    # filter(upos == "VERB") |>
     left_join(frames, by = c("doc_id", "token_id" = "head_token_id")) |>
     # removes character(0) and NULL, both of which indicate no dependents under consideration
     mutate(subcat = ifelse(lengths(subcat) == 0, NA, subcat)) |>
@@ -158,7 +158,7 @@ compute_subcat_entropy <- function(parsed_data) {
   parsed_data |>
     select(token, lemma) |>
     distinct() |>
-    left_join(verbs, by = "lemma") |>
+    left_join(items, by = "lemma") |>
     select(-lemma) |>
     group_by(token) |>
     summarise(subcat_entropy = mean(subcat_entropy))

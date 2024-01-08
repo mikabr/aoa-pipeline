@@ -19,7 +19,7 @@ Croatian,Croatian,hrv,NA,hr_HR,hr,hr,hbs,NA,hbs,hrv,croatian-set
 Czech,Czech,ces,NA,cs_CZ,cs,cs,ces,ces,ces,ces,czech-cac
 Mandarin Chinese,Mandarin (Beijing),zho,no need,no need,zh,cmn-Latn-pinyin,zho,zho,NA,cmn,chinese-gsdsimp
 Mandarin Chinese,Mandarin (Taiwanese),zho,no need,no need,zh,cmn-Latn-pinyin,zho,zho,NA,cmn,chinese-gsdsimp
-Yue Chinese,Cantonese,yue,no need,no need,zh-yue,yue,NA,NA,NA,yue,chinese-gsd
+Yue Chinese,Cantonese,yue eng,no need,no need,zh-yue,yue,yue,yue,NA,yue,cantonese-hk
 Hebrew,Hebrew,heb,NA,he_IL,NA,he,heb,NA,NA,heb,hebrew-htb
 Korean,Korean,kor,NA,ko,NA,ko,kor,NA,NA,kor,korean-kaist
 Catalan,Catalan,cat,catalan,ca_ES,ca,ca,cat,cat,cat,cat,catalan-ancora
@@ -29,15 +29,15 @@ Indonesian,NA,ind,indonesian,id_ID,id,id,ind,NA,NA,ind,indonesian-gsd
 Romanian,NA,ron,romanian,ro_RO,ro,ro,ron,NA,ron,ron,romanian-rrt
 Tamil,NA,tam,tamil,ta,ta,ta,NA,NA,NA,tam,tamil-ttb
 Afrikaans,NA,afr,NA,af_ZA,af,af,afr,NA,NA,afr,afrikaans-afribooms
-Arabic,Arabic,ara,arabic,ar,NA,ar,NA,NA,NA,arb,arabic-padt
+Arabic,Arabic (Saudi),ara,arabic,ar,NA,ar,NA,NA,NA,arb,arabic-padt
 Basque,NA,eus,basque,eu,NA,eu,eus,NA,NA,eus,basque-bdt
-Finnish,Finnish,NA,finnish,fi_FI,fi,fi,fin,fin,fin,fin,finnish-tdt
+Finnish,NA,NA,finnish,fi_FI,fi,fi,fin,fin,fin,fin,finnish-tdt
 Hindi,NA,NA,hindi,hi_IN,hi,hi,hin,NA,NA,hin,hindi-hdtb
 Icelandic,NA,isl,NA,is,is,is,isl,NA,NA,isl,NA
 Irish,NA,gle,irish,ga_IE,NA,ga,gle,NA,gle,gle,irish-idt
 Latvian,Latvian,NA,NA,lv_LV,lv,lv,lav,NA,lav,lav,latvian-lvtb
 Polish,NA,pol,NA,pl_PL,pl,pl,pol,pol,pol,pol,polish-lfg
-Serbian,NA,srp,NA,sr,sr,sr,hbs,NA,hbs,NA,serbian-set
+Serbian,NA,srp,NA,sr,sr,sr,hbs,NA,hbs,hrv,serbian-set
 Slovak,Slovak,NA,NA,sk_SK,sk,sk,slk,NA,NA,NA,slovak-snk
 Swahili,Kiswahili,NA,NA,sw_KE,sw,sw,swc,NA,NA,swh,NA
 Welsh,NA,cym,NA,cy_GB,cy,cy,cym,NA,NA,cym,NA
@@ -54,7 +54,7 @@ Georgian,NA,NA,NA,ka,ka,ka,kat,NA,NA,kat,NA
 Giryama,Kigiriama,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
 Hawaiian,NA,haw,NA,NA,NA,haw,NA,NA,NA,haw,NA
 Jamaican,NA,jam,NA,NA,NA,NA,NA,NA,NA,NA,NA
-Japanese,Japanese,jpn,NA,NA,NA,ja,NA,NA,NA,NA,japanese-gsd
+Japanese,Japanese,jpn,NA,NA,NA,ja,jpn,NA,NA,jpn,japanese-gsd
 Javanese,NA,jav,NA,NA,NA,NA,NA,NA,NA,jav,NA
 Kannada,NA,NA,NA,NA,kn,kn,kan,NA,NA,kan,NA
 Kikuyu,NA,kik,NA,NA,NA,NA,NA,NA,NA,kik,NA
