@@ -13,7 +13,7 @@ fit_cv_models <- function(predictor_data, pred_lists, loo_df = NULL) {
     pl <- map(pred_lists, drop_predictors, train_df)
     formulae <- map(pl, make_predictor_formula)
 
-    try(models <- fit_with(train_df, lm, formulae))
+    try(models <- fit_with(train_df, lm, formulae)) # FIXME: change to bayesglm
 
     result <- enframe(models) |>
       mutate(model = value,

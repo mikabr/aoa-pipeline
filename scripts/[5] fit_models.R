@@ -61,18 +61,31 @@ fit_group_model <- function(predictors, group_data, lexcat_interactions = TRUE,
   if (all_lang) {
     lmerTest::lmer(model_formula, group_data)
   } else {
-    lm(model_formula, group_data)
+    # lm(model_formula, group_data)
+    # arm::bayesglm(model_formula,
+    #               family = gaussian,
+    #               data = group_data,
+    #               prior.scale = 2,
+    #               prior.df = 3,
+    #               scaled = FALSE)
+    brms::brm(model_formula,
+              group_data,
+              prior = brms::prior(student_t(3, 0, 2), class = "b"))
   }
 }
 
 get_vifs <- function(model) {
-  vif <- car::vif(model)
-  as.data.frame(vif) |> rownames_to_column("predictor") |> rename_with(tolower)
+  if (class(model) == "brmsfit") {
+    vif <- performance::check_collinearity(model)
+  } else {
+    vif <- car::vif(model)
+  }
+  as_tibble(vif) |> rownames_to_column("predictor") |> rename_with(tolower)
 }
 
 fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
                        model_formula = NULL) {
-  sinotibetan_langs <- c("Mandarin (Beijing)", "Mandarin (Taiwanese)")
+  sinotibetan_langs <- c("Mandarin (Beijing)", "Mandarin (Taiwanese)", "Cantonese")
   predictor_data |>
     nest(group_data = -c(language, measure)) |>
     mutate(predictors = ifelse(language %in% sinotibetan_langs,
@@ -82,10 +95,10 @@ fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
                         \(gd, preds) fit_group_model(preds, gd, lexcat_interactions,
                                                      morphcomp_interactions = FALSE,
                                                      all_lang = FALSE, model_formula)),
-           coefs = map(model, broom::tidy),
-           stats = map(model, broom::glance),
-           alias = map(model, alias)# ,
-           # vifs = map(model, get_vifs)
+           coefs = map(model, broom.mixed::tidy),
+           stats = map(model, broom.mixed::glance),
+           # alias = map(model, alias)# ,
+           vifs = map(model, get_vifs)
     )
 }
 

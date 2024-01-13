@@ -7,7 +7,7 @@ drop_predictors <- function(predictors, data) {
 # normalizing, and log transforming, then rename "count_x" to "freq_x"
 transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
                              log_transform = TRUE) {
-  trans_metrics <- childes_metrics |> group_by(language)
+  trans_metrics <- childes_metrics # |> group_by(language)
   trans_funs <- c()
   if (smooth) trans_funs <- c(trans_funs, \(count) count + 1)
   if (normalize) trans_funs <- c(trans_funs, \(count) count / sum(count))
@@ -127,7 +127,7 @@ do_lang_imputation <- function(lang, data, pred_sources, max_steps) {
   imputed_data <- do_iterate_imputation(pred_sources, imputed_data,
                                         missing_data)
   scaled_data <- do_scaling(imputed_data, predictors)
-  return(imputed_data)
+  return(scaled_data)
 }
 
 do_full_imputation <- function(model_data, predictor_sources, max_steps) {

@@ -77,7 +77,7 @@ annotate_text <- function(text, language,
     mutate(lemma = ifelse(upos == "PRON", token, lemma))
 
   if (write) {
-    file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
+    file_p <- here(childes_path, glue("parsed_childes_{childes_lang}.rds"))
     saveRDS(annotated, file_p)
   }
 
@@ -88,7 +88,7 @@ get_parsed_data <- function(lang, num_cores = 4,
                             corpus_args = default_corpus_args,
                             import_data = NULL) {
   childes_lang <- convert_lang_childes(lang)
-  file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
+  file_p <- here(childes_path, glue("parsed_childes_{childes_lang}.rds"))
 
   if (!is.null(import_data)) {
     childes_data <- import_data
@@ -100,7 +100,7 @@ get_parsed_data <- function(lang, num_cores = 4,
 
 load_parsed_data <- function(lang, corpus_args = default_corpus_args) {
   childes_lang <- convert_lang_childes(lang)
-  file_p <- file.path(childes_path, glue("parsed_childes_{childes_lang}.rds"))
+  file_p <- here(childes_path, glue("parsed_childes_{childes_lang}.rds"))
   if(file.exists(file_p)) {
     message(glue("Loading cached parsed data for {lang}."))
     annotated <- readRDS(file_p)

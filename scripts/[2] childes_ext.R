@@ -318,6 +318,7 @@ process_childes_ara <- function(childes_data) {
         nest(data = -corpus_name) |>
         mutate(data = map2(data, corpus_name, \(d, c) {
           d |> mutate(gloss = untransliterate(d$gloss, schema, c) |>
+                        str_replace_all("(.)\\1", "\\1") |>
                         str_replace_all("(.)\\1", "\\1"))
         })) |>
         unnest(data) # |>
@@ -336,10 +337,10 @@ process_childes_ara <- function(childes_data) {
 
 process_childes <- function(childes_data, childes_lang) {
   if (childes_lang == "rus") {
-    process_data_rus(childes_data)
+    process_childes_rus(childes_data)
   } else if (childes_lang == "heb") {
-    process_data_heb(childes_data)
+    process_childes_heb(childes_data)
   } else if (childes_lang == "ara") {
-    process_data_ara(childes_data)
+    process_childes_ara(childes_data)
   } else stop("No processing available for {childes_lang}.")
 }

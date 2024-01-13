@@ -124,7 +124,7 @@ create_wb_data <- function(language, write = TRUE, db_args = NULL) {
 
   if (write) {
     norm_lang <- normalize_language(language)
-    saveRDS(lang_summary, file = glue("{wb_path}/{norm_lang}.rds"))
+    saveRDS(lang_summary, file = here(wb_path, glue("{norm_lang}.rds")))
   }
   return(lang_summary)
 }
@@ -132,7 +132,7 @@ create_wb_data <- function(language, write = TRUE, db_args = NULL) {
 load_wb_data <- function(languages, cache = TRUE) {
   wb_data <- map_df(languages, function(lang) {
     norm_lang <- normalize_language(lang)
-    lang_file <- glue("{wb_path}/{norm_lang}.rds")
+    lang_file <- here(wb_path, glue("{norm_lang}.rds"))
     if (file.exists(lang_file)) {
       message(glue("Loading cached Wordbank data for {lang}..."))
       lang_data <- readRDS(lang_file)

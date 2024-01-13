@@ -6,8 +6,8 @@ get_childes_data <- function(childes_lang, corpus_args) {
   if (childes_lang == "jpn") return(get_childes_data_jpn(corpus_args))
   if (childes_lang == "ara") return(get_childes_data_ara(corpus_args))
 
-  file_t <- file.path(childes_path, glue("tokens_{childes_lang}.rds"))
-  file_u <- file.path(childes_path, glue("utterances_{childes_lang}.rds"))
+  file_t <- here(childes_path, glue("tokens_{childes_lang}.rds"))
+  file_u <- here(childes_path, glue("utterances_{childes_lang}.rds"))
 
   if (file.exists(file_u)) {
     utterances <- readRDS(file_u)
@@ -40,7 +40,7 @@ get_childes_data <- function(childes_lang, corpus_args) {
   childes_data <- list("utterances" = utterances, "tokens" = tokens)
 
   if (childes_lang %in% c("rus", "heb", "ara") &&
-      !file.exists(file.path(childes_path, glue("tokens_{childes_lang}_orig.rds")))) {
+      !file.exists(here(childes_path, glue("tokens_{childes_lang}_orig.rds")))) {
     childes_data <- process_childes(childes_data, childes_lang)
   }
 

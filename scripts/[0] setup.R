@@ -1,7 +1,7 @@
-Sys.setenv(DICPATH = "resources/dicts")
+Sys.setenv(DICPATH = here("resources", "dicts"))
 
-wb_path <- "data/wordbank"
-childes_path <- "data/childes"
+wb_path <- here("data", "wordbank")
+childes_path <- here("data", "childes")
 
 get_lang_map <- function() {
   googlesheets4::gs4_deauth()
@@ -11,11 +11,11 @@ get_lang_map <- function() {
            "espeak", "espeak-ng",
            "unimorph", "unimorph segmentation", "unimorph derivation",
            "morph complexity", "udpipe")
-  write_csv(lang_map, "resources/language_map.csv")
+  write_csv(lang_map, here("resources", "language_map.csv"))
   lang_map
 }
 
-lang_map <- read_csv("resources/language_map.csv")
+lang_map <- read_csv(here("resources", "language_map.csv"))
 
 convert_lang_childes <- function(lang) {
   lang_map |> filter(wordbank == lang) |> pull(childes)
