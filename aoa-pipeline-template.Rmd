@@ -16,6 +16,7 @@ library(wordbankr)
 library(childesr)
 library(here)
 library(quanteda)
+library(tmcn)
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
 ```
@@ -42,6 +43,7 @@ Defining languages:
 target_langs <- c("French (French)", "French (Quebecois)", 
                   "Italian",
                   "Spanish (Mexican)", "Spanish (European)",
+                  "Catalan",
                   "Portuguese (European)",  
                   "Dutch",
                   "English (American)", "English (Australian)", 
@@ -50,17 +52,18 @@ target_langs <- c("French (French)", "French (Quebecois)",
                   "Danish", "Norwegian", "Swedish", 
                   "Croatian", "Czech", "Russian",
                   "Turkish", 
-                  "Hungarian",
+                  "Hungarian", "Estonian",
                   "Mandarin (Taiwanese)", "Mandarin (Beijing)",
                   "Cantonese",
-                  "Hebrew", 
-                  "Korean")
+                  "Hebrew", # "Arabic (Saudi)",
+                  "Korean",
+                  "Japanese")
 ```
 
 
 Loading Wordbank data for multiple languages (cached or not):
 ```{r load_wordbank_xling}
-wb_data <- load_wb_data(target_langs)
+wb_data <- load_wb_data(target_langs, db_args = db_args)
 aoas <- fit_aoas(wb_data)
 ```
 
@@ -179,7 +182,10 @@ childes_metrics <- childes_metrics |>
 By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualize_freqs()` residualizes all columns that starts with "freq_" from the column "freq".
 
 ```{r prepare_frequency}
-childes_metrics <- childes_metrics |> transform_counts() |> residualize_freqs() 
+childes_metrics <- childes_metrics |> 
+  nest(data = -language) |> 
+  mutate(data = map(data, transform_counts),
+         data = map(data, residualize_freqs))
 ```
 
 ```{r residualize}
@@ -191,10 +197,12 @@ syntax_preds <- c("mlu", "subcat_entropy")
 
 for (preds in list(distrib_preds, phon_preds, morph_preds, syntax_preds)) {
   childes_metrics <- childes_metrics |> 
-    mutate(across(all_of(preds[-1]), 
-                  partial(residualize_col, 
-                          residualizing_column = childes_metrics |> pull(preds[1]))))
+    mutate(data = map(data, \(d) {
+      d |> mutate(across(all_of(preds[-1]), 
+                         partial(residualize_col, 
+                                 residualizing_column = d |> pull(preds[1]))))}))
 }
+childes_metrics <- childes_metrics |> unnest(data)
 ```
 
 
@@ -212,7 +220,7 @@ predictor_data <- predictor_data_list |>
 
 ```{r set_predictors}
 predictor_sources <- list(
-  c("freq", "cd"),
+  c("freq"), # "cd"
   c("concreteness", "babiness"),
   c("length_phon", "phon_neighbors"),
   c("n_features", "form_entropy", "subcat_entropy"), 
@@ -237,8 +245,8 @@ predictor_data_imputed_scaled <- do_full_imputation(predictor_data_lexcat, predi
 
 ```{r}
 # specific handling for subcat_entropy for non-verbs
-predictor_data_imputed_scaled <- predictor_data_imputed_scaled |> 
-  mutate(subcat_entropy = ifelse(lexical_category == "verbs", subcat_entropy, 0))
+# predictor_data_imputed_scaled <- predictor_data_imputed_scaled |> 
+#   mutate(subcat_entropy = ifelse(lexical_category == "verbs", subcat_entropy, 0))
 ```
 
 ## Merge with AOAs
@@ -259,13 +267,19 @@ aoa_predictor_data <- predictor_data_imputed_scaled |>
 
 ## Run model 
 
-```{r}
+```{rm eval=F}
 aoa_models <- fit_models(predictors, aoa_predictor_data,
                          lexcat_interactions = FALSE)
 
 aoa_models_lexcat <- fit_models(predictors, aoa_predictor_data,
                                 lexcat_interactions = TRUE)
 ```
+
+```{r}
+aoa_models <- readRDS("aoa_models.rds") |> filter(language != "Arabic (Saudi)")
+aoa_models_lexcat <- readRDS("aoa_models_lexcat.rds") |> filter(language != "Arabic (Saudi)")
+```
+
 
 ## Model outputs
 
@@ -276,15 +290,15 @@ coefs <- aoa_models |> select(language, measure, coefs) |> unnest(coefs)
 
 ```{r extract_coefs}
 lexcats <- set_names(
-  paste0("lexical_category", 1:3),
-  rownames(contrasts(aoa_models$group_data[[1]]$lexical_category))[1:3]
+  paste0("lexical_category", 1:2),
+  rownames(contrasts(aoa_models_lexcat$group_data[[1]]$lexical_category))[1:2]
 )
 
 aoa_coefs <- aoa_models_lexcat |>
   select(language, measure, coefs) |>
   unnest(coefs) |>
   filter(term != "(Intercept)") |>
-  mutate(signif = if_else(p.value < 0.05, TRUE, FALSE),
+  mutate(# signif = if_else(p.value < 0.05, TRUE, FALSE),
          effect = if_else(str_detect(term, ":"), "interaction", "main"),
          lexical_category = str_extract(term, "lexical_category[0-9]"),
          # lexical_category = fct_recode(lexical_category, !!!lexcats),
@@ -293,7 +307,16 @@ aoa_coefs <- aoa_models_lexcat |>
                         term),
          # term = fct_recode(term, !!!lexcats),
          term = factor(term), #, levels = c(predictors, names(lexcats))
-         language = factor(language, levels = target_langs))
+         language = factor(language, levels = target_langs),
+         term_cat = fct_collapse(term,
+                                 Morphological = c("N features", "Form entropy", "N morphemes"),
+                                 Syntactic = c("MLU-w", "Subcat entropy"),
+                                 Phonological = c("Length in phonemes", "Phon neighbors"),
+                                 Other = c("Frequency", "Contextual diversity", 
+                                           "Concreteness", "Babiness")) |> 
+                  fct_rev() |> 
+                  fct_shift(-2))
+                
 
 n_by_lexcat <- aoa_predictor_data |> 
   group_by(language, lexical_category) |> 
@@ -315,7 +338,7 @@ display_predictors <- function(predictors) {
     str_replace("Cd", "Contextual diversity")
 }
 
-term_fct <- c("Frequency", "Contextual diversity", 
+term_fct <- c("Frequency", # "Contextual diversity", 
               "Concreteness", "Babiness", 
               "Length in phonemes", "Phon neighbors",
               "N features", "Form entropy", "N morphemes",
@@ -331,20 +354,22 @@ plot_coefs <- aoa_coefs |>
          measure = fct_recode(measure, 
                               "comprehension" = "understands",
                               "production" = "produces"),
-         signif = ifelse(p.value < .05, "significant", "non-significant") |> 
-           fct_rev()) |> 
+         #signif = ifelse(p.value < .05, "significant", "non-significant") |> 
+         #  fct_rev()
+         ) |> 
   filter(!is.na(term)) |> 
-  left_join(n_by_lang, by = "language")
+  left_join(n_by_lang, by = "language") |> 
+  mutate(signif = ifelse(conf.low < 0 & conf.high > 0,
+                         "Not significant", "Significant"))
 
 lc_plot <- aoa_coefs |> 
   select(language, measure, term, estimate, lexical_category) |> 
   pivot_wider(names_from = lexical_category, values_from = estimate) |> 
-  mutate(verbs = `NA` + lexical_category1,
-         adjectives = `NA` + lexical_category2,
-         function_words = `NA` + lexical_category3,
-         nouns = `NA` - lexical_category1 - lexical_category2 - lexical_category3) |> 
-  select(-c(`NA`, lexical_category1, lexical_category2, lexical_category3)) |> 
-  pivot_longer(cols = c(verbs, adjectives, function_words, nouns),
+  mutate(predicates = `NA` + lexical_category1,
+         function_words = `NA` + lexical_category2,
+         nouns = `NA` - lexical_category1 - lexical_category2) |> 
+  select(-c(`NA`, lexical_category1, lexical_category2)) |> 
+  pivot_longer(cols = c(predicates, function_words, nouns),
                names_to = "lexical_category",
                values_to = "estimate") |> 
   filter(!is.na(estimate)) |> 
@@ -364,7 +389,7 @@ lc_plot <- aoa_coefs |>
 
 Summary stats:
 ```{r}
-sum_stats <- aoa_models |> select(language, measure, stats) |> unnest(stats)
+sum_stats <- aoa_models_lexcat |> select(language, measure, stats) |> unnest(stats)
 ```
 
 Variance inflation factors:
@@ -373,9 +398,9 @@ vifs <- aoa_models |> select(language, measure, vifs) |> unnest(vifs)
 ```
 
 
-## Cross-validation
+## Cross-validation (temporarily eval=F)
 
-```{r}
+```{r, eval=F}
 baseline_preds <- c("freq", "concreteness", "babiness")
 phon_preds <- c("length_phon", "phon_neighbors")
 morph_preds <- c("form_entropy", "n_features", "n_morphemes")
@@ -399,7 +424,7 @@ loo_data <- aoa_predictor_data |>
          cv_results = map(loo_preds, get_cv_results))
 ```
 
-```{r extract_cross_validated_results}
+```{r extract_cross_validated_results, eval=F}
 cv_results <- loo_data |>
   select(language, measure, cv_results) |>
   unnest(cv_results) |> 
@@ -430,7 +455,7 @@ morph_coefs <- lc_plot |>
   select(-iso_codes) |> 
   mutate(term = as.factor(term))
 
-lexcats <- c("nouns", "verbs", "adjectives", "function_words")
+lexcats <- c("nouns", "predicates", "function_words")
 
 mc_mods <- map(c("production", "comprehension"), \(y) {
   map(ms_terms, \(x) {
@@ -468,7 +493,7 @@ theme_mikabr <- function(base_size = 14, base_family = "Open Sans") {
 
 
 ```{r}
-ggplot(plot_coefs |> filter(!is.na(estimate), !is.na(term), term != "(Intercept)") |> 
+ggplot(plot_coefs |> filter(!is.na(estimate), !is.na(term), term != "(Intercept)", is.na(group)) |> 
          mutate(language = factor(language, levels = target_langs),
                 term_cat = fct_collapse(term,
                                         Morphological = c("N features", "Form entropy", "N morphemes"),
@@ -477,20 +502,20 @@ ggplot(plot_coefs |> filter(!is.na(estimate), !is.na(term), term != "(Intercept)
                                         Other = c("Frequency", "Contextual diversity", 
                                                   "Concreteness", "Babiness")) |> 
                   fct_rev() |> 
-                  fct_shift(-4)) |> 
+                  fct_shift(-2)) |> 
          filter(measure == "production"), 
        aes(x = estimate, y = term)) +
   facet_grid(term_cat ~ ., scales = "free", space = "free") +
   geom_point(aes(shape = signif, color = language, size = n),  alpha = 0.7) +
-  scale_shape_manual(values = c(16, 21)) +
-  stat_summary(geom = "crossbar", fun = mean, fun.min = mean,
-               fun.max = mean, fatten = 2, width = 0.5) +
+  scale_shape_manual(values = c(21, 16)) +
+  stat_summary(geom = "crossbar", fun = median, fun.min = median,
+               fun.max = median, fatten = 2, width = 0.5) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
   labs(x = "Coefficient estimate", y = "", 
        shape = "Significance", color = "Language")+
   theme(legend.position="none") +
   theme_mikabr() +
-  coord_cartesian(xlim = c(-2, 2))
+  coord_cartesian(xlim = c(-2.5, 2.5))
 ```
 
 ```{r}
@@ -503,7 +528,7 @@ label_caps <- function(value) {
 ggplot(lc_plot |> 
          mutate(language = factor(language, levels = target_langs),
                 lexical_category = factor(lexical_category, levels = 
-                                            c("nouns", "verbs", "adjectives", "function_words")) |> 
+                                            c("nouns", "predicates", "function_words")) |> 
                   fct_relabel(label_caps),
                 term_cat = fct_collapse(term,
                                         Morphological = c("N features", "Form entropy", "N morphemes"),
@@ -512,21 +537,71 @@ ggplot(lc_plot |>
                                         Other = c("Frequency", "Contextual diversity", 
                                                   "Concreteness", "Babiness")) |> 
                   fct_rev() |> 
-                  fct_shift(-4),
+                  fct_shift(-2),
                 term = term |> fct_relevel("Babiness", "Concreteness", "Frequency")) |> 
          filter(measure == "production"), 
        aes(x = estimate, y = term)) +
   facet_grid(term_cat ~ lexical_category, scales = "free", space = "free") +
   geom_point(aes(color = language, size = n),  alpha = 0.7) +
   # scale_shape_manual(values = c(16, 21)) +
-  stat_summary(geom = "crossbar", fun = mean, fun.min = mean,
-               fun.max = mean, fatten = 2, width = 0.5) +
+  stat_summary(geom = "crossbar", fun = median, fun.min = median,
+               fun.max = median, fatten = 2, width = 0.5) +
   geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
   labs(x = "Coefficient estimate", y = "") +
   theme_mikabr() +
   theme(legend.position = "none") +
-  coord_cartesian(xlim = c(-2.5, 2.5))
+  coord_cartesian(xlim = c(-3.5, 3.5))
 ```
+
+```{r correlo-dendrogram}
+dd_coefs <- aoa_coefs |> 
+  filter(# !str_detect(term, "lexical_category"),
+         is.na(lexical_category), 
+         term != "sd__Observation") |> 
+  select(language, measure, term, lexical_category, estimate) |> 
+  filter(measure == "produces") |> 
+  pivot_wider(names_from = c(term, lexical_category),
+              values_from = estimate) |> 
+  select(-measure)
+
+dd_matrix <- dd_coefs |> 
+  select(-language) |> 
+  as.matrix() |> 
+  `rownames<-`(dd_coefs$language)
+
+COR_SCALE <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+GERMANIC <- "#cc0000"
+ROMANCE <- "#e69138"
+SLAVIC <- "#f1c232"
+JAPONIC <- "#8db63d"
+KOREANIC <- "#47ad44"
+SEMITIC <- "#45816e"
+SINOTIBETAN <- "#3d85c6"
+TURKIC <- "#3d50c6"
+URALIC <- "#674ea7"
+
+lang_cols <- c(# SEMITIC, 
+               SINOTIBETAN, ROMANCE, SLAVIC,
+               SLAVIC, GERMANIC, GERMANIC, GERMANIC,
+               GERMANIC, GERMANIC, URALIC, ROMANCE, 
+               ROMANCE, GERMANIC, SEMITIC, URALIC, 
+               ROMANCE, KOREANIC, SINOTIBETAN, 
+               SINOTIBETAN, GERMANIC, ROMANCE, SLAVIC, 
+               ROMANCE, ROMANCE, GERMANIC, TURKIC, JAPONIC)
+
+dd_heatmap <- gplots::heatmap.2(cor(t(dd_matrix), use = "pairwise.complete.obs"),
+                        dendrogram = "column",
+                        trace = "none",
+                        col = COR_SCALE(30),
+                        colRow = lang_cols,
+                        colCol = lang_cols,
+                        mar = c(10, 10))
+```
+
+
+
+
 
 ```{r}
 cv_plot <- cv_results |> 
@@ -562,10 +637,12 @@ ggplot(mlu_pred, aes(x = morph_complexity, y = estimate)) +
   geom_point(aes(col = language)) + 
   geom_smooth(method = "lm", col = "black") +
   geom_hline(yintercept = 0, color = "grey", lty = "dotted") +
+  geom_label_repel(aes(label = language, col = language), size = 2) +
   labs(x = "Estimated morphological complexity", 
        y = "Coefficient estimate",
        col = "Language") +
-  theme_mikabr()
+  theme_mikabr() +
+  theme(legend.position = "none")
 ```
 
 

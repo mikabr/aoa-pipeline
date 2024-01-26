@@ -82,12 +82,14 @@ build_special_case_map <- function(lang) {
   return(special_case_map)
 }
 
-build_options <- function(lang, word, special_cases) {
+build_options <- function(lang, word, uni_lemma, special_cases) {
   opts <- c(word, special_cases)
   opts <- c(opts, word |> str_split("[,/、]") |> unlist()) # "foo, bar", "foo/bar"
   opts <- c(opts, map(transforms, \(t) t(opts)))
   opts <- opts |> unlist() |> unique() |> str_trim()
-  opts <- c(opts, lemmatize(opts, lang))
+  if (!str_detect(lang, "French \\(") || !str_detect(uni_lemma, "[0-9]")) { # hacky fix for French pronouns
+    opts <- c(opts, lemmatize(opts, lang))
+  }
   return(unique(opts))
 }
 
@@ -102,11 +104,14 @@ build_uni_lemma_map <- function(uni_lemmas) {
     unnest(items) |>
     left_join(special_case_map,
               by = c("language", "uni_lemma", "item_definition")) |>
-    mutate(option = pmap(list(language, item_definition, special_cases),
+    mutate(option = pmap(list(language, item_definition, uni_lemma, special_cases),
                          build_options)) |>
     select(language, uni_lemma, option) |>
     unnest(option) |>
-    mutate(option = tolower(option))
+    mutate(option = tolower(option),
+           option = ifelse(language == "Mandarin (Taiwanese)",
+                           option |> tmcn::toTrad(rev = TRUE),
+                           option))
 }
 
 get_uni_lemma_metrics <- function(lang, uni_lemma_map, import_data = NULL) {

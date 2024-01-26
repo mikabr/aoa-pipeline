@@ -175,7 +175,9 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
                   select(language, item_definition, lexical_category) |>
                   distinct(),
                 by = c("language", "item_definition")) |>
-      mutate(lexical_category = coalesce(lexical_category.y, lexical_category.x)) |>
+      mutate(lexical_category = coalesce(lexical_category.y, lexical_category.x),
+             lexical_category = ifelse(lexical_category %in% c("verbs", "adjectives"),
+                                       "predicates", lexical_category)) |>
       select(language, uni_lemma, lexical_category, category, item_definition)
   }
 
@@ -194,7 +196,7 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
     filter(!is.na(n_lexcat)) |>
     select(-n_lexcat) |>
     mutate(lexical_category = lexical_category |> as_factor() |>
-             fct_relevel("nouns", "verbs", "adjectives", "function_words") |>
+             fct_relevel("nouns", "predicates", "function_words") |>
              fct_relevel(ref_cat, after = Inf) |>
              `contrasts<-`(value = contr.sum))
 

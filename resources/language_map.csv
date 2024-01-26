@@ -29,7 +29,7 @@ Indonesian,NA,ind,indonesian,id_ID,id,id,ind,NA,NA,ind,indonesian-gsd
 Romanian,NA,ron,romanian,ro_RO,ro,ro,ron,NA,ron,ron,romanian-rrt
 Tamil,NA,tam,tamil,ta,ta,ta,NA,NA,NA,tam,tamil-ttb
 Afrikaans,NA,afr,NA,af_ZA,af,af,afr,NA,NA,afr,afrikaans-afribooms
-Arabic,Arabic (Saudi),ara,arabic,ar,NA,ar,NA,NA,NA,arb,arabic-padt
+Arabic,Arabic (Saudi),ara,arabic,ar,NA,ar,ara,NA,NA,arb,arabic-padt
 Basque,NA,eus,basque,eu,NA,eu,eus,NA,NA,eus,basque-bdt
 Finnish,NA,NA,finnish,fi_FI,fi,fi,fin,fin,fin,fin,finnish-tdt
 Hindi,NA,NA,hindi,hi_IN,hi,hi,hin,NA,NA,hin,hindi-hdtb

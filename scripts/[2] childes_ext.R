@@ -50,7 +50,8 @@ get_childes_data_jpn <- function(corpus_args) {
       left_join(ortho_utterances, by = c("transcript_id", "utterance_order")) |>
       mutate(gloss = orthography) |>
       select(-orthography) |>
-      filter(!is.na(gloss))
+      filter(!is.na(gloss)) |>
+      mutate(num_tokens = str_count(gloss, " ") + 1)
 
     saveRDS(utterances_df, utt_fp)
   }
@@ -231,7 +232,7 @@ process_childes_heb <- function(childes_data) {
 
   tokens <- childes_data$tokens |>
     mutate(gloss = ifelse(!corpus_name %in% c("Ravid", "BermanLong"),
-                          str_replace_all(gloss, c("(?<=\\b[aeiou])([aeiou])" = "ʔ\\1",
+                          str_replace_all(gloss, c("(?=\\b[aeiou])([aeiou])" = "ʔ\\1",
                                                    "([ae])(?=\\b)" = "\\1h",
                                                    "yi" = "y")),
                           gloss))
@@ -274,7 +275,8 @@ process_childes_heb <- function(childes_data) {
   # via https://github.com/hermitdave/FrequencyWords/tree/master
   heb_freq <- read_delim(here("resources", "he_full.txt"),
                          delim = " ",
-                         col_names = c("gloss", "freq"))
+                         col_names = c("gloss", "freq")) |>
+    filter(lengths(gloss) > 1)
 
   tokens_final <- tokens_opts |>
     filter(num_opts > 0) |>

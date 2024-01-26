@@ -186,20 +186,23 @@ Mandarin (Taiwanese),all,全部(通通),,全部/通通
 Mandarin (Taiwanese),half,一半(半個),,一半/半個
 Mandarin (Taiwanese),NA,嗎(對嗎/好嗎/是嗎),,嗎/對嗎/好嗎/是嗎
 Mandarin (Taiwanese),NA,(還有)呢？,,(還有)呢？
-Korean,and,-고(먹고),,고(먹고)
-Korean,and,-고,,고
-Korean,at,-에서,,에서
-Korean,but,-는데,,는데
-Korean,give,-주다,,주다
-Korean,let's,-자(가자),,자(가자)
-Korean,no,-말구(이거말구),,말구(이거말구)
-Korean,on,-에,,에
-Korean,please,-줘(빼줘),,줘(빼줘)
-Korean,put,-놓다,,놓다
-Korean,roll (action),-말다,,말다
-Korean,see,-보다,,보다
-Korean,so,-서,,서
-Korean,wanna,-싶다,,싶다
-Korean,will do,-ㄹ게(할게),,ㄹ게(할게)
-Korean,with,-랑(엄마랑),,랑(엄마랑)
-Korean,with,-하고,,하고
+Korean,and,#NAME?,,고(먹고)
+Korean,and,#NAME?,,고
+Korean,at,#NAME?,,에서
+Korean,but,#NAME?,,는데
+Korean,give,#NAME?,,주다
+Korean,let's,#NAME?,,자(가자)
+Korean,no,#NAME?,,말구(이거말구)
+Korean,on,#NAME?,,에
+Korean,please,#NAME?,,줘(빼줘)
+Korean,put,#NAME?,,놓다
+Korean,roll (action),#NAME?,,말다
+Korean,see,#NAME?,,보다
+Korean,so,#NAME?,,서
+Korean,wanna,#NAME?,,싶다
+Korean,will do,#NAME?,,ㄹ게(할게)
+Korean,with,#NAME?,,랑(엄마랑)
+Korean,with,#NAME?,,하고
+English (British),airplane,aeroplane,,airplane
+English (British),tire (object),tyre,,tire
+English (British),pajamas,pyjamas,,pajamas

@@ -31,25 +31,60 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
 
 get_inst_words <- function(language, form, db_args = NULL) {
   message(glue("Getting words for {language} {form}..."))
-  get_item_data(language = language,
+  items <- get_item_data(language = language,
                 form = form,
                 db_args = db_args) |>
     filter(item_kind == "word") |>
-    # split predicates into adjectives and verbs
-    mutate(lexical_category = case_when(
-      str_detect(category, "descriptive_words") ~ "adjectives", # also catches Russian adverbs
-      category == "action_words" ~ "verbs",
-      .default = lexical_category
-    )) |>
+    # # split predicates into adjectives and verbs
+    # # REVERTED: Chinese adjectives function like stative verbs, so this division is not cross-linguistically robust
+    # mutate(lexical_category = case_when(
+    #   str_detect(category, "descriptive_words") ~ "adjectives", # also catches Russian adverbs
+    #   category == "action_words" ~ "verbs",
+    #   .default = lexical_category
+    # )) |>
     select(language, form, item_kind, lexical_category, category,
            uni_lemma, item_definition, item_id)
+
+  # temporary, to rescue failed form definition linking pre-cogsci
+  if (nrow(items) == 0) {
+    form_path <- here("resources", "temp_wb", glue("[{str_replace_all(language, '[ )(]', '')}_{form}].csv"))
+    if (file.exists(form_path)) {
+      items <- read_csv(form_path) |>
+        filter(type == "word") |>
+        mutate(language = language,
+               form = form,
+               form_type = str_sub(form, 1, 2),
+               complexity_category = NA,
+               lexical_category = case_when(
+                 category %in% c("vehicles", "animals", "body_parts",
+                                 "clothing", "toys", "food_drink",
+                                 "household", "furniture_rooms", "outside") ~ "nouns",
+                 category %in% c("action_words", "descriptive_words") ~ "predicates",
+                 category %in% c("pronouns", "quantifiers", "verb_endings",
+                                 "locations", "question_words", "quantifiers",
+                                 "helping_verbs", "connecting_words", "negation_words") ~ "function_words",
+                 category %in% c("sounds", "places", "people", "games_routines", "time_words") ~ "other",
+                 .default = NA
+               )) |>
+        select(item_id = itemID,
+               language, form, form_type,
+               item_kind = type,
+               category,
+               item_definition = definition,
+               english_gloss = gloss,
+               uni_lemma,
+               lexical_category,
+               complexity_category)
+    }
+  }
+  items
 }
 
 get_inst_data <- function(language, form, admins, items, db_args = NULL) {
   message(glue("Getting data for {language} {form}..."))
 
   # temp solution:
-  form_type = admins |> pull(form_type) |> unique()
+  form_type = admins |> pull(form_type) |> unique() |> na.omit()
   if (length(form_type) != 1) {
     message(glue("form_type failure for {language} {form}"))
     form_type <- "WS" # default to WS if fail
@@ -102,23 +137,27 @@ combine_form_data <- function(inst_summaries) {
     ungroup()
 }
 
-create_inst_data <- function(language, form) {
-  inst_admins <- get_inst_admins(language, form)
-  inst_words <- get_inst_words(language, form)
-  get_inst_data(language, form, inst_admins, inst_words)
+create_inst_data <- function(language, form, db_args = NULL) {
+  inst_admins <- get_inst_admins(language, form, db_args = db_args)
+  inst_words <- get_inst_words(language, form, db_args = db_args)
+  get_inst_data(language, form, inst_admins, inst_words, db_args = db_args)
 }
 
 create_wb_data <- function(language, write = TRUE, db_args = NULL) {
   lang <- language # for filter name scope issues
   insts <- get_instruments(db_args = db_args)
-  forms <- insts |> filter(language == lang) |> pull(form)
+  forms <- insts |>
+    filter(language == lang,
+           form != "WSOther") |> # hotfix for Arabic (Saudi)
+    pull(form)
   if (length(forms) == 0) {
     message(glue("\tNo instruments found for language {lang}, skipping."))
     return()
   }
 
   lang_datas <- map(forms, partial(create_inst_data,
-                                   language = language))
+                                   language = language,
+                                   db_args = db_args))
   lang_summaries <- map(lang_datas, collapse_inst_data)
   lang_summary <- combine_form_data(lang_summaries)
 
@@ -129,7 +168,7 @@ create_wb_data <- function(language, write = TRUE, db_args = NULL) {
   return(lang_summary)
 }
 
-load_wb_data <- function(languages, cache = TRUE) {
+load_wb_data <- function(languages, cache = TRUE, db_args = NULL) {
   wb_data <- map_df(languages, function(lang) {
     norm_lang <- normalize_language(lang)
     lang_file <- here(wb_path, glue("{norm_lang}.rds"))
@@ -139,7 +178,7 @@ load_wb_data <- function(languages, cache = TRUE) {
     } else {
       if (cache) {
         message(glue("No cached Wordbank data for {lang}, getting and caching data."))
-        lang_data <- create_wb_data(lang)
+        lang_data <- create_wb_data(lang, db_args = db_args)
       } else {
         message(glue("No cached Wordbank data for {lang}, skipping."))
         lang_data <- tibble()
