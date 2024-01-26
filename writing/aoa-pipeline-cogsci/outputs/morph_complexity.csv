@@ -1,0 +1,28 @@
+language_family,language,iso_codes,iso_unique,n_feat,morph_complexity
+Romance,French (French),fra,fra (fr),26,0.381410256
+Romance,French (Quebecois),fra,fra (ca),26,0.381410256
+Romance,Italian,ita,ita,17,0.362745098
+Romance,Spanish (Mexican),spa,spa (mx),27,0.398148148
+Romance,Spanish (European),spa,spa (eu),27,0.398148148
+Romance,Catalan,cat,cat,8,0.208333333
+Romance,Portuguese (European),por,por (eu),16,0.4375
+Germanic,Dutch,nld,nld,16,0.302083333
+Germanic,English (American),eng,eng (am),28,0.278911565
+Germanic,English (Australian),eng,eng (au),28,0.278911565
+Germanic,English (British),eng,eng (gb),28,0.278911565
+Germanic,German,deu,deu,27,0.349206349
+Germanic,Danish,dan,dan,14,0.380952381
+Germanic,Norwegian,nob,nob,12,0.444444444
+Germanic,Swedish,swe,swe,19,0.305764411
+Slavic,Croatian,hrv,hrv,15,0.438095238
+Slavic,Czech,ces,ces,11,0.636363636
+Slavic,Russian,rus,rus,28,0.418367347
+Turkic,Turkish,tur,tur,27,0.742504409
+Uralic,Hungarian,hun,hun,28,0.523809524
+Uralic,Estonian,est,est,13,0.615384615
+Sino-Tibetan,Mandarin (Taiwanese),cmn,cmn (tw),25,0.208
+Sino-Tibetan,Mandarin (Beijing),cmn,cmn (cn),25,0.208
+Sino-Tibetan,Cantonese,yue,yue,16,0.125
+Semitic,Hebrew,heb,heb,27,0.478395062
+Koreanic,Korean,kor,kor,25,0.395238095
+Japonic,Japanese,jpn,jpn,27,0.40952381
