@@ -45,6 +45,11 @@ get_inst_words <- function(language, form, db_args = NULL) {
     select(language, form, item_kind, lexical_category, category,
            uni_lemma, item_definition, item_id)
 
+  # temporary, fix Mandarin (Beijing) WS issue
+  if (language == "Mandarin (Beijing)" && form == "WS") {
+    items$item_definition[534:537] <- c("球", "书", "小娃娃", "笔")
+  }
+
   # temporary, to rescue failed form definition linking pre-cogsci
   if (nrow(items) == 0) {
     form_path <- here("resources", "temp_wb", glue("[{str_replace_all(language, '[ )(]', '')}_{form}].csv"))

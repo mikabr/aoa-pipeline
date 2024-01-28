@@ -19,6 +19,7 @@ library(quanteda)
 library(tmcn)
 # load functions
 walk(list.files("scripts", pattern = "*.R$", full.names = TRUE), source)
+set.seed(42)
 ```
 
 This template provides the structure for how to fit age of acquisition (AoA) prediction models, using data and scripts in this repository.
@@ -267,17 +268,18 @@ aoa_predictor_data <- predictor_data_imputed_scaled |>
 
 ## Run model 
 
-```{rm eval=F}
+```{r, eval=T}
 aoa_models <- fit_models(predictors, aoa_predictor_data,
                          lexcat_interactions = FALSE)
-
+saveRDS(aoa_models, "aoa_models.rds")
 aoa_models_lexcat <- fit_models(predictors, aoa_predictor_data,
                                 lexcat_interactions = TRUE)
+saveRDS(aoa_models_lexcat, "aoa_models_lexcat.rds")
 ```
 
 ```{r}
-aoa_models <- readRDS("aoa_models.rds") |> filter(language != "Arabic (Saudi)")
-aoa_models_lexcat <- readRDS("aoa_models_lexcat.rds") |> filter(language != "Arabic (Saudi)")
+aoa_models <- readRDS("aoa_models.rds")
+aoa_models_lexcat <- readRDS("aoa_models_lexcat.rds")
 ```
 
 
@@ -294,28 +296,50 @@ lexcats <- set_names(
   rownames(contrasts(aoa_models_lexcat$group_data[[1]]$lexical_category))[1:2]
 )
 
+display_predictors <- function(predictors) {
+  predictors |>
+    str_replace_all("b_", "") |>
+    str_replace_all("_", " ") |>
+    str_to_sentence() |>
+    str_replace("Mlu", "MLU-w") |>
+    str_replace("Length phon", "Length in phonemes") |>
+    str_replace("Freq", "Frequency") |>
+    str_replace("Cd", "Contextual diversity")
+}
+
+term_fct <- c("Frequency",
+              "Concreteness", "Babiness",
+              "Length in phonemes", "Phon neighbours",
+              "N features", "Form entropy", "N morphemes",
+              "Subcat entropy", "MLU-w")
+
 aoa_coefs <- aoa_models_lexcat |>
   select(language, measure, coefs) |>
   unnest(coefs) |>
-  filter(term != "(Intercept)") |>
-  mutate(# signif = if_else(p.value < 0.05, TRUE, FALSE),
-         effect = if_else(str_detect(term, ":"), "interaction", "main"),
-         lexical_category = str_extract(term, "lexical_category[0-9]"),
-         # lexical_category = fct_recode(lexical_category, !!!lexcats),
-         term = if_else(effect == "interaction",
-                        str_remove(term, ":?lexical_category[0-9]:?"),
-                        term),
-         # term = fct_recode(term, !!!lexcats),
-         term = factor(term), #, levels = c(predictors, names(lexcats))
-         language = factor(language, levels = target_langs),
-         term_cat = fct_collapse(term,
-                                 Morphological = c("N features", "Form entropy", "N morphemes"),
-                                 Syntactic = c("MLU-w", "Subcat entropy"),
-                                 Phonological = c("Length in phonemes", "Phon neighbors"),
-                                 Other = c("Frequency", "Contextual diversity", 
-                                           "Concreteness", "Babiness")) |> 
-                  fct_rev() |> 
-                  fct_shift(-2))
+  filter(Parameter != "b_Intercept") |>
+  mutate(
+    effect = if_else(str_detect(Parameter, ":"), "interaction", "main"),
+    lexical_category = str_extract(Parameter, "lexical_category[0-9]"),
+    term = if_else(effect == "interaction",
+                   str_remove(Parameter, ":?lexical_category[0-9]:?"),
+                   Parameter) |>
+      str_replace("neighbor", "neighbour"),
+    term = term |>
+      factor() |>
+      fct_relabel(display_predictors) |>
+      fct_relevel(term_fct) |>
+      fct_rev(),
+    language = factor(language, levels = target_langs),
+    term_cat = fct_collapse(term,
+                            Morphological = c("N features", "Form entropy", "N morphemes"),
+                            Syntactic = c("MLU-w", "Subcat entropy"),
+                            Phonological = c("Length in phonemes", "Phon neighbours"),
+                            Other = c("Frequency", "Concreteness", "Babiness")) |>
+      fct_rev() |>
+      fct_shift(-2)) |>
+  rename(estimate = MAP,
+         conf.low = CI_low,
+         conf.high = CI_high)
                 
 
 n_by_lexcat <- aoa_predictor_data |> 
@@ -328,62 +352,31 @@ n_by_lang <- n_by_lexcat |>
 ```
 
 ```{r}
-display_predictors <- function(predictors) {
-  predictors |> 
-    str_replace_all("_", " ") |> 
-    str_to_sentence() |>
-    str_replace("Mlu", "MLU-w") |> 
-    str_replace("Length phon", "Length in phonemes") |> 
-    str_replace("Freq", "Frequency") |> 
-    str_replace("Cd", "Contextual diversity")
-}
-
-term_fct <- c("Frequency", # "Contextual diversity", 
-              "Concreteness", "Babiness", 
-              "Length in phonemes", "Phon neighbors",
-              "N features", "Form entropy", "N morphemes",
-              "Subcat entropy", "MLU-w"
-              )
-
-plot_coefs <- aoa_coefs |> 
-  filter(is.na(lexical_category)) |> 
-  mutate(term = term |> 
-           fct_relabel(display_predictors) |> 
-           fct_relevel(term_fct) |> 
-           fct_rev(),
-         measure = fct_recode(measure, 
-                              "comprehension" = "understands",
-                              "production" = "produces"),
-         #signif = ifelse(p.value < .05, "significant", "non-significant") |> 
-         #  fct_rev()
-         ) |> 
-  filter(!is.na(term)) |> 
-  left_join(n_by_lang, by = "language") |> 
+plot_coefs <- aoa_coefs |>
+  filter(is.na(lexical_category),
+         !is.na(term)) |>
+  left_join(n_by_lang, by = "language") |>
   mutate(signif = ifelse(conf.low < 0 & conf.high > 0,
-                         "Not significant", "Significant"))
+                         "Not significant", "Significant"),
+         language = factor(language, levels = target_langs))
 
-lc_plot <- aoa_coefs |> 
-  select(language, measure, term, estimate, lexical_category) |> 
-  pivot_wider(names_from = lexical_category, values_from = estimate) |> 
+lc_plot <- aoa_coefs |>
+  select(language, measure, term, estimate, lexical_category, term_cat) |>
+  pivot_wider(names_from = lexical_category, values_from = estimate) |>
   mutate(predicates = `NA` + lexical_category1,
          function_words = `NA` + lexical_category2,
-         nouns = `NA` - lexical_category1 - lexical_category2) |> 
-  select(-c(`NA`, lexical_category1, lexical_category2)) |> 
+         nouns = `NA` - lexical_category1 - lexical_category2) |>
+  select(-c(`NA`, lexical_category1, lexical_category2)) |>
   pivot_longer(cols = c(predicates, function_words, nouns),
                names_to = "lexical_category",
-               values_to = "estimate") |> 
-  filter(!is.na(estimate)) |> 
-  mutate(term = term |> 
-           fct_relabel(display_predictors) |> 
-           fct_relevel(term_fct) |> 
-           fct_rev(),
-         measure = fct_recode(measure, 
-                              "comprehension" = "understands",
-                              "production" = "produces"),
-         # signif = ifelse(p.value < .05, "significant", "non-significant")
-         ) |> 
-  filter(!is.na(term)) |> 
-  left_join(n_by_lexcat, by = c("language", "lexical_category"))
+               values_to = "estimate") |>
+  filter(!is.na(estimate),
+         !is.na(term)) |>
+  left_join(n_by_lexcat, by = c("language", "lexical_category")) |>
+  mutate(language = factor(language, levels = target_langs),
+         lexical_category = factor(lexical_category, levels =
+                                     c("nouns", "predicates", "function_words")) |>
+           fct_relabel(label_caps))
 ```
 
 
@@ -455,24 +448,28 @@ morph_coefs <- lc_plot |>
   select(-iso_codes) |> 
   mutate(term = as.factor(term))
 
-lexcats <- c("nouns", "predicates", "function_words")
+lexcats <- c("Nouns", "Predicates", "Function words")
 
-mc_mods <- map(c("production", "comprehension"), \(y) {
+mc_mods <- map(c("produces", "understands"), \(y) {
   map(ms_terms, \(x) {
     map(lexcats, \(lc) {
-      lm(estimate ~ morph_complexity, 
+      arm::bayesglm(estimate ~ morph_complexity, 
        data = morph_coefs |> 
-         filter(term == x, measure == y, lexical_category == lc))
+         filter(term == x, measure == y, 
+                lexical_category == lc))
     })
   }) |> unlist(recursive = FALSE)
 }) |> unlist(recursive = FALSE)
+saveRDS(mc_mods, "mc_mods.rds")
 
-mc_vals <- expand_grid(measure = c("production", "comprehension"),
+mc_vals <- expand_grid(measure = c("produces", "understands"),
                        ms_term = ms_terms,
                        lexical_category = lexcats) |> 
-  mutate(mc_data = map(mc_mods, tidy)) |> 
+  mutate(mc_data = map(mc_mods, broom.mixed::tidy)) |> 
   unnest(mc_data) |> 
-  mutate(signif = p.value < .05)
+  mutate(ci.low = estimate - std.error,
+         ci.high = estimate + std.error,
+         signif = !(ci.low < 0 & ci.high > 0))
 ```
 
 
@@ -630,9 +627,9 @@ ggplot(cv_plot |> filter(name != "baseline"),
 
 ```{r}
 mlu_pred <- morph_coefs |> 
-  filter(measure == "production",
+  filter(# measure == "production",
          term == "MLU-w",
-         lexical_category == "predicates")
+         lexical_category == "Predicates")
 ggplot(mlu_pred, aes(x = morph_complexity, y = estimate)) +
   geom_point(aes(col = language)) + 
   geom_smooth(method = "lm", col = "black") +

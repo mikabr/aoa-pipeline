@@ -70,7 +70,8 @@ fit_group_model <- function(predictors, group_data, lexcat_interactions = TRUE,
     #               scaled = FALSE)
     brms::brm(model_formula,
               group_data,
-              prior = brms::prior(student_t(3, 0, 2), class = "b"))
+              prior = brms::prior(student_t(3, 0, 2), class = "b"),
+              iter = 4000)
   }
 }
 
@@ -95,7 +96,9 @@ fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
                         \(gd, preds) fit_group_model(preds, gd, lexcat_interactions,
                                                      morphcomp_interactions = FALSE,
                                                      all_lang = FALSE, model_formula)),
-           coefs = map(model, broom.mixed::tidy),
+           # coefs = map(model, broom.mixed::tidy),
+           coefs = map(model, bayestestR::describe_posterior,
+                       centrality = "MAP", ci_method = "HDI"),
            stats = map(model, broom.mixed::glance),
            # alias = map(model, alias)# ,
            vifs = map(model, get_vifs)

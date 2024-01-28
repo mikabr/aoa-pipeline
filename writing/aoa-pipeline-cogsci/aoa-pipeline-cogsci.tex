@@ -77,10 +77,10 @@ Sino-Tibetan, Uralic). We studied 10 predictors of word ages of
 acquisition across 28 languages and dialects, finding that words that
 were more frequent, concrete, and associated with babies were learnt
 earlier, whereas words that had greater length in phonemes and mean
-length of utterance (MLU) were learnt later. There was no reliable
-effect of other morphosyntactic predictors, or of phonological
+length of utterance in words (MLU-w) were learnt later. There was no
+reliable effect of other morphosyntactic predictors, or of phonological
 neighbourhood size. We found evidence of a tradeoff between the
-morphological complexity of a language and the effect of MLU for
+morphological complexity of a language and the effect of MLU-w for
 predicates. Predictor coefficients revealed broad consistency across all
 languages, along with variability that reflected language family
 classifications.
@@ -101,22 +101,22 @@ Yurovsky, \& Marchman, 2021; Tardif et al., 2008), and similar emergence
 of lexical categories (Caselli et al., 1995). The order of lexical
 development can thus be used as a tool to understand the commonalities
 and differences in the factors that predict word learning across
-languages, lexical categories, and individuals.
+languages and lexical categories.
 
 Such questions have led to a productive line of inquiry, with previous
-research demonstrating that, in English, words learnt earlier tend to
-have higher word frequency (Goodman, Dale, \& Li, 2008), have greater
-iconicity (Perry, Perlman, \& Lupyan, 2015), and appear in shorter
-utterances (Swingley \& Humphrey, 2018). The conclusions of these
-studies, however, were limited in generalisability as they considered
-different sets of predictors, and mostly focused only on
-English-learning children. In order to have a more comprehensive
-understanding of early language learning, it is important to capture two
-dimensions of variability: variability across languages, and variability
-across levels of linguistic representation (e.g., phonological,
-morphological, syntactic, and semantic). These dimensions jointly
-provide information about how different sources of information may be
-differentially relevant across languages of different structures.
+research demonstrating that, in English, words learnt earlier tend to be
+more frequent (Goodman, Dale, \& Li, 2008), be more iconic (Perry,
+Perlman, \& Lupyan, 2015), and appear in shorter utterances (Swingley \&
+Humphrey, 2018). The conclusions of these studies, however, were limited
+in generalisability as they considered different sets of predictors, and
+mostly focused only on English-learning children. In order to have a
+more comprehensive understanding of early language learning, it is
+important to capture two dimensions of variability: variability across
+languages, and variability across levels of linguistic representation
+(e.g., phonological, morphological, syntactic, and semantic). These
+dimensions jointly provide information about how different sources of
+information may be differentially relevant across languages of different
+structures.
 
 One study that has attempted to adopt this approach comes from
 Braginsky, Yurovsky, Marchman, \& Frank (2019), who conducted a larger
@@ -159,8 +159,8 @@ representation, as well as a large set of languages with particular
 emphasis on non-Indo-European languages. We also examine the role of
 lexical categories, given the theoretical predictions that different
 lexical categories may be sensitive to different predictors. Together,
-these directions will improve our understanding and characterisation of
-the consistency and variation in early word learning across languages.
+these directions will improve our characterisation of the consistency
+and variation in early word learning across languages.
 
 \hypertarget{method}{%
 \section{Method}\label{method}}
@@ -193,7 +193,7 @@ overview of the data used is shown in Figure \ref{fig:descriptives}.
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/descriptives} 
+{\centering \includegraphics[width=240px]{figs/descriptives}
 
 }
 
@@ -207,14 +207,14 @@ cross-linguistic conceptual abstractions. For example, the items
 ``chat'' (FRA) and ``gato'' (SPA) map to the same unilemma, CAT. These
 unilemmas were first constructed from glosses provided by the original
 dataset contributors, then verified by native or proficient speakers of
-the respective languages, and then manually cleaned and consolidated to
+the respective languages, and manually cleaned and consolidated to
 improve overall consistency; more information about unilemma
 construction can be found on Github {[}LINK REDACTED{]}. Note that some
-items do not have corresponding unilemmas (e.g., if they reflected
-specific grammatical items that did not generally exist
-cross-linguistically), and these items were dropped for analysis.
+items do not have corresponding unilemmas (e.g., language-specific items
+that were not relevant cross-linguistically); these items were dropped
+for analysis.
 
-From these data, we derived item ages of acquisition (AoAs) by fitting
+From these data, we derived ages of acquisition (AoAs) by fitting
 Bayesian logistic regressions for each item, with word knowledge
 (produces vs does not produce; understands vs does not understand) as
 the outcome variable and age as the predictor variable. We used weakly
@@ -222,7 +222,7 @@ informative priors of \(\mathcal{N}(0, 2.5)\) for the intercept and
 \(\mathcal{N}(0.3, 0.01)\) for the slopes. Then, the AoA is the age at
 which 50\% of children are expected to know the word; this quantity can
 be calculated as the negative of the intercept divided by the slope from
-the fitted models see (Braginsky, Yurovsky, Marchman, \& Frank, 2016).
+the fitted models (see Braginsky, Yurovsky, Marchman, \& Frank, 2016).
 
 \hypertarget{predictors-of-age-of-acquisition}{%
 \subsection{Predictors of age of
@@ -230,24 +230,24 @@ acquisition}\label{predictors-of-age-of-acquisition}}
 
 For each language, we used corpora of child-directed speech from CHILDES
 (MacWhinney, 2000) to calculate distributional information as well as
-MLU-w. We also used these corpora in conjunction with morphological
-segmentation information from UniMorph (Batsuren, Bella, \& Giunchiglia,
-2021; Sylak-Glassman, 2016) and morphosyntactic parsing from UDPipe
-(Straka, 2018) to calculate morphosyntactic predictors. In addition, we
-used previously collected adult psycholinguistic norms for the semantic
-predictors (detailed below), and eSpeak-NG (Vītoliņš, 2022) to obtain
+MLU-w.\footnote{Note that some of the languages (Hebrew and Russian) had
+  CHILDES corpora that were transcribed in transliterated form instead
+  of the original script; we used ad-hoc custom untransliteration
+  scripts to enable matching to Wordbank, UniMorph, and UDPipe.} We also
+used these corpora in conjunction with morphological segmentation
+information from UniMorph (Batsuren, Bella, \& Giunchiglia, 2021;
+Sylak-Glassman, 2016) and morphosyntactic parsing from UDPipe (Straka,
+2018) to calculate morphosyntactic predictors. In addition, we used
+previously collected adult psycholinguistic norms for the semantic
+predictors (detailed below), and eSpeak NG (Vītoliņš, 2022) to obtain
 phonological representations for the calculation of phonological
-properties. Note that some of the languages (Hebrew and Russian) had
-CHILDES corpora that were transcribed in transliterated form instead of
-the original script; we used custom untransliteration scripts to enable
-matching to Wordbank, UniMorph, and UDPipe. An overview of the data and
-resources used for each item property is shown in Figure
-\ref{fig:sources}.
+properties. An overview of the data and resources used for each item
+property is shown in Figure \ref{fig:sources}.
 
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/sources} 
+{\centering \includegraphics[width=240px]{figs/sources}
 
 }
 
@@ -256,10 +256,10 @@ resources used for each item property is shown in Figure
 \end{CodeChunk}
 
 \textbf{Phonological properties.} For each item in each language, we
-obtained all possible realisations of the item (e.g., ``cat'' and
-``cats'') and generated phonological representations with eSpeak-NG
-(Vītoliņš, 2022). These were directly used to calculate the mean length
-in phonemes, as well as to measure the size of the phonological
+obtained all possible realisations of the item (e.g., ``cat'', ``cats'')
+and generated phonological representations with eSpeak NG (Vītoliņš,
+2022). These were directly used to calculate the mean length in
+phonemes, as well as to measure the size of the phonological
 neighbourhood, which was the number of other items that differed from
 the target item by at most a Levenshtein distance of 2.
 
@@ -273,13 +273,12 @@ particular lemma (e.g., ``the'', ``cat'', ``is'', ``running'').
 We used two measures of morphological paradigmatic complexity, namely
 entropy over inflected forms and number of morphological features, both
 of which involved morphological parsing from UDPipe (Straka, 2018). For
-each item, we found all tokens in CHILDES which had the same
-morphological lemma as the item, and calculated the Shannon entropy over
-the inflected forms (Çöltekin \& Rama, 2023). The parsing also output
-morphological features in the Universal Dependencies format (Nivre,
-Zeman, Ginter, \& Tyers, 2017), and we calculated the mean number of
-morphological features for each item as an approximation of the size of
-the inflectional paradigm.
+each item, we found all tokens in CHILDES which had the same lemma as
+the item, and calculated the Shannon entropy over the inflected forms
+(Çöltekin \& Rama, 2023). The parsing also output morphological features
+in the Universal Dependencies format (Nivre, Zeman, Ginter, \& Tyers,
+2017), and we calculated the mean number of morphological features for
+each item as an approximation of the size of the inflectional paradigm.
 
 We also included one measure of morphological syntagmatic complexity,
 namely mean number of morphemes; this made use of morphological
@@ -316,9 +315,9 @@ words); all other items were classified as ``other''.
 correlated with one another. For example, shorter words tend to have
 larger phonological neighbourhoods, and words with more morphological
 features are likely to exhibit greater entropy over inflected forms. As
-such, we conducted residualisation for each type of property (except
-semantic). For each property type, we residualised the first property
-(e.g, length in phonemes) out of all other properties (e.g.,
+such, we conducted residualisation for phonological, morphological, and
+syntactic properties. For each property type, we residualised the first
+property (e.g, length in phonemes) out of all other properties (e.g.,
 phonological neighbourhood), such that the coefficients of the other
 properties would reflect their effects over and above any variance
 explained by the first property.
@@ -334,11 +333,22 @@ allow for direct comparison of standardised regression coefficients.
 
 \textbf{Collinearity.} One possible concern for comparing coefficients
 across languages is multicollinearity among predictor values. We
-calculated variance inflation factors on models including all predictors
-except for lexical categories (since models with interaction effects are
-known to have inflated variance inflation factors). The variance
-inflation factors for each predictor in each language was smaller than
-3.6, indicating low multicollinearity among predictors.
+calculated variance inflation factors (VIFs) on models including all
+predictors except for lexical categories (since models with interaction
+effects are known to have inflated VIFs). The VIFs for each predictor in
+each language was \(<3.5\), indicating low multicollinearity among
+predictors.
+
+\begin{CodeChunk}
+\begin{figure*}[ht]
+
+{\centering \includegraphics[width=500px]{figs/big_plot-1}
+
+}
+
+\caption[Maximum a posteriori estimates of coefficients predicting age of acquisition across all languages]{Maximum a posteriori estimates of coefficients predicting age of acquisition across all languages. Black vertical bars indicate estimate medians across all languages. Significance indicates whether the credible interval includes zero. Dot size indicates number of unilemmas.}\label{fig:big_plot}
+\end{figure*}
+\end{CodeChunk}
 
 \hypertarget{analysis}{%
 \subsection{Analysis}\label{analysis}}
@@ -348,7 +358,7 @@ each item from all item properties as well as their interactions with
 the lexical category of the item. We used conservative informative
 priors based on coefficient values from Braginsky et al. (2016), which
 broadly fell in the range \((-2, 2)\); thus, we used a non-standardised
-t distribution, \(t(3, 0, 2)\) as our priors for coefficients. The
+\(t\) distribution, \(t(3, 0, 2)\) as priors for coefficients. The
 resultant standardised coefficients for each item property would reflect
 its independent contribution to the AoA of the item, and interactions
 with lexical categories would reflect how this contribution varies
@@ -360,34 +370,23 @@ REDACTED{]}.
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
-\begin{CodeChunk}
-\begin{figure*}[ht]
-
-{\centering \includegraphics[width=500px]{figs/big_plot-1} 
-
-}
-
-\caption[Maximum a posteriori estimates of coefficients predicting age of acquisition across all languages]{Maximum a posteriori estimates of coefficients predicting age of acquisition across all languages. Black vertical bars indicate estimate medians across all languages. Significance indicates whether the credible interval includes zero. Dot size indicates number of unilemmas.}\label{fig:big_plot}
-\end{figure*}
-\end{CodeChunk}
-
-As a concise method to display model results, we plotted maximum a
+As a concise method to display model results, we plotted the maximum a
 posteriori estimates for each predictor from the model fit on data from
 each language. The main effects from all languages are shown in Figure
 \ref{fig:big_plot}.
 
 Model results demonstrated strong and consistent effects of frequency
-(\(\bar{b}\) = -1.43), concreteness (\(\bar{b}\) = -1.14), and babiness
-(\(\bar{b}\) = -0.26), as were previously found, such that words which
+(\(\bar{b}\) = -1.46), concreteness (\(\bar{b}\) = -1.14), and babiness
+(\(\bar{b}\) = -0.27), as were previously found, such that words which
 were more frequent, more concrete, and more associated with babies were
 learnt earlier. For phonological predictors, longer words as measured in
-phonemes were learnt later (\(\bar{b}\) = 0.33), but there was no
+phonemes were learnt later (\(\bar{b}\) = 0.37), but there was no
 reliable effect of phonological neighbourhood size (\(\bar{b}\) = NA).
 For morphological predictors, the number of morphological features
-(\(\bar{b}\) = 0.14), entropy over inflected forms (\(\bar{b}\) = 0.12),
-and number of morphemes (\(\bar{b}\) = 0.15) all did not have reliable
+(\(\bar{b}\) = 0.15), entropy over inflected forms (\(\bar{b}\) = 0.15),
+and number of morphemes (\(\bar{b}\) = 0.16) all did not have reliable
 effects. For syntactic predictors, entropy over subcategorisation frames
-did not have a reliable effect (\(\bar{b}\) = 0.02), while words that
+did not have a reliable effect (\(\bar{b}\) = 0.03), while words that
 had a greater MLU-w were learnt later (\(\bar{b}\) = 0.68).
 
 \hypertarget{lexical-categories}{%
@@ -396,7 +395,7 @@ had a greater MLU-w were learnt later (\(\bar{b}\) = 0.68).
 \begin{CodeChunk}
 \begin{figure*}[ht]
 
-{\centering \includegraphics[width=500px]{figs/lc_plot-1} 
+{\centering \includegraphics[width=500px]{figs/lc_plot-1}
 
 }
 
@@ -407,35 +406,43 @@ had a greater MLU-w were learnt later (\(\bar{b}\) = 0.68).
 Estimates of predictor coefficients for different lexical categories are
 shown in Figure \ref{fig:lc_plot}. Effects were mostly consistent across
 lexical categories, with a few notable deviations. The effect of
-babiness was attenuated for function words (\(\bar{b}\) = -0.07), and
+babiness was attenuated for function words (\(\bar{b}\) = -0.01), and
 the effect of length in phonemes was attenuated for predicates
-(\(\bar{b}\) = 0.09). On the other hand, the effect of MLU-w was
-enhanced for function words (\(\bar{b}\) = 0.46).
+(\(\bar{b}\) = 0.11). On the other hand, the effect of MLU-w was
+enhanced for function words (\(\bar{b}\) = 0.43).
 
-\hypertarget{correlogram-and-dendrogram}{%
-\subsection{Correlogram and
-dendrogram}\label{correlogram-and-dendrogram}}
+\hypertarget{correlations}{%
+\subsection{Correlations}\label{correlations}}
 
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/correlogram-1} 
+{\centering \includegraphics[width=240px]{figs/correlations-1}
 
 }
 
-\caption[Correlogram of main effect coefficients across languages, and the associated dendrogram]{Correlogram of main effect coefficients across languages, and the associated dendrogram. Text colours indicate language families (red: Germanic, orange: Romance, yellow: Slavic, light green: Japonic, dark green: Koreanic, teal: Semitic, light blue: Sino-Tibetan, dark blue: Turkic, purple: Uralic). }\label{fig:correlogram}
+\caption[Correlations of main effect coefficients across languages]{Correlations of main effect coefficients across languages. Filled circles indicate correlations with all other languages. Empty circles indicate correlations with other languages within the same language family. Shaded areas represent the bootstrapped randomised baseline. All ranges indicate 95\% confidence intervals. Dotted line indicates mean correlation. Colours represent language families.}\label{fig:correlations}
 \end{figure}
 \end{CodeChunk}
 
-The correlations between the coefficients of main effects across
-languages is shown in Figure \ref{fig:correlogram}, along with an
-associated dendrogram constructed by hierarchical clustering. The
-average correlation across languages was relatively high (\(\bar{r}\) =
-0.83), comparable to results found by Braginsky et al.~(2019). Some
-clusters of language families emerged, such as the cluster containing
-Estonian and Hungarian, the cluster containing several Romance
-languages, and the large cluster containing most of the Indo-European
-languages.
+To understand the consistency and variability of predictors across
+languages, we calculated the correlations between the coefficients of
+the main effects for each language with all other languages, as well as
+for other languages within its language family (for language families
+with \(\ge 2\) included languages), as shown in Figure
+\ref{fig:correlations}. The average correlation across languages was
+relatively high (\(\bar{r}\) = 0.85), comparable to results found by
+Braginsky et al.~(2019). Mean correlations within language families were
+broadly numerically greater than those across language families,
+indicating greater consistency within language families, except for
+families in which particular languages had more idiosyncratic predictor
+coefficients (English (British), Swedish, and Russian). We also
+calculated a bootstrapped randomised baseline by permuting the predictor
+labels for coefficients within each language and recalculating the
+correlations with other languages; this procedure represented the
+correlations that would be expected by chance. This baseline was
+consistently close to 0, and was also consistently smaller than the
+observed correlations.
 
 \hypertarget{exploratory-analysis-morphological-complexity}{%
 \subsection{Exploratory analysis: Morphological
@@ -458,7 +465,7 @@ morphologically complex).
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/mlu_pred-1} 
+{\centering \includegraphics[width=240px]{figs/mlu_pred-1}
 
 }
 
@@ -469,72 +476,64 @@ morphologically complex).
 Only one model demonstrated a significant main effect of morphological
 complexity, which was the model with MLU-w for predicates as the outcome
 variable, as shown in Figure \ref{fig:mlu_pred}. The coefficient of the
-effect of morphological complexity was negative (\(b\) = -1.15),
+effect of morphological complexity was negative (\(b\) = -1.05),
 suggesting that languages with greater morphological complexity had a
-smaller effect of MLU-w for the age of acquisition of predicates.
+smaller effect of MLU-w for the AoA of predicates.
 
-Discussion By examining the predictors of AoA across different
-languages, we found that words with higher frequency, concreteness, and
-babiness were learnt earlier, whereas words with greater length in
-phonemes and MLU-w were learnt later. We found that these effects were
-generally high across typologically diverse languages, suggesting that
-early word learning broadly taps on similar sources of linguistic
-information despite disparities in the realisations of such information
-across languages. These effects also concur with those found by previous
-work (Braginsky et al., 2016, 2019).
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+By examining the predictors of AoA across different languages, we found
+that words with higher frequency, concreteness, and babiness were learnt
+earlier, whereas words with greater length in phonemes and MLU-w were
+learnt later. We found that these effects were generally consistent
+across typologically diverse languages, suggesting that early word
+learning broadly taps on similar sources of linguistic information
+despite disparities in the realisations of such information across
+languages. These effects also concur with those found by previous work
+(Braginsky et al., 2016, 2019).
 
 In contrast, there was little evidence overall of any effect of
-morphosyntactic predictors. This finding is surprising, given the large
+morphosyntactic predictors. This finding is surprising, given the
 diversity in morphosyntax across the languages included in our study.
 One possible explanation for the lack of a reliable effect is the
 operationalisation of our metrics. When completing the CDI, caregivers
 may indicate that their child is able to say a word even if the specific
-produced form of the word is reduced or otherwise idiosyncratic, and
-therefore the child need not have a complete grasp of the inflectional
-paradigm of the word. As such, we adopted metrics that were appropriate
-at the lemma level (e.g., information about the complexity of lemma
-paradigms). Morphosyntactic predictors may be more crucial when learning
-other aspects of morphosyntax, particularly at the form level (e.g.,
-knowing how to deploy appropriately inflected forms).
+produced form is reduced or otherwise idiosyncratic, and thus the child
+need not have a complete grasp of the inflectional paradigm of the word.
+As such, we adopted metrics that were appropriate at the lemma level
+(e.g., information about the complexity of lemma paradigms).
+Morphosyntactic predictors may be more crucial when learning other
+aspects of morphosyntax, particularly at the form level (e.g., deploying
+appropriately inflected forms).
 
 We also did not find an effect of phonological neighbourhood size, which
 contrasts with previous work suggesting that words with larger
 phonological neighbourhoods were more likely to be learnt (Fourtassi,
-Bian, \& Frank, 2020; Jones \& Brandt, 2019). Considering first the
-results from Jones \& Brandt (2019), the difference in results may arise
-from two possible sources. First, Jones \& Brandt (2019) used data from
-the English Lexicon Project as their reference corpus, which contains
-data for over 40,000 words. We only considered potential neighbours from
-within the CDI lists, since this approach provided comparability across
-languages, was more likely to be representative of the words actually
-heard by children, and was computationally tractable. Second, Jones \&
-Brandt (2019) did not residualise word length out of phonological
-neighbourhood size, and indeed they found potentially inflated variance
-for word length, which is unsurprising since these factors are typically
-correlated (as shorter words tend to have more phonological neighbours).
-On the other hand, Fourtassi et al. (2020) also used only CDI words and
-controlled for the effect of frequency, and still found an effect of
-phonological neighbourhood. In this case, the difference in results may
-be due to the fact that they restricted their analyses to nouns on the
-CDI, whereas we also included predicates and function words in our
-reference corpus. Further research is necessary to determine whether
-lexical category-specific phonological networks may be more relevant for
-early word learning.
+Bian, \& Frank, 2020; Jones \& Brandt, 2019). In particular, Fourtassi
+et al. (2020) used a relatively similar method of calculation to the
+present study (considering only CDI words as potential neighbours and
+controlling for frequency), but still found an effect of phonological
+neighbourhood. The difference in results may be due to the fact that
+they restricted their analyses to CDI nouns, whereas we also included
+predicates and function words in our reference corpora. Further research
+is necessary to determine whether lexical category-specific phonological
+networks may be more relevant for early word learning.
 
 Our results also demonstrated broad consistency across lexical
 categories, with some variation for particular predictors. This
 variation supports the hypothesis that words from different lexical
-categories may be learnt in different ways, such that different factors
-may contribute to differing extents. For example, semantic factors (such
-as babiness) may be less important for function words, and word length
-may not be the bottleneck for acquiring predicates, whereas syntactic
-complexity (as measured by MLU-w) may be more important for predicates.
-These results align with the predictions made by other theories of early
-language acquisition. Notably, syntactic bootstrapping theory (Gleitman,
-1990) suggests that syntactic information may be more crucial for
-acquiring verb meanings, while comparatively, noun semantics can be
-learnt more easily from direct cross-situational mapping (Monaghan,
-Mattock, Davies, \& Smith, 2015).
+categories may be learnt in different ways, such that different word
+properties may contribute to differing extents. For example, semantic
+factors (such as babiness) may be less important for function words,
+whereas syntactic complexity (as measured by MLU-w) may be more
+important, and word length may not be the bottleneck for acquiring
+predicates. These results align with the predictions made by other
+theories of early language acquisition. Notably, syntactic bootstrapping
+theory (Gleitman, 1990) suggests that syntactic information may be more
+crucial for acquiring the meanings of function words, while
+comparatively, noun semantics can be learnt more easily from direct
+cross-situational mapping (Monaghan, Mattock, Davies, \& Smith, 2015).
 
 Indeed, the differing roles of various predictors across lexical
 categories is also demonstrated by the relationship between
@@ -546,8 +545,8 @@ languages may lead to differences in the AoA of different linguistic
 structures. For languages with greater morphological complexity, the
 reliability of morphological markers may lead to a lessened effect of
 syntactic complexity, and vice versa, suggesting a trade-off between the
-two dimensions of complexity (see Benítez-Burraco, Chen, \& Gil, 2024;
-but cf. Bentz, Gutierrez-Vasques, Sozinova, \& Samardžić, 2022). It is
+two dimensions of complexity (see Bentz, Gutierrez-Vasques, Sozinova, \&
+Samardžić, 2022; but cf. Benítez-Burraco, Chen, \& Gil, 2024). It is
 important to emphasise that this analysis is exploratory in nature, and
 the results should be interpreted with caution, especially because of
 the small number of data points.
@@ -568,11 +567,10 @@ Additionally, even for the languages which were included in our study,
 there was variation in the amount and quality of coverage for the
 different resources used. For example, some languages have more UniMorph
 data on verbs than other lexical categories, which may have resulted in
-somewhat biassed predictor values. The consistency in predictor values
-we observed suggests that such a potential bias was not very large in
-magnitude, but it remains crucial to increase resource availability in
-understudied languages to permit a more accurate study of these
-languages.
+biassed predictor values. The consistency in observed predictor values
+suggests that such a potential bias was not very large in magnitude, but
+it remains crucial to increase resource availability in understudied
+languages to permit more accurate study of these languages.
 
 Nonetheless, the current work presents a case for the use of a diverse
 range of language samples to study the consistency and variability of
@@ -587,13 +585,13 @@ understanding of language acquisition in young children.
 \hypertarget{references}{%
 \section{References}\label{references}}
 
-\setlength{\parindent}{-0.1in} 
+\setlength{\parindent}{-0.1in}
 \setlength{\leftskip}{0.125in}
 
 \noindent
 
 \hypertarget{refs}{}
-\begin{CSLReferences}{1}{0}
+\begin{CSLReferences}
 \leavevmode\vadjust pre{\hypertarget{ref-batesFunctionalistApproachesGrammar1982}{}}%
 Bates, E., \& Macwhinney, B. (1982). Functionalist approaches to
 grammar. In E. Wanner \& L. R. Gleitman (Eds.), \emph{Child {Language}:

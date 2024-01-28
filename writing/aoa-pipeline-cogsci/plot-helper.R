@@ -21,6 +21,7 @@ target_langs <- c("Danish",
 
 display_predictors <- function(predictors) {
   predictors |>
+    str_replace_all("b_", "") |>
     str_replace_all("_", " ") |>
     str_to_sentence() |>
     str_replace("Mlu", "MLU-w") |>
@@ -37,7 +38,7 @@ term_fct <- c("Frequency",
 
 ms_terms <- c("N features", "Form entropy", "N morphemes", "MLU-w")
 
-lexcats <- c("nouns", "predicates", "function_words")
+lexcats <- c("Nouns", "Predicates", "Function words")
 
 label_caps <- function(value) {
   value |>

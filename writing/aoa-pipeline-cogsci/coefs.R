@@ -10,13 +10,13 @@ aoa_coefs <- aoa_models_lexcat |>
   filter(measure == "produces") |>
   select(language, coefs) |>
   unnest(coefs) |>
-  filter(term != "(Intercept)") |>
+  filter(Parameter != "b_Intercept") |>
   mutate(
-    effect = if_else(str_detect(term, ":"), "interaction", "main"),
-    lexical_category = str_extract(term, "lexical_category[0-9]"),
+    effect = if_else(str_detect(Parameter, ":"), "interaction", "main"),
+    lexical_category = str_extract(Parameter, "lexical_category[0-9]"),
     term = if_else(effect == "interaction",
-                   str_remove(term, ":?lexical_category[0-9]:?"),
-                   term) |>
+                   str_remove(Parameter, ":?lexical_category[0-9]:?"),
+                   Parameter) |>
       str_replace("neighbor", "neighbour"),
     term = term |>
       factor() |>
@@ -30,7 +30,10 @@ aoa_coefs <- aoa_models_lexcat |>
                             Phonological = c("Length in phonemes", "Phon neighbours"),
                             Other = c("Frequency", "Concreteness", "Babiness")) |>
       fct_rev() |>
-      fct_shift(-2))
+      fct_shift(-2)) |>
+  rename(estimate = MAP,
+         conf.low = CI_low,
+         conf.high = CI_high)
 
 # Summary stats
 n_by_lexcat <- aoa_predictor_data |>
@@ -44,8 +47,7 @@ n_by_lang <- n_by_lexcat |>
 # Wrangle for plotting
 plot_coefs <- aoa_coefs |>
   filter(is.na(lexical_category),
-         !is.na(term),
-         is.na(group)) |>
+         !is.na(term)) |>
   left_join(n_by_lang, by = "language") |>
   mutate(signif = ifelse(conf.low < 0 & conf.high > 0,
                          "Not significant", "Significant"),
@@ -71,8 +73,7 @@ lc_plot <- aoa_coefs |>
 
 # Dendrogram
 dd_coefs <- aoa_coefs |>
-  filter(is.na(lexical_category),
-         is.na(group)) |>
+  filter(is.na(lexical_category)) |>
   select(language, term, lexical_category, estimate) |>
   pivot_wider(names_from = c(term, lexical_category),
               values_from = estimate) |>
