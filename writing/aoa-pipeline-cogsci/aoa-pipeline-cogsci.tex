@@ -52,42 +52,72 @@
 % \textwidth 16cm
 % \textheight 21cm
 
-\title{Predicting ages of acquisition across 28 languages and dialects}
+\title{Predicting ages of acquisition for children's early vocabulary
+across 28 languages and dialects}
 
 
-\author{{\large \bf Alvin W.M. Tan*, Georgia Loukatou*, Mika Braginsky} \\ Department of Psychology, Stanford University \AND {\large \bf Jessica Mankewitz} \\ Department of Psychology, University of Wisconsin--Madison \AND {\large \bf Michael C. Frank} \\ Department of Psychology, Stanford University}
+\author{{\large \bf Alvin W.M. Tan*, Georgia Loukatou*, Mika Braginsky} \\ Department of Psychology, Stanford University \AND {\large \bf Jess Mankewitz} \\ Department of Psychology, University of Wisconsin--Madison \AND {\large \bf Michael C. Frank} \\ Department of Psychology, Stanford University}
 
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
-\newenvironment{CSLReferences}%
-  {}%
-  {\par}
+%\newenvironment{CSLReferences}%
+%  {}%
+%  {\par}
+
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+{}%
+{\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+{% don't indent paragraphs
+	\setlength{\parindent}{0pt}
+	% turn on hanging indent if param 1 is 1
+	\ifodd #1
+	\let\oldpar\par
+	\def\par{\hangindent=\cslhangindent\oldpar}
+	\fi
+	% set entry spacing
+	%\setlength{\parskip}{#2\cslentryspacingunit}
+}%
+{}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Research in early word learning has demonstrated that various factors
-(e.g., word frequency) predict the ages of acquisition of different
-words. However, a more comprehensive account requires the examination of
-multiple levels of linguistic representation (e.g., phonological,
-morphosyntactic, semantic) and language families (e.g., Indo-European,
-Sino-Tibetan, Uralic). We studied 10 predictors of word ages of
-acquisition across 28 languages and dialects, finding that words that
-were more frequent, concrete, and associated with babies were learnt
-earlier, whereas words that had greater length in phonemes and mean
-length of utterance in words (MLU-w) were learnt later. There was no
-reliable effect of other morphosyntactic predictors, or of phonological
-neighbourhood size. We found evidence of a tradeoff between the
-morphological complexity of a language and the effect of MLU-w for
-predicates. Predictor coefficients revealed broad consistency across all
-languages, along with variability that reflected language family
-classifications.
+What factors contribute to the growth of children's early vocabulary?
+One method for exploring this question is investigating predictors
+(e.g., frequency) that differentiate words learnt earlier from those
+learnt later. A more comprehensive account requires the examination of
+multiple language families and multiple levels of linguistic
+representation (e.g., phonological, morphosyntactic, semantic). Here, we
+studied 10 predictors of word ages of acquisition across 28 languages
+and dialects. We found that words that were more frequent, concrete, and
+associated with babies were learnt earlier, whereas words that had
+greater length in phonemes and mean length of utterance were learnt
+later. There was no reliable effect of other morphosyntactic predictors,
+or of phonological neighbourhood. We found evidence of a tradeoff
+between a language's morphological complexity and the predictivity of
+syntactic complexity for predicates, supporting the competition model.
+Predictor coefficients revealed broad consistency across all languages,
+along with variability that reflected language family classifications.
 
 \textbf{Keywords:}
-Language acquisition; Word learning; Cross-linguistic; Age of
-acquisition
+language acquisition; word learning; vocabulary; cross-linguistic; age
+of acquisition
 \end{abstract}
 
 \hypertarget{introduction}{%
@@ -193,7 +223,7 @@ overview of the data used is shown in Figure \ref{fig:descriptives}.
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/descriptives}
+{\centering \includegraphics[width=240px]{figs/descriptives} 
 
 }
 
@@ -247,7 +277,7 @@ property is shown in Figure \ref{fig:sources}.
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/sources}
+{\centering \includegraphics[width=240px]{figs/sources} 
 
 }
 
@@ -336,13 +366,13 @@ across languages is multicollinearity among predictor values. We
 calculated variance inflation factors (VIFs) on models including all
 predictors except for lexical categories (since models with interaction
 effects are known to have inflated VIFs). The VIFs for each predictor in
-each language was \(<3.5\), indicating low multicollinearity among
+each language was \(<\) 3.5, indicating low multicollinearity among
 predictors.
 
 \begin{CodeChunk}
 \begin{figure*}[ht]
 
-{\centering \includegraphics[width=500px]{figs/big_plot-1}
+{\centering \includegraphics[width=500px]{figs/big_plot-1} 
 
 }
 
@@ -395,7 +425,7 @@ had a greater MLU-w were learnt later (\(\bar{b}\) = 0.68).
 \begin{CodeChunk}
 \begin{figure*}[ht]
 
-{\centering \includegraphics[width=500px]{figs/lc_plot-1}
+{\centering \includegraphics[width=500px]{figs/lc_plot-1} 
 
 }
 
@@ -417,7 +447,7 @@ enhanced for function words (\(\bar{b}\) = 0.43).
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/correlations-1}
+{\centering \includegraphics[width=240px]{figs/correlations-1} 
 
 }
 
@@ -432,7 +462,7 @@ for other languages within its language family (for language families
 with \(\ge 2\) included languages), as shown in Figure
 \ref{fig:correlations}. The average correlation across languages was
 relatively high (\(\bar{r}\) = 0.85), comparable to results found by
-Braginsky et al.~(2019). Mean correlations within language families were
+Braginsky et al. (2019). Mean correlations within language families were
 broadly numerically greater than those across language families,
 indicating greater consistency within language families, except for
 families in which particular languages had more idiosyncratic predictor
@@ -465,7 +495,7 @@ morphologically complex).
 \begin{CodeChunk}
 \begin{figure}[ht]
 
-{\centering \includegraphics[width=240px]{figs/mlu_pred-1}
+{\centering \includegraphics[width=240px]{figs/mlu_pred-1} 
 
 }
 
@@ -476,9 +506,9 @@ morphologically complex).
 Only one model demonstrated a significant main effect of morphological
 complexity, which was the model with MLU-w for predicates as the outcome
 variable, as shown in Figure \ref{fig:mlu_pred}. The coefficient of the
-effect of morphological complexity was negative (\(b\) = -1.05),
-suggesting that languages with greater morphological complexity had a
-smaller effect of MLU-w for the AoA of predicates.
+effect of morphological complexity was negative (\(b\) = -1.05, \(p\) =
+0.02), suggesting that languages with greater morphological complexity
+had a smaller effect of MLU-w for the AoA of predicates.
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
@@ -490,8 +520,7 @@ learnt later. We found that these effects were generally consistent
 across typologically diverse languages, suggesting that early word
 learning broadly taps on similar sources of linguistic information
 despite disparities in the realisations of such information across
-languages. These effects also concur with those found by previous work
-(Braginsky et al., 2016, 2019).
+languages (see Braginsky et al., 2019).
 
 In contrast, there was little evidence overall of any effect of
 morphosyntactic predictors. This finding is surprising, given the
@@ -503,9 +532,10 @@ produced form is reduced or otherwise idiosyncratic, and thus the child
 need not have a complete grasp of the inflectional paradigm of the word.
 As such, we adopted metrics that were appropriate at the lemma level
 (e.g., information about the complexity of lemma paradigms).
-Morphosyntactic predictors may be more crucial when learning other
-aspects of morphosyntax, particularly at the form level (e.g., deploying
-appropriately inflected forms).
+Morphosyntactic predictors may not matter for the age of first
+production of an item, but they may be more crucial when learning other
+aspects of morphosyntax, particularly in deploying appropriately
+inflected forms.
 
 We also did not find an effect of phonological neighbourhood size, which
 contrasts with previous work suggesting that words with larger
@@ -559,18 +589,17 @@ consideration, using data from 28 languages and varieties, of which 10
 (i.e., more than a third) were non-Indo-European. Nonetheless, there
 remained an Indo-European bias, and certain language families were also
 underrepresented, especially language families across Africa and
-Oceania. Much more research in those languages is necessary for a truly
-comprehensive view of early word learning, as encouraged by Kidd \&
-Garcia (2022) and others.
+Oceania; much more research in those languages is necessary for a truly
+comprehensive view of early word learning.
 
-Additionally, even for the languages which were included in our study,
-there was variation in the amount and quality of coverage for the
-different resources used. For example, some languages have more UniMorph
-data on verbs than other lexical categories, which may have resulted in
-biassed predictor values. The consistency in observed predictor values
-suggests that such a potential bias was not very large in magnitude, but
-it remains crucial to increase resource availability in understudied
-languages to permit more accurate study of these languages.
+Additionally, even for the languages included in our study, there was
+variation in the amount and quality of coverage for the different
+resources used. For example, some languages have more UniMorph data on
+verbs than other lexical categories, which may have resulted in biassed
+predictor values. The consistency in observed predictor values suggests
+that such a potential bias was not very large in magnitude, but it
+remains crucial to increase resource availability in understudied
+languages to permit more accurate research.
 
 Nonetheless, the current work presents a case for the use of a diverse
 range of language samples to study the consistency and variability of
@@ -585,13 +614,13 @@ understanding of language acquisition in young children.
 \hypertarget{references}{%
 \section{References}\label{references}}
 
-\setlength{\parindent}{-0.1in}
+\setlength{\parindent}{-0.1in} 
 \setlength{\leftskip}{0.125in}
 
 \noindent
 
 \hypertarget{refs}{}
-\begin{CSLReferences}
+\begin{CSLReferences}{1}{0}
 \leavevmode\vadjust pre{\hypertarget{ref-batesFunctionalistApproachesGrammar1982}{}}%
 Bates, E., \& Macwhinney, B. (1982). Functionalist approaches to
 grammar. In E. Wanner \& L. R. Gleitman (Eds.), \emph{Child {Language}:

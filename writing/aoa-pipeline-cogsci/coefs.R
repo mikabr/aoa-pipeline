@@ -1,5 +1,6 @@
 # Load data
-aoa_models_lexcat <- readRDS("outputs/aoa_models_lexcat.rds")
+aoa_models_lexcat <- readRDS("outputs/aoa_models_lexcat_output.rds")
+aoa_models <- readRDS("outputs/aoa_models_output.rds")
 aoa_predictor_data <- readRDS("outputs/aoa_predictor_data.rds")
 mc_mods <- readRDS("outputs/mc_mods.rds")
 morph_complexity <- read_csv("outputs/morph_complexity.csv")
@@ -43,6 +44,12 @@ n_by_lexcat <- aoa_predictor_data |>
 n_by_lang <- n_by_lexcat |>
   group_by(language) |>
   summarise(n = sum(n))
+
+# VIFs
+vifs <- aoa_models |>
+  filter(measure == "produces") |>
+  select(language, vifs) |>
+  unnest(vifs)
 
 # Wrangle for plotting
 plot_coefs <- aoa_coefs |>

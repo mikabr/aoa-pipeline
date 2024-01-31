@@ -272,9 +272,11 @@ aoa_predictor_data <- predictor_data_imputed_scaled |>
 aoa_models <- fit_models(predictors, aoa_predictor_data,
                          lexcat_interactions = FALSE)
 saveRDS(aoa_models, "aoa_models.rds")
+saveRDS(aoa_models |> select(-model), "aoa_models_output.rds")
 aoa_models_lexcat <- fit_models(predictors, aoa_predictor_data,
                                 lexcat_interactions = TRUE)
 saveRDS(aoa_models_lexcat, "aoa_models_lexcat.rds")
+saveRDS(aoa_models_lexcat |> select(-model), "aoa_models_lexcat_output.rds")
 ```
 
 ```{r}

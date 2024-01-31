@@ -1,24 +1,26 @@
 ---
-title: "Predicting ages of acquisition across 28 languages and dialects"
+title: "Predicting ages of acquisition for children's early vocabulary across 28 languages and dialects"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
 
 author-information: > 
     \author{{\large \bf Alvin W.M. Tan*, Georgia Loukatou*, Mika Braginsky} \\ Department of Psychology, Stanford University
-    \AND {\large \bf Jessica Mankewitz} \\ Department of Psychology, University of Wisconsin--Madison
+    \AND {\large \bf Jess Mankewitz} \\ Department of Psychology, University of Wisconsin--Madison
     \AND {\large \bf Michael C. Frank} \\ Department of Psychology, Stanford University}
 
 abstract: >
-    Research in early word learning has demonstrated that various factors (e.g., word frequency) predict the ages of acquisition of different words. 
-    However, a more comprehensive account requires the examination of multiple levels of linguistic representation (e.g., phonological, morphosyntactic, semantic) and language families (e.g., Indo-European, Sino-Tibetan, Uralic). 
-    We studied 10 predictors of word ages of acquisition across 28 languages and dialects, finding that words that were more frequent, concrete, and associated with babies were learnt earlier, whereas words that had greater length in phonemes and mean length of utterance in words (MLU-w) were learnt later. 
-    There was no reliable effect of other morphosyntactic predictors, or of phonological neighbourhood size. 
-    We found evidence of a tradeoff between the morphological complexity of a language and the effect of MLU-w for predicates. 
+    What factors contribute to the growth of children’s early vocabulary? 
+    One method for exploring this question is investigating predictors (e.g., frequency) that differentiate words learnt earlier from those learnt later. 
+    A more comprehensive account requires the examination of multiple language families and multiple levels of linguistic representation (e.g., phonological, morphosyntactic, semantic). 
+    Here, we studied 10 predictors of word ages of acquisition across 28 languages and dialects.
+    We found that words that were more frequent, concrete, and associated with babies were learnt earlier, whereas words that had greater length in phonemes and mean length of utterance were learnt later. 
+    There was no reliable effect of other morphosyntactic predictors, or of phonological neighbourhood.
+    We found evidence of a tradeoff between a language's morphological complexity and the predictivity of syntactic complexity for predicates, supporting the competition model.
     Predictor coefficients revealed broad consistency across all languages, along with variability that reflected language family classifications. 
     
 keywords: >
-    Language acquisition; Word learning; Cross-linguistic; Age of acquisition
+    language acquisition; word learning; vocabulary; cross-linguistic; age of acquisition
     
 output: cogsci2016::cogsci_paper
 #final-submission: \cogscifinalcopy
@@ -178,7 +180,7 @@ Finally, we centred and scaled all properties to allow for direct comparison of 
 **Collinearity.** 
 One possible concern for comparing coefficients across languages is multicollinearity among predictor values. 
 We calculated variance inflation factors (VIFs) on models including all predictors except for lexical categories (since models with interaction effects are known to have inflated VIFs). 
-The VIFs for each predictor in each language was $<3.5$, indicating low multicollinearity among predictors.
+The VIFs for each predictor in each language was $<$ `r round(max(vifs$vif)+0.05, 1)`, indicating low multicollinearity among predictors.
 
 ```{r big_plot}
 #| fig.env = "figure*", 
@@ -287,7 +289,7 @@ ggplot(dd_cor_all, aes(y = language, col = language_family)) +
 ```
 
 To understand the consistency and variability of predictors across languages, we calculated the correlations between the coefficients of the main effects for each language with all other languages, as well as for other languages within its language family (for language families with $\ge 2$ included languages), as shown in Figure \ref{fig:correlations}. 
-The average correlation across languages was relatively high ($\bar{r}$ = `r dd_cor_gen |> pull(estimate) |> mean()`), comparable to results found by Braginsky et al. (2019).
+The average correlation across languages was relatively high ($\bar{r}$ = `r dd_cor_gen |> pull(estimate) |> mean()`), comparable to results found by @braginskyConsistencyVariabilityChildren2019.
 Mean correlations within language families were broadly numerically greater than those across language families, indicating greater consistency within language families, except for families in which particular languages had more idiosyncratic predictor coefficients (English (British), Swedish, and Russian). 
 We also calculated a bootstrapped randomised baseline by permuting the predictor labels for coefficients within each language and recalculating the correlations with other languages; this procedure represented the correlations that would be expected by chance. 
 This baseline was consistently close to 0, and was also consistently smaller than the observed correlations.
@@ -322,20 +324,20 @@ ggplot(mlu_pred, aes(x = morph_complexity, y = estimate)) +
 ```
 
 Only one model demonstrated a significant main effect of morphological complexity, which was the model with MLU-w for predicates as the outcome variable, as shown in Figure \ref{fig:mlu_pred}. 
-The coefficient of the effect of morphological complexity was negative ($b$ = `r mc_vals |> filter(ms_term == "MLU-w", lexical_category == "Predicates", term == "morph_complexity") |> pull(estimate)`), suggesting that languages with greater morphological complexity had a smaller effect of MLU-w for the AoA of predicates.
+The coefficient of the effect of morphological complexity was negative ($b$ = `r mc_vals |> filter(ms_term == "MLU-w", lexical_category == "Predicates", term == "morph_complexity") |> pull(estimate)`, $p$ = `r mc_vals |> filter(ms_term == "MLU-w", lexical_category == "Predicates", term == "morph_complexity") |> pull(p.value)`), suggesting that languages with greater morphological complexity had a smaller effect of MLU-w for the AoA of predicates.
 
 # Discussion
 
+What factors affect early word learning in children across languages?
 By examining the predictors of AoA across different languages, we found that words with higher frequency, concreteness, and babiness were learnt earlier, whereas words with greater length in phonemes and MLU-w were learnt later. 
-We found that these effects were generally consistent across typologically diverse languages, suggesting that early word learning broadly taps on similar sources of linguistic information despite disparities in the realisations of such information across languages. 
-These effects also concur with those found by previous work [@braginskyConsistencyVariabilityChildren2019; @braginskyUhohTomorrowPredicting2016].
+We found that these effects were generally consistent across typologically diverse languages, suggesting that early word learning broadly taps on similar sources of linguistic information despite disparities in the realisations of such information across languages [see @braginskyConsistencyVariabilityChildren2019]. 
 
 In contrast, there was little evidence overall of any effect of morphosyntactic predictors. 
 This finding is surprising, given the diversity in morphosyntax across the languages included in our study. 
 One possible explanation for the lack of a reliable effect is the operationalisation of our metrics. 
 When completing the CDI, caregivers may indicate that their child is able to say a word even if the specific produced form is reduced or otherwise idiosyncratic, and thus the child need not have a complete grasp of the inflectional paradigm of the word.
 As such, we adopted metrics that were appropriate at the lemma level (e.g., information about the complexity of lemma paradigms). 
-Morphosyntactic predictors may be more crucial when learning other aspects of morphosyntax, particularly at the form level (e.g., deploying appropriately inflected forms). 
+Morphosyntactic predictors may not matter for the age of first production of an item, but they may be more crucial when learning other aspects of morphosyntax, particularly in deploying appropriately inflected forms.
 
 We also did not find an effect of phonological neighbourhood size, which contrasts with previous work suggesting that words with larger phonological neighbourhoods were more likely to be learnt [@fourtassiGrowthChildrenSemantic2020; @jonesChildrenReallyAcquire2019]. 
 In particular, @fourtassiGrowthChildrenSemantic2020 used a relatively similar method of calculation to the present study (considering only CDI words as potential neighbours and controlling for frequency), but still found an effect of phonological neighbourhood. 
@@ -346,7 +348,8 @@ Our results also demonstrated broad consistency across lexical categories, with 
 This variation supports the hypothesis that words from different lexical categories may be learnt in different ways, such that different word properties may contribute to differing extents. 
 For example, semantic factors (such as babiness) may be less important for function words, whereas syntactic complexity (as measured by MLU-w) may be more important, and word length may not be the bottleneck for acquiring predicates. 
 These results align with the predictions made by other theories of early language acquisition. 
-Notably, syntactic bootstrapping theory [@gleitmanStructuralSourcesVerb1990] suggests that syntactic information may be more crucial for acquiring the meanings of function words, while comparatively, noun semantics can be learnt more easily from direct cross-situational mapping [@monaghanGavagaiGavagaiDoes2015]. 
+Notably, syntactic bootstrapping theory [@gleitmanStructuralSourcesVerb1990] suggests that syntactic information may be more crucial for acquiring the meanings of function words, because young children acquiring function words have to infer their meaning based on their role in sentences, and that inference is easier for shorter sentences.
+Comparatively, noun semantics can be learnt more easily from direct cross-situational mapping [@monaghanGavagaiGavagaiDoes2015]. 
 
 Indeed, the differing roles of various predictors across lexical categories is also demonstrated by the relationship between morphological complexity and the effect of MLU-w, specifically for predicates (but not nouns or function words). 
 This finding provides some support for the competition model [@batesFunctionalistApproachesGrammar1982], which suggests that differential cue availability and reliability across languages may lead to differences in the AoA of different linguistic structures. 
@@ -355,12 +358,11 @@ It is important to emphasise that this analysis is exploratory in nature, and th
 
 The current study represents an attempt to understand the process of word learning across a large range of languages, so as to better characterise the role of linguistic diversity in early language learning. 
 In particular, we expanded the range of languages under consideration, using data from 28 languages and varieties, of which 10 (i.e., more than a third) were non-Indo-European. 
-Nonetheless, there remained an Indo-European bias, and certain language families were also underrepresented, especially language families across Africa and Oceania. 
-Much more research in those languages is necessary for a truly comprehensive view of early word learning, as encouraged by @kiddHowDiverseChild2022 and others.
+Nonetheless, there remained an Indo-European bias, and certain language families were also underrepresented, especially language families across Africa and Oceania; much more research in those languages is necessary for a truly comprehensive view of early word learning.
 
-Additionally, even for the languages which were included in our study, there was variation in the amount and quality of coverage for the different resources used. 
+Additionally, even for the languages included in our study, there was variation in the amount and quality of coverage for the different resources used. 
 For example, some languages have more UniMorph data on verbs than other lexical categories, which may have resulted in biassed predictor values. 
-The consistency in observed predictor values suggests that such a potential bias was not very large in magnitude, but it remains crucial to increase resource availability in understudied languages to permit more accurate study of these languages.
+The consistency in observed predictor values suggests that such a potential bias was not very large in magnitude, but it remains crucial to increase resource availability in understudied languages to permit more accurate research.
 
 Nonetheless, the current work presents a case for the use of a diverse range of language samples to study the consistency and variability of early language learning across languages and across levels of representation. 
 Additionally, it is worth highlighting that this research was only made possible through the availability of multiple open data and open science resources, emphasising the importance of open science practices. 
