@@ -994,70 +994,7 @@ p_cor
 ```
 
 ## Morphological complexity
-We use the random slopes from the all-language model to examine the relationship between morphological complexity and the effect of morphosyntactic predictors on AoA.
-```{r morph_complexity_analysis}
-all_rs <- all_draws_random |> 
-  group_by(language, measure, variable) |>
-  rename(estimate = .value) |> 
-  summarise_draws() |> 
-  mutate(language = str_replace_all(language, "\\.", " ") |> 
-           factor(levels = target_langs),
-         reliability = ifelse(reliability, "Reliable", "Not reliable"),
-         lexical_category = str_extract(measure, "lexical_category[0-9]"),
-         term = str_remove_all(measure, ":?lexical_category[0-9]:?")) |> 
-  standardise_terms()
-
-ms_terms <- c("N features", "Form entropy", "N morphemes", "MLU-w", "MDD", "Subcat entropy") 
-
-all_rs_lexcat <- all_rs |> 
-  filter(term %in% ms_terms) |> 
-  ungroup() |> 
-  mutate(lexical_category = replace_na(lexical_category, "main")) |> 
-  select(language, estimate = map, lexical_category, term) |> 
-  pivot_wider(names_from = lexical_category, values_from = estimate) |> 
-  mutate(nouns = main - lexical_category1 - lexical_category2 - lexical_category3,
-         adjectives = main + lexical_category1,
-         function_words = main + lexical_category2,
-         verbs = main + lexical_category3) |> 
-  select(-main, -lexical_category1, -lexical_category2, -lexical_category3) |> 
-  pivot_longer(cols = c(nouns, adjectives, verbs, function_words),
-               names_to = "lexical_category",
-               values_to = "estimate") |> 
-  left_join(morph_complexity, by = join_by(language))
-
-lexcats <- c("nouns", "verbs", "adjectives", "function_words")
-
-mc_mods <- map(ms_terms, \(x) {
-  map(lexcats, \(lc) {
-    arm::bayesglm(estimate ~ morph_complexity, 
-                  data = all_rs_lexcat |> 
-                    filter(term == x, lexical_category == lc))
-  })
-}) |> unlist(recursive = FALSE)
-saveRDS(mc_mods, "outputs/mc_mods.rds")
-
-mc_vals <- expand_grid(ms_term = ms_terms,
-                       lexical_category = lexcats) |> 
-  mutate(mc_data = map(mc_mods, broom.mixed::tidy)) |> 
-  unnest(mc_data) |> 
-  mutate(ci.low = estimate - std.error,
-         ci.high = estimate + std.error,
-         signif = !(ci.low < 0 & ci.high > 0)) |> 
-  filter(term == "morph_complexity")
-```
-
-```{r}
-all_rs_lexcat |> 
-  ggplot(aes(x = morph_complexity, y = estimate, col = lexical_category)) +
-  facet_grid(term ~ ., scales = "free") +
-  geom_point(alpha = 0.7) +
-  geom_smooth(method = "lm", se = F) +
-  labs(x = "Morphological complexity", y = "Random slope estimate", 
-       col = "Lexical category") +
-  theme(legend.position = "bottom")
-```
-
-Trying again using the separate language models
+We use the random slopes from the separate language models to examine the relationship between morphological complexity and the effect of morphosyntactic predictors on AoA.
 ```{r morph_complexity_bylang}
 ms_terms <- c("N features", "Form entropy", "N morphemes", "MLU-w", "MDD", "Subcat entropy") 
 
@@ -1092,23 +1029,6 @@ mc_vals <- expand_grid(measure = c("produces", "understands"),
   mutate(ci.low = estimate - std.error,
          ci.high = estimate + std.error,
          signif = !(ci.low < 0 & ci.high > 0))
-```
-
-```{r}
-mc_vals |> 
-  filter(term == "morph_complexity") |> View()
-```
-
-
-```{r}
-morph_coefs |> 
-  ggplot(aes(x = morph_complexity, y = estimate, col = lexical_category)) +
-  facet_grid(term ~ ., scales = "free") +
-  geom_point(alpha = 0.7) +
-  geom_smooth(method = "lm", se = F) +
-  labs(x = "Morphological complexity", y = "Random slope estimate", 
-       col = "Lexical category") +
-  theme(legend.position = "bottom")
 ```
 
 ```{r}
