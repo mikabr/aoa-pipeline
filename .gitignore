@@ -43,3 +43,4 @@ vignettes/*.pdf
 
 # RDS files
 *.rds
+.positai

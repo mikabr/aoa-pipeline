@@ -53,7 +53,7 @@ target_langs <- c("French (French)", "French (Quebecois)",
                   "Danish", "Norwegian", "Swedish", 
                   "Croatian", "Czech", "Russian",
                   "Turkish", 
-                  "Hungarian", "Estonian",
+                  "Hungarian", "Estonian", "Finnish", 
                   "Mandarin (Taiwanese)", "Mandarin (Beijing)",
                   "Cantonese",
                   "Hebrew", # "Arabic (Saudi)",
@@ -82,6 +82,21 @@ eng_ws_summary <- collapse_inst_data(eng_ws)
 eng_comb_summary <- combine_form_data(list(eng_wg_summary, eng_ws_summary))
 ```
 
+Cache lemmas
+```{r, eval=F}
+wb_data |> 
+  select(language, uni_lemma, items) |> 
+  unnest(items) |>
+  distinct() |> 
+  nest_by(language) |> 
+  ungroup() |> 
+  mutate(data = map2(data, language, 
+                     \(d, l) d |> 
+                       mutate(lemma = lemmatize(item_definition, l)))) |> 
+  unnest(data) |> 
+  write_csv(here("resources", "lemmas.csv"))
+```
+
 
 # Load predictors
 
@@ -100,8 +115,30 @@ valence_map <- c(word = "Word", valence = "V.Mean.Sum", arousal = "A.Mean.Sum")
 valence <- uni_lemmas |> map_predictor("valence", valence_map)
 concreteness_map <- c(word = "Word", concreteness = "Conc.M")
 concreteness <- uni_lemmas |> map_predictor("concreteness", concreteness_map)
+sensorimotor_map <- c(word = "Word", sensorimotor = "Minkowski3.sensorimotor")
+sensorimotor <- uni_lemmas |> map_predictor("sensorimotor", sensorimotor_map)
 ```
 
+```{r emotionality_construct, eval=F}
+emotionality_replace <- read_csv(here("data", "predictors", "emotionality_replace.csv"))
+emotionality <- uni_lemmas |> 
+  select(uni_lemma) |> 
+  distinct() |> 
+  filter(!uni_lemma |> str_starts("[123]")) |> 
+  bind_rows(data.frame(uni_lemma = emotionality_replace$replacement)) |> 
+  mutate(uni_lemma = uni_lemma |> str_replace("\\s*\\([^\\)]+\\)", ""),
+         emotionality = affect3d(uni_lemma),
+         rationality = emotionality[, "rationality"],
+         social_impact = emotionality[, "social impact"],
+         valence = emotionality[, "valence"],
+         emotionality = abs(valence)) |> 
+  write_csv(here("data", "predictors", "emotionality.csv"))
+```
+
+```{r}
+emotionality_map <- c(word = "uni_lemma", emotionality = "emotionality")
+emotionality <- uni_lemmas |> map_predictor("emotionality", emotionality_map)
+```
 
 ## CHILDES
 
@@ -130,11 +167,12 @@ eng_metrics <- load_childes_metrics("English (American)", uni_lemmas)
 
 Creating saved CHILDES metrics for English, potentially changing which metrics are computed and/or arguments that are passed to `childesr` functions:
 ```{r specify_childes}
-metric_funs <- list(base = list(compute_count, compute_cd, 
+metric_funs <- list(base = list(compute_count, compute_transcript_diversity,
                                 compute_mlu, compute_positions,
-                                compute_length_char, compute_length_phon),
+                                compute_length_char, compute_length_phon,
+                                compute_burstiness),
                     parsed = list(compute_form_entropy, compute_subcat_entropy,
-                                  compute_n_features),
+                                  compute_n_features, compute_contextual_diversity),
                     morph = list(compute_n_morphemes))
 ```
 
@@ -180,18 +218,18 @@ childes_metrics <- childes_metrics |>
 
 ## Frequency transformations
 
-By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualize_freqs()` residualizes all columns that starts with "freq_" from the column "freq".
+By default, `transform_counts()` transforms any column that starts with "count" by smoothing (add 1), normalizing, and log transforming, then renaming every column "count_x" to "freq_x". `residualise_freqs()` residualises all columns that starts with "freq_" from the column "freq".
 
 ```{r prepare_frequency}
 childes_metrics <- childes_metrics |> 
   nest(data = -language) |> 
   mutate(data = map(data, transform_counts),
-         data = map(data, residualize_freqs))
+         data = map(data, residualise_freqs))
 ```
 
-```{r residualize}
-semantic_preds <- c("concreteness", "babiness")
-distrib_preds <- c("freq", "cd")
+```{r residualise, eval=F}
+semantic_preds <- c("concreteness", "babiness", "emotionality", "sensorimotor")
+distrib_preds <- c("freq", "context_diversity", "burstiness")
 phon_preds <- c("length_phon", "phon_neighbors")
 morph_preds <- c("form_entropy", "n_features", "n_morphemes")
 syntax_preds <- c("mlu", "subcat_entropy")
@@ -200,9 +238,12 @@ for (preds in list(distrib_preds, phon_preds, morph_preds, syntax_preds)) {
   childes_metrics <- childes_metrics |> 
     mutate(data = map(data, \(d) {
       d |> mutate(across(all_of(preds[-1]), 
-                         partial(residualize_col, 
-                                 residualizing_column = d |> pull(preds[1]))))}))
+                         partial(residualise_col, 
+                                 residualising_column = d |> pull(preds[1]))))}))
 }
+```
+
+```{r}
 childes_metrics <- childes_metrics |> unnest(data)
 ```
 
@@ -212,7 +253,8 @@ childes_metrics <- childes_metrics |> unnest(data)
 Combine mapped predictors and CHILDES predictors:
 
 ```{r merge_all}
-predictor_data_list <- list(babiness, concreteness, childes_metrics)
+predictor_data_list <- list(babiness, valence, concreteness, sensorimotor, 
+                            emotionality, childes_metrics)
 predictor_data <- predictor_data_list |>
   reduce(partial(full_join, by = c("language", "uni_lemma"))) 
 ```
@@ -221,12 +263,13 @@ predictor_data <- predictor_data_list |>
 
 ```{r set_predictors}
 predictor_sources <- list(
-  c("freq"), # "cd"
-  c("concreteness", "babiness"),
+  c("freq", "burstiness", "context_diversity"), # "cd"
+  c("concreteness", "babiness", "emotionality", "sensorimotor"),
   c("length_phon", "phon_neighbors"),
   c("n_features", "form_entropy", "subcat_entropy"), 
   c("n_morphemes"),
-  c("mlu"))
+  c("mlu"))# ,
+  # c("semantic_diversity", "semantic_support"))
 predictors <- unlist(predictor_sources)
 ```
 
@@ -238,6 +281,18 @@ ref_cat = "nouns"
 predictor_data_lexcat <- prep_lexcat(predictor_data, uni_lemmas, ref_cat) |>
   distinct()
 ```
+
+```{r}
+missingness <- predictor_data_lexcat |> 
+  group_by(language) |> 
+  summarise(across(all_of(predictors), \(x) sum(is.na(x)) / n())) |> 
+  pivot_longer(-c(language), names_to = "predictor", values_to = "prop_missing")
+ggplot(missingness, aes(y = predictor, x = prop_missing)) +
+  geom_point(aes(col = language)) +
+  labs(y = "Predictor", x = "Proportion missing") +
+  theme(legend.position = "bottom")
+```
+
 
 ```{r prep_data2}
 max_steps = 20
@@ -309,8 +364,8 @@ display_predictors <- function(predictors) {
     str_replace("Cd", "Contextual diversity")
 }
 
-term_fct <- c("Frequency",
-              "Concreteness", "Babiness",
+term_fct <- c("Frequency", "Burstiness", "Context diversity",
+              "Concreteness", "Babiness", "Sensorimotor", "Emotionality",
               "Length in phonemes", "Phon neighbours",
               "N features", "Form entropy", "N morphemes",
               "Subcat entropy", "MLU-w")
@@ -336,7 +391,8 @@ aoa_coefs <- aoa_models_lexcat |>
                             Morphological = c("N features", "Form entropy", "N morphemes"),
                             Syntactic = c("MLU-w", "Subcat entropy"),
                             Phonological = c("Length in phonemes", "Phon neighbours"),
-                            Other = c("Frequency", "Concreteness", "Babiness")) |>
+                            Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                            Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")) |>
       fct_rev() |>
       fct_shift(-2)) |>
   rename(estimate = MAP,
@@ -361,6 +417,12 @@ plot_coefs <- aoa_coefs |>
   mutate(signif = ifelse(conf.low < 0 & conf.high > 0,
                          "Not significant", "Significant"),
          language = factor(language, levels = target_langs))
+
+label_caps <- function(value) {
+  value |> 
+    str_to_sentence() |> 
+    str_replace_all("_", " ")
+}
 
 lc_plot <- aoa_coefs |>
   select(language, measure, term, estimate, lexical_category, term_cat) |>
@@ -431,7 +493,7 @@ cv_results <- loo_data |>
 ```
 
 
-
+## Morphological complexity
 ```{r morph_complexity}
 # Exploratory
 library(broom)
@@ -472,6 +534,543 @@ mc_vals <- expand_grid(measure = c("produces", "understands"),
   mutate(ci.low = estimate - std.error,
          ci.high = estimate + std.error,
          signif = !(ci.low < 0 & ci.high > 0))
+```
+
+## All-language model
+```{r, eval=F}
+aoa_predictor_alllang <- aoa_predictor_data |> 
+  mutate(n_morphemes = replace_na(n_morphemes, 0))
+
+aoa_model_alllang_fix <- fit_all_lang_model(predictors, aoa_predictor_alllang,
+                                            lexcat_interactions = TRUE)
+saveRDS(aoa_model_alllang_fix, "aoa_model_alllang_fix.rds")
+mod_all <- aoa_model_alllang_fix$model[[1]]
+```
+
+```{r, eval=F}
+aoa_model_alllang_nom <- fit_all_lang_model(predictors |> setdiff("n_morphemes"), aoa_predictor_data,
+                              lexcat_interactions = TRUE)
+saveRDS(aoa_model_alllang_nom, "aoa_model_alllang_nom.rds")
+```
+
+```{r}
+aoa_model_alllang_nom <- readRDS("aoa_model_alllang_nom.rds")
+mod_all <- aoa_model_alllang_nom$model[[1]]
+```
+
+```{r}
+term_fct <- c("Frequency", "Burstiness", "Context diversity", 
+              "Concreteness", "Sensorimotor", "Babiness", "Emotionality",
+              "Phon neighbours", "Length in phonemes",
+              "Form entropy", "N features",
+              "Subcat entropy", "MLU-w")
+```
+
+
+```{r}
+library(broom.mixed)
+library(tidybayes)
+library(bayestestR)
+mod_all_outputs <- tidy(mod_all)
+
+all_coefs <- mod_all_outputs |> 
+  filter(term != "Intercept") |>
+  mutate(
+    effect = if_else(str_detect(term, ":"), "interaction", "main"),
+    lexical_category = str_extract(term, "lexical_category[0-9]"),
+    type = case_when(
+      str_detect(term, "sd_") ~ "random",
+      str_detect(term, "cor_") ~ "correlation",
+      TRUE ~ "fixed"
+    ),
+    term = if_else(effect == "interaction",
+                   str_remove(term, ":?lexical_category[0-9]:?"),
+                   term) |>
+      str_replace("neighbor", "neighbour") |> 
+      str_remove("sd__") |> 
+      str_remove("cor__"),
+    term = term |>
+      factor() |>
+      fct_relabel(display_predictors) |>
+      fct_relevel(term_fct) |>
+      fct_rev(),
+    term_cat = fct_collapse(term,
+                            Morphological = c("N features", "Form entropy", "N morphemes"),
+                            Syntactic = c("MLU-w", "Subcat entropy"),
+                            Phonological = c("Length in phonemes", "Phon neighbours"),
+                            Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                            Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")) |>
+      fct_rev() |>
+      fct_shift(-2)) |> 
+  filter(type != "correlation")
+
+all_draws <- gather_draws(mod_all, `b_.*`, `r_.*`, regex=T) |> 
+  separate_wider_delim(.variable,
+                       names = c("variable", "language", "measure"),
+                       delim = regex("[\\[\\],]"),
+                       too_few = "align_start",
+                       too_many = "drop")
+all_draws_fixed <- all_draws |> 
+  filter(str_starts(variable, "b_")) |> 
+  mutate(variable = str_remove(variable, "b_"))
+all_draws_random <- all_draws |>
+  filter(str_starts(variable, "r_"))
+
+all_draws_est <- all_draws_random |> 
+  left_join(all_draws_fixed |> select(-language, -measure), 
+            by = join_by(.chain, .iteration, .draw, measure == variable)) |> 
+  mutate(estimate = .value.x + .value.y)
+```
+
+```{r}
+all_langs_est <- all_draws_est |> 
+  group_by(language, measure) |> 
+  summarise(map = map_estimate(estimate)$MAP_Estimate,
+            eap = mean(estimate),
+            sd = sd(estimate),
+            hdi = hdi(estimate),
+            eti = eti(estimate),
+            pct_rope = sum(-.1 <= estimate & estimate <= .1) / n()) |> 
+  mutate(hdi.lower = hdi$CI_low,
+         hdi.upper = hdi$CI_high,
+         eti.lower = eti$CI_low,
+         eti.upper = eti$CI_high,
+         reliability = sign(hdi.lower) == sign(hdi.upper)) |>
+  select(-hdi, -eti)
+all_fixed_est <- all_draws_fixed |> 
+  group_by(variable) |> 
+  rename(estimate = .value) |> 
+  summarise(map = map_estimate(estimate)$MAP_Estimate,
+            eap = mean(estimate),
+            sd = sd(estimate),
+            hdi = hdi(estimate),
+            eti = eti(estimate),
+            pct_rope = sum(-.1 <= estimate & estimate <= .1) / n()) |> 
+  mutate(hdi.lower = hdi$CI_low,
+         hdi.upper = hdi$CI_high,
+         eti.lower = eti$CI_low,
+         eti.upper = eti$CI_high,
+         reliability = sign(hdi.lower) == sign(hdi.upper)) |>
+  select(-hdi, -eti)
+```
+
+```{r}
+plot_all_langs <- all_langs_est |> 
+  filter(!str_detect(measure, "lexical_category"),
+         measure != "Intercept") |> 
+  rename(term = measure) |> 
+  mutate(language = str_replace_all(language, "\\.", " "),
+         term = term |>
+           str_replace("neighbor", "neighbour") |>
+           factor() |>
+           fct_relabel(display_predictors) |>
+           fct_relevel(term_fct) |>
+           fct_rev(),
+         language = factor(language, levels = target_langs),
+         term_cat = fct_collapse(term,
+                                 Morphological = c("N features", "Form entropy", "N morphemes"),
+                                 Syntactic = c("MLU-w", "Subcat entropy"),
+                                 Phonological = c("Length in phonemes", "Phon neighbours"),
+                                 Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                                 Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")),
+         reliability = ifelse(reliability, "Reliable", "Not reliable"))
+plot_fixed <- all_fixed_est |> 
+  filter(!str_detect(variable, "lexical_category"),
+         variable != "Intercept") |> 
+  rename(term = variable) |> 
+  mutate(term = term |>
+           str_replace("neighbor", "neighbour") |>
+           factor() |>
+           fct_relabel(display_predictors) |>
+           fct_relevel(term_fct) |>
+           fct_rev(),
+         term_cat = fct_collapse(term,
+                                 Morphological = c("N features", "Form entropy", "N morphemes"),
+                                 Syntactic = c("MLU-w", "Subcat entropy"),
+                                 Phonological = c("Length in phonemes", "Phon neighbours"),
+                                 Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                                 Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")))
+
+ggplot(plot_all_langs,
+       aes(x = map, y = term)) +
+  facet_grid(term_cat ~ ., scales = "free", space = "free") +
+  geom_rect(aes(xmin = -0.1, xmax = 0.1, ymin = -Inf, ymax = Inf), 
+            fill = "#e0e0e0", alpha = 0.2) +
+  geom_point(aes(col = language, shape = reliability), 
+             alpha = .7, size = 2) +
+  geom_crossbar(aes(xmin = map, xmax = map), 
+                width = 0.5, fatten = 2,
+                data = plot_fixed) +
+  geom_vline(xintercept = 0, color = "#606060", linetype = "dotted") +
+  labs(x = "Coefficient estimate", y = "", 
+       shape = "Reliability", color = "Language") +
+  theme_mikabr() +
+  coord_cartesian(xlim = c(-2.5, 2.5)) +
+  scale_shape_manual(values = c(21, 16))
+```
+
+Coefficient of variation
+```{r}
+coef_var <- all_draws_est |> 
+  group_by(.chain, .iteration, .draw, measure) |> 
+  summarise(mean = mean(.value.y),
+            sd = sd(estimate)) |> 
+  mutate(coef_of_var = sd / abs(mean))
+coef_var_est <- coef_var |> 
+  group_by(measure) |> 
+  summarise(map = map_estimate(coef_of_var, precision = 2^20)$MAP_Estimate,
+            eap = mean(coef_of_var),
+            sd = sd(coef_of_var),
+            hdi = hdi(coef_of_var),
+            eti = eti(coef_of_var),
+            pct_rope = sum(-.1 <= coef_of_var & coef_of_var <= .1) / n()) |> 
+  mutate(hdi.lower = hdi$CI_low,
+         hdi.upper = hdi$CI_high,
+         eti.lower = eti$CI_low,
+         eti.upper = eti$CI_high,
+         reliability = sign(hdi.lower) == sign(hdi.upper)) |>
+  select(-hdi, -eti)
+```
+
+
+```{r}
+plot_coef_var <- coef_var_est |> 
+  rename(variable = measure) |> 
+  filter(!str_detect(variable, "lexical_category"),
+         variable != "Intercept") |> 
+  rename(term = variable) |> 
+  mutate(term = term |>
+           str_replace("neighbor", "neighbour") |>
+           factor() |>
+           fct_relabel(display_predictors) |>
+           fct_relevel(term_fct) |>
+           fct_rev(),
+         term_cat = fct_collapse(term,
+                                 Morphological = c("N features", "Form entropy", "N morphemes"),
+                                 Syntactic = c("MLU-w", "Subcat entropy"),
+                                 Phonological = c("Length in phonemes", "Phon neighbours"),
+                                 Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                                 Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")))
+
+ggplot(plot_coef_var,
+       aes(x = map, y = term)) +
+  facet_grid(term_cat ~ ., scales = "free", space = "free") +
+  geom_pointrange(aes(xmin = hdi.lower, xmax = hdi.upper)) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dotted") +
+  labs(x = "Coefficient of variation", y = "") +
+  theme_mikabr() +
+  coord_cartesian(xlim = c(0, 10))
+```
+
+Lex cat plots
+```{r}
+all_langs_lexcat_est <- all_draws_est |> 
+  mutate(lexcat = str_extract(measure, "lexical_category[0-9]") |> 
+           replace_na("main"),
+         measure = str_remove(measure, ":?lexical_category[0-9]:?"),
+         measure = ifelse(measure == "", "Intercept", measure)) |> 
+  select(-.value.x, -.value.y) |>
+  pivot_wider(names_from = lexcat, values_from = estimate) |> 
+  mutate(nouns = main - lexical_category1 - lexical_category2,
+         predicates = main + lexical_category1,
+         function_words = main + lexical_category2) |> 
+  select(-main, -lexical_category1, -lexical_category2) |> 
+  pivot_longer(cols = c(nouns, predicates, function_words),
+               names_to = "lexical_category",
+               values_to = "estimate") |> 
+  group_by(language, measure, lexical_category) |> 
+  summarise(map = map_estimate(estimate)$MAP_Estimate,
+            eap = mean(estimate),
+            sd = sd(estimate),
+            hdi = hdi(estimate),
+            eti = eti(estimate),
+            pct_rope = sum(-.1 <= estimate & estimate <= .1) / n()) |> 
+  mutate(hdi.lower = hdi$CI_low,
+         hdi.upper = hdi$CI_high,
+         eti.lower = eti$CI_low,
+         eti.upper = eti$CI_high,
+         reliability = sign(hdi.lower) == sign(hdi.upper)) |>
+  select(-hdi, -eti)
+
+all_fixed_lexcat_est <- all_draws_fixed |> 
+  mutate(measure = variable,
+         lexcat = str_extract(measure, "lexical_category[0-9]") |> 
+           replace_na("main"),
+         measure = str_remove(measure, ":?lexical_category[0-9]:?"),
+         measure = ifelse(measure == "", "Intercept", measure)) |> 
+  select(-variable) |> 
+  rename(estimate = .value) |>
+  pivot_wider(names_from = lexcat, values_from = estimate) |> 
+  mutate(nouns = main - lexical_category1 - lexical_category2,
+         predicates = main + lexical_category1,
+         function_words = main + lexical_category2) |> 
+  select(-main, -lexical_category1, -lexical_category2) |> 
+  pivot_longer(cols = c(nouns, predicates, function_words),
+               names_to = "lexical_category",
+               values_to = "estimate") |> 
+  group_by(measure, lexical_category) |> 
+  summarise(map = map_estimate(estimate)$MAP_Estimate,
+            eap = mean(estimate),
+            sd = sd(estimate),
+            hdi = hdi(estimate),
+            eti = eti(estimate),
+            pct_rope = sum(-.1 <= estimate & estimate <= .1) / n()) |> 
+  mutate(hdi.lower = hdi$CI_low,
+         hdi.upper = hdi$CI_high,
+         eti.lower = eti$CI_low,
+         eti.upper = eti$CI_high,
+         reliability = sign(hdi.lower) == sign(hdi.upper)) |>
+  select(-hdi, -eti)
+
+plot_all_langs_lexcat <- all_langs_lexcat_est |> 
+  filter(measure != "Intercept") |> 
+  rename(term = measure) |> 
+  mutate(language = str_replace_all(language, "\\.", " "),
+         term = term |>
+           str_replace("neighbor", "neighbour") |>
+           factor() |>
+           fct_relabel(display_predictors) |>
+           fct_relevel(term_fct) |>
+           fct_rev(),
+         language = factor(language, levels = target_langs),
+         term_cat = fct_collapse(term,
+                                 Morphological = c("N features", "Form entropy", "N morphemes"),
+                                 Syntactic = c("MLU-w", "Subcat entropy"),
+                                 Phonological = c("Length in phonemes", "Phon neighbours"),
+                                 Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                                 Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")),
+         reliability = ifelse(reliability, "Reliable", "Not reliable"),
+         lexical_category = lexical_category |> 
+           factor(levels = c("nouns", "predicates", "function_words")) |> 
+           fct_relabel(\(x) {
+             x |> 
+               str_to_sentence() |> 
+               str_replace_all("_", " ")
+           }))
+
+plot_all_fixed_lexcat <- all_fixed_lexcat_est |> 
+  filter(measure != "Intercept") |> 
+  rename(term = measure) |> 
+  ungroup() |> 
+  mutate(term = term |>
+           str_replace("neighbor", "neighbour") |>
+           factor() |>
+           fct_relabel(display_predictors) |>
+           fct_relevel(term_fct) |>
+           fct_rev(),
+         term_cat = fct_collapse(term,
+                                 Morphological = c("N features", "Form entropy", "N morphemes"),
+                                 Syntactic = c("MLU-w", "Subcat entropy"),
+                                 Phonological = c("Length in phonemes", "Phon neighbours"),
+                                 Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                                 Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")),
+         reliability = ifelse(reliability, "Reliable", "Not reliable"),
+         lexical_category = lexical_category |> 
+           factor(levels = c("nouns", "predicates", "function_words")) |> 
+           fct_relabel(\(x) {
+             x |> 
+               str_to_sentence() |> 
+               str_replace_all("_", " ")
+           }))
+
+ggplot(plot_all_langs_lexcat,
+       aes(x = map, y = term)) +
+  facet_grid(term_cat ~ lexical_category, scales = "free", space = "free") +
+  geom_rect(aes(xmin = -0.1, xmax = 0.1, ymin = -Inf, ymax = Inf), 
+            fill = "#e0e0e0", alpha = 0.2) +
+  geom_point(aes(col = language, shape = reliability), alpha = .7) +
+  geom_crossbar(aes(xmin = map, xmax = map), 
+                width = 0.5, fatten = 2,
+                data = plot_all_fixed_lexcat) +
+  geom_vline(xintercept = 0, color = "#606060", linetype = "dotted") +
+  labs(x = "Coefficient estimate", y = "", 
+       shape = "Reliability", color = "Language") +
+  theme_mikabr() +
+  coord_cartesian(xlim = c(-3.5, 3.5)) +
+  scale_shape_manual(values = c(21, 16)) +
+  theme(legend.position = "none")
+```
+
+```{r}
+plot_all_fixed_lexcat |> 
+  arrange(lexical_category, term_cat, term) |> 
+  ggplot(aes(x = map, y = term)) +
+  facet_grid(term_cat ~ ., scales = "free", space = "free") +
+  geom_rect(aes(xmin = -0.1, xmax = 0.1, ymin = -Inf, ymax = Inf), 
+            fill = "#e0e0e0", alpha = 0.2) +
+  geom_point(aes(shape = reliability, col = lexical_category), size = 2.5) +
+  geom_path(aes(group = lexical_category, col = lexical_category), position = "identity") +
+  geom_vline(xintercept = 0, color = "#606060", linetype = "dotted") +
+  labs(x = "Coefficient estimate", y = "", 
+       shape = "Reliability", col = "Lexical category") +
+  theme_mikabr() +
+  coord_cartesian(xlim = c(-2, 2)) +
+  scale_shape_manual(values = c(21, 16))
+```
+
+## XGBoost
+```{r}
+library(xgboost)
+
+aoa_pred_data_xgb <- aoa_predictor_data |> 
+  select(language, lexical_category, all_of(predictors)) |> 
+  mutate(across(all_of(predictors), as.numeric),
+         lexical_category = as.integer(lexical_category),
+         language = language |> factor() |> as.integer()) |> 
+  as.matrix()
+aoa_pred_data_xgb_df <- aoa_predictor_data |> 
+  select(language, lexical_category, all_of(predictors)) |> 
+  mutate(across(all_of(predictors), as.numeric),
+         language = language |> factor())
+aoa_out_data_xgb <- aoa_predictor_data |> 
+  pull(aoa)
+```
+
+
+```{r eval=F}
+hyper_grid <- expand.grid(
+  eta = 0.1,
+  max_depth = 3:6, 
+  min_child_weight = 3,
+  subsample = 0.5, 
+  colsample_bytree = 0.5,
+  gamma = c(0, 1, 10, 100, 1000),
+  lambda = c(0, 1e-2, 0.1, 1, 10, 100),
+  alpha = c(0, 1e-2, 0.1, 1, 10, 100, 1000),
+  rmse = 0,          # a place to dump RMSE results
+  trees = 0          # a place to dump required number of trees
+)
+
+aoa_dtrain <- xgb.DMatrix(data = aoa_pred_data_xgb, label = aoa_out_data_xgb)
+# aoa_xgb_model <- xgboost(data = aoa_dtrain, 
+#                          nrounds = 1000, 
+#                          max_depth = 6, 
+#                          eta = 0.1, 
+#                          objective = "reg:squarederror", 
+#                          eval_metric = "rmse",
+#                          verbose = 1,
+#                          early_stopping_rounds = 50)
+# min(aoa_xgb_model$evaluation_log$train_rmse)
+
+# aoa_xgb_cv <- xgb.cv(data = aoa_dtrain, 
+#                             nrounds = 1000, 
+#                             max_depth = 6, 
+#                             eta = 0.1, 
+#                             objective = "reg:squarederror", 
+#                             eval_metric = "rmse",
+#                             verbose = 1,
+#                             early_stopping_rounds = 50,
+#                             nfold = 10)
+# min(aoa_xgb_cv$evaluation_log$test_rmse_mean)
+
+for (i in seq_len(nrow(hyper_grid))) {
+  set.seed(123)
+  message("Fitting model ", i, " of ", nrow(hyper_grid))
+  params <- hyper_grid[i, ]
+  aoa_xgb_cv <- xgb.cv(data = aoa_dtrain, 
+                       nrounds = 1000, 
+                       max_depth = params$max_depth, 
+                       eta = params$eta, 
+                       min_child_weight = params$min_child_weight,
+                       subsample = params$subsample, 
+                       colsample_bytree = params$colsample_bytree,
+                       gamma = params$gamma,
+                       lambda = params$lambda,
+                       alpha = params$alpha,
+                       objective = "reg:squarederror", 
+                       eval_metric = "rmse",
+                       verbose = FALSE,
+                       early_stopping_rounds = 50,
+                       nfold = 5)
+  hyper_grid$rmse[i] <- min(aoa_xgb_cv$evaluation_log$test_rmse_mean)
+  hyper_grid$trees[i] <- aoa_xgb_cv$best_iteration
+}
+```
+
+```{r}
+library(shapviz)
+
+best_xgb_params <- list(
+  learning_rate = 0.1,
+  max_depth = 5, 
+  min_child_weight = 3,
+  subsample = 0.5, 
+  colsample_bytree = 0.5,
+  min_split_loss = 100,
+  reg_lambda = 1,
+  reg_alpha = 100,
+  objective = "reg:squarederror",
+  eval_metric = "rmse"
+)
+```
+
+```{r eval=F}
+# doesn't work, too few data points
+aoa_nested <- aoa_predictor_data |> 
+  select(language, lexical_category, aoa, all_of(predictors)) |> 
+  mutate(lexical_category = lexical_category |> factor() |> as.numeric()) |> 
+  group_by(language) |> 
+  nest(aoas = aoa,
+       predictors = all_of(c("lexical_category", predictors))) |> 
+  mutate(dmat = map2(predictors, aoas, 
+                     ~ xgb.DMatrix(data = as.matrix(.x), label = .y$aoa)),
+         model = map(dmat, ~ xgb.train(data = .x, 
+                                       nrounds = 1000,
+                                       params = best_xgb_params)),
+         shap = map2(model, predictors, ~ shapviz(.x,
+                                                  X_pred = data.matrix(.y),
+                                                  interaction = TRUE)))
+```
+
+
+```{r}
+aoa_pred_dmat <- xgb.DMatrix(data = aoa_pred_data_xgb_df, label = aoa_out_data_xgb)
+
+# aoa_xgb_model <- xgboost(x = aoa_pred_data_xgb_df,
+#                          y = aoa_out_data_xgb,
+#                          nrounds = 1000,
+#                          max_depth = best_xgb_params$max_depth, 
+#                          learning_rate = best_xgb_params$eta, 
+#                          min_child_weight = best_xgb_params$min_child_weight,
+#                          subsample = best_xgb_params$subsample, 
+#                          colsample_bytree = best_xgb_params$colsample_bytree,
+#                          min_split_loss = best_xgb_params$gamma,
+#                          reg_lambda = best_xgb_params$lambda,
+#                          reg_alpha = best_xgb_params$alpha,
+#                          objective = "reg:squarederror", 
+#                          eval_metric = "rmse")
+
+aoa_xgb_model <- xgb.train(data = aoa_pred_dmat,
+                           nrounds = 1000,
+                           params = best_xgb_params)
+
+shap <- shapviz(aoa_xgb_model,
+                X_pred = data.matrix(aoa_pred_data_xgb_df),
+                interaction = TRUE)
+
+aoa_imp <- sv_importance(shap, max_display = 20)
+aoa_bee <- sv_importance(shap, kind = "bee", max_display = 20)
+```
+
+
+```{r eval=F}
+best_xgb_params <- hyper_grid |> 
+  filter(rmse == min(rmse)) |> 
+  select(-rmse, -trees)
+
+aoa_xgb_model <- xgboost(data = aoa_dtrain, 
+                         nrounds = 1000,
+                         max_depth = best_xgb_params$max_depth, 
+                         eta = best_xgb_params$eta, 
+                         min_child_weight = best_xgb_params$min_child_weight,
+                         subsample = best_xgb_params$subsample, 
+                         colsample_bytree = best_xgb_params$colsample_bytree,
+                         gamma = best_xgb_params$gamma,
+                         lambda = best_xgb_params$lambda,
+                         alpha = best_xgb_params$alpha,
+                         objective = "reg:squarederror", 
+                         eval_metric = "rmse",
+                         verbose = TRUE)
 ```
 
 
@@ -518,12 +1117,6 @@ ggplot(plot_coefs |> filter(!is.na(estimate), !is.na(term), term != "(Intercept)
 ```
 
 ```{r}
-label_caps <- function(value) {
-  value |> 
-    str_to_sentence() |> 
-    str_replace_all("_", " ")
-}
-
 ggplot(lc_plot |> 
          mutate(language = factor(language, levels = target_langs),
                 lexical_category = factor(lexical_category, levels = 

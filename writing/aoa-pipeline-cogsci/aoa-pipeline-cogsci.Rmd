@@ -22,8 +22,8 @@ abstract: >
 keywords: >
     language acquisition; word learning; vocabulary; cross-linguistic; age of acquisition
     
-output: cogsci2016::cogsci_paper
-#final-submission: \cogscifinalcopy
+output: cogsci2024::cogsci_paper
+final-submission: \cogscifinalcopy
 ---
 
 ```{r global_options, include=FALSE}
@@ -69,9 +69,9 @@ Second, of the 10 languages examined by @braginskyConsistencyVariabilityChildren
 As such, it is possible that some of the consistency that they observed was in fact due to structural similarities among Indo-European languages, as opposed to underlying patterns in language learning across languages regardless of language family.
 To have a more generalisable understanding of the factors driving early word learning, it is imperative to study a more diverse set of languages, representing more language families [see @kiddHowDiverseChild2022]. 
 
-Hence, the present study aims to capture a more comprehensive view of early word learning by including a broad set of predictors encompassing phonological, morphological, syntactic, and semantic levels of representation, as well as a large set of languages with particular emphasis on non-Indo-European languages. 
+Hence, the present study aims to capture a more comprehensive view of early word learning by including a broad set of predictors encompassing phonological, morphological, syntactic, and semantic levels of representation, as well as a large set of languages with emphasis on non-Indo-European languages. 
 We also examine the role of lexical categories, given the theoretical predictions that different lexical categories may be sensitive to different predictors. 
-We aim to answer two key research questions: (1) whether predictors are consistent across different languages, and (2) whether predictors are consistent across different lexical categories.
+We aim to answer two key research questions: (1) whether predictors are consistent across languages, and (2) whether predictors are consistent across lexical categories.
 Together, these directions will improve our characterisation of the consistency and variation in early word learning across languages. 
 
 # Method
@@ -105,14 +105,14 @@ An overview of the data used is shown in Figure \ref{fig:descriptives}.
 knitr::include_graphics("figs/descriptives.png")
 ```
 
-To conduct comparisons across languages, we mapped items to "universal lemmas" or "unilemmas", which are approximate cross-linguistic conceptual abstractions. 
+To compare across languages, we mapped items to "universal lemmas" or "unilemmas", which are approximate cross-linguistic conceptual abstractions. 
 For example, the items "chat" (FRA) and "gato" (SPA) map to the same unilemma, \textsc{cat}. 
-These unilemmas were first constructed from glosses provided by original dataset contributors, then verified by native or proficient speakers, and manually cleaned and consolidated to improve overall consistency; more information about unilemma construction can be found on Github [LINK REDACTED]. 
+These unilemmas were first constructed from glosses provided by original dataset contributors, then verified by native or proficient speakers, and manually cleaned and consolidated to improve overall consistency; more information about unilemma construction can be found on Github at [https://github.com/langcog/update_unilemmas](https://github.com/langcog/update_unilemmas). 
 Note that some items do not have corresponding unilemmas (e.g., language-specific items that were not relevant cross-linguistically); these items were dropped for analysis.
 
 From these data, we derived ages of acquisition (AoAs) by fitting Bayesian logistic regressions for each item, predicting word knowledge (produces vs does not produce; understands vs does not understand) from age. 
 We used weakly informative priors of $\mathcal{N}(0, 2.5)$ for the intercept and $\mathcal{N}(0.3, 0.01)$ for the slopes. 
-Then, the AoA is the earliest age at which 50% of children are expected to know the word, and can be calculated as the negative of the intercept divided by the slope from fitted models [see @braginskyUhohTomorrowPredicting2016].
+Then, the AoA is the age at which 50% of children are expected to know the word, calculated as the negative of the intercept divided by the slope from fitted models [see @braginskyUhohTomorrowPredicting2016].
 
 ## Predictors of age of acquisition
 
@@ -122,6 +122,7 @@ In addition, we used previously collected adult psycholinguistic norms for the s
 An overview of the data and resources used for each item property is shown in Figure \ref{fig:sources}.
 
 [^1]: Note that some of the languages (Hebrew and Russian) had CHILDES corpora that were transcribed in transliterated form instead of the original script; we used ad-hoc custom reverse transliteration scripts to enable matching to other resources.
+We also collapsed over dialects of a language, as dialectal information was not always clearly marked.
 
 ```{r sources}
 #| fig.env = "figure", 
@@ -147,7 +148,7 @@ We used two measures of morphological paradigmatic complexity, namely entropy ov
 For each item, we found all tokens in CHILDES which had the same lemma as the item, and calculated the Shannon entropy over the inflected forms [@coltekinWhatComplexityMeasures2023]. 
 The parsing also output morphological features in the Universal Dependencies format [@nivreUniversalDependencies2017], and we calculated the mean number of morphological features for each item as an approximation of the size of the inflectional paradigm.
 
-We also included one measure of morphological syntagmatic complexity, namely mean number of morphemes; this made use of morphological segmentation information from UniMorph. 
+We also included a measure of morphological syntagmatic complexity, namely mean number of morphemes; this used morphological segmentation information from UniMorph. 
 
 **Syntactic properties.** 
 For each item, we calculated the MLU-w for utterances in which the item appeared using CHILDES corpora, as a proxy for the syntactic complexity of the item. 
@@ -155,7 +156,7 @@ We also used UDPipe to parse the dependency structure of utterances, extracting 
 We then calculated the entropy over subcategorisation frames [@sharpeAutomaticAccessVerb2019].
 
 **Semantic properties.** 
-We used previously collected adult norms for concreteness [@brysbaertConcretenessRatings402014] and babiness [@perryIconicityEnglishSpanish2015] as our semantic predictors.
+We used previously collected adult norms for concreteness [@brysbaertConcretenessRatings402014] and babiness [@perryIconicityEnglishSpanish2015] as semantic predictors.
 
 **Distributional properties.** 
 We used CHILDES to calculate item unigram frequencies, which were Laplace smoothed and log-transformed.
@@ -211,11 +212,11 @@ ggplot(plot_coefs,
 ## Analysis
 
 We fit Bayesian linear models for each language, predicting the AoA of each item from all item properties and their interactions with lexical category. 
-The Bayesian approach allowed us to incorporate information from prior research, and also provided implicit regularisation for coefficients that may be underdetermined due to data sparsity.
-We used conservative informative priors based on coefficient values from @braginskyUhohTomorrowPredicting2016, which broadly fell in the range $(-2, 2)$; thus, we used a non-standardised $t$ distribution, $t(3, 0, 2)$, as priors for coefficients. 
-The resultant standardised coefficients for each item property would reflect its independent contribution to the AoA of the item, and interactions with lexical categories would reflect how this contribution varies across categories.
+This approach allowed us to incorporate information from prior research, and provided implicit regularisation for coefficients that may be underdetermined due to data sparsity.
+We used conservative informative priors based on coefficient values from @braginskyUhohTomorrowPredicting2016, which were broadly within $(-2, 2)$; thus, we used a non-standardised $t$ distribution, $t(3, 0, 2)$, as priors for coefficients. 
+The resultant standardised coefficients for each item property would reflect its independent contribution to an item's AoA, and interactions with lexical categories would reflect how this contribution varies across categories.
 
-All code for data processing and analysis can be found on Github [LINK REDACTED].
+All code for data processing and analysis can be found on Github at  [https://github.com/mikabr/aoa-pipeline](https://github.com/mikabr/aoa-pipeline).
 
 # Results
 
@@ -289,10 +290,10 @@ ggplot(dd_cor_all, aes(y = language, col = language_family)) +
        y = "Language")
 ```
 
-To understand the consistency and variability of predictors across languages, we calculated the correlations between the coefficients of the main effects for each language with all other languages, and with other languages within its language family (for language families with $\ge 2$ included languages), as shown in Figure \ref{fig:correlations}. 
+To understand the consistency and variability of predictors across languages, we calculated correlations between the coefficients of the main effects for each language with all other languages, and with other languages within its language family (for language families with $\ge 2$ included languages), as in Figure \ref{fig:correlations}. 
 The average correlation across languages was relatively high ($\bar{r}$ = `r dd_cor_gen |> pull(estimate) |> mean()`).
 Mean correlations within language families were broadly numerically greater than those across language families, indicating greater consistency within language families, except for families in which particular languages had more idiosyncratic predictor coefficients (English (British), Swedish, and Russian). 
-We also calculated a bootstrapped randomised baseline by permuting the predictor labels for coefficients within each language and recalculating correlations with other languages, representing correlations that would be expected by chance. 
+We also calculated a bootstrapped randomised baseline by permuting coefficient predictor labels within each language and recalculating correlations, representing correlations that would be expected by chance. 
 This baseline was consistently close to 0, and consistently smaller than observed correlations.
 
 ## Exploratory analysis: Morphological complexity
@@ -334,16 +335,17 @@ By examining the predictors of AoA across different languages, we found that wor
 We found that these effects were generally consistent across typologically diverse languages, suggesting that early word learning broadly taps on similar sources of linguistic information despite disparities in the realisations of such information across languages [see @braginskyConsistencyVariabilityChildren2019]. 
 
 In contrast, there was little evidence of any effect of morphosyntactic predictors. 
-This finding is surprising, given the diversity in morphosyntax across the languages included in our study. 
+This finding is surprising, given the diversity in morphosyntax across the languages in our study. 
 One possible explanation for the lack of a reliable effect is the operationalisation of our metrics. 
-When completing the CDI, caregivers may indicate that their child is able to say a word even if the specific produced form is reduced or otherwise idiosyncratic, and thus the child need not have a complete grasp of the word's inflectional paradigm.
-As such, we adopted metrics that were appropriate at the lemma level (e.g., information about the complexity of lemma paradigms). 
+When completing the CDI, caregivers may indicate that their child can say a word even if their produced form is reduced or otherwise idiosyncratic; thus the child need not have a complete grasp of the word's inflectional paradigm.
+As such, we adopted metrics that were appropriate at the lemma level (e.g., relating to the complexity of lemma paradigms). 
 Morphosyntactic predictors may not matter for the age of first production of an item, but may be more crucial for learning other aspects of morphosyntax, particularly in deploying appropriately inflected forms.
+It is also possible that other morphosyntactic factors [e.g., inflection class, @milinSimultaneousEffectsInflectional2009] may be more important in early word learning than the predictors in our current analysis.
 
-We also did not find an effect of phonological neighbourhood size, which contrasts with previous work suggesting that words with larger phonological neighbourhoods were more likely to be learnt [@fourtassiGrowthChildrenSemantic2020; @jonesChildrenReallyAcquire2019]. 
-In particular, @fourtassiGrowthChildrenSemantic2020 used a relatively similar method of calculation to the present study (considering only CDI words as potential neighbours and controlling for frequency), but still found an effect of phonological neighbourhood. 
+We also did not find an effect of phonological neighbourhood size, unlike previous work suggesting that words with larger phonological neighbourhoods were more likely to be learnt [@fourtassiGrowthChildrenSemantic2020; @jonesChildrenReallyAcquire2019]. 
+In particular, @fourtassiGrowthChildrenSemantic2020 used a similar calculation method to the present study (considering only CDI words as potential neighbours and controlling for frequency), but still found an effect of phonological neighbourhood. 
 The difference in results may be due to the fact that they restricted their analyses to CDI nouns, whereas we also included predicates and function words in our reference corpora.
-Further research is necessary to determine whether lexical category-specific phonological networks may be more relevant for early word learning.
+Further research is necessary to determine whether lexical category-specific phonological networks may be more relevant for early word learning [see also @beckageModelingLexicalAcquisition2015; @liEarlyLexicalDevelopment2004].
 
 Our results also demonstrated broad consistency across lexical categories, with some variation for particular predictors. 
 This variation supports the hypothesis that words from different lexical categories may be learnt in different ways, such that different word properties may contribute to differing extents. 
@@ -352,8 +354,8 @@ These results align with the predictions made by other theories of early languag
 Notably, syntactic bootstrapping theory [@gleitmanStructuralSourcesVerb1990] suggests that syntactic information may be more crucial for acquiring the meanings of function words, because young children acquiring function words have to infer their meaning based on their role in sentences, and that inference is easier for shorter sentences.
 Comparatively, noun semantics can be learnt more easily from direct cross-situational mapping [@monaghanGavagaiGavagaiDoes2015]. 
 
-Indeed, the differing roles of various predictors across lexical categories is also demonstrated by the relationship between morphological complexity and the effect of MLU-w, specifically for predicates (but not nouns or function words). 
-This finding provides some support for the competition model [@batesFunctionalistApproachesGrammar1982], which suggests that differential cue availability and reliability across languages may lead to differences in the AoA of different linguistic structures. 
+Indeed, the differing roles of predictors across lexical categories is also demonstrated by the relationship between morphological complexity and the effect of MLU-w, specifically for predicates (but not nouns or function words). 
+This result provides some support for the competition model [@batesFunctionalistApproachesGrammar1982], which suggests that differential cue availability and reliability across languages may lead to differences in the AoA of different linguistic structures. 
 For languages with greater morphological complexity, the reliability of morphological markers may lead to a lessened effect of syntactic complexity, and vice versa, suggesting a trade-off between the two dimensions of complexity [see @bentzComplexityTradeoffsEquicomplexity2022; but cf. @benitez-burracoAbsenceTradeoffMorphological2024]. 
 It is important to emphasise that this analysis is exploratory in nature, and the results should be interpreted with caution, especially because of the small number of data points.
 
@@ -362,11 +364,12 @@ In particular, we expanded the range of languages under consideration, using dat
 Nonetheless, there remained an Indo-European bias, and certain language families were also underrepresented, especially language families across Africa and Oceania; much more research in those languages is necessary for a truly comprehensive view of early word learning.
 
 Additionally, even for the languages included in our study, there was variation in the amount and quality of coverage for the different resources used. 
-For example, some languages have more UniMorph data on verbs than other lexical categories, which may have resulted in biassed predictor values. 
+For example, the CHILDES corpora were of different sizes and collected through different procedures, which may affect the degree to which these corpora reflect children's actual naturalistic input.
+Some languages also have more UniMorph data on verbs than other lexical categories, which may have resulted in biassed predictor values. 
 The consistency in observed predictor values suggests that such a potential bias was not very large in magnitude, but it remains crucial to increase resource availability in understudied languages to permit more accurate research.
 
-Nonetheless, the current work presents a case for the use of a diverse range of language samples to study the consistency and variability of early language learning across languages and across levels of representation. 
-It also provides an open, extensible pipeline that easily allows for the addition of other languages and predictors, enabling a range of applications both in cognitive science and in evaluating language models [e.g., @changWordAcquisitionNeural2022]
+Nonetheless, the current work presents a case for using diverse language samples to study the consistency and variability of early language learning across languages and across levels of representation. 
+It also provides an open, extensible pipeline that easily allows for the addition of other languages and predictors, enabling a range of applications both in cognitive science and in evaluating language models [e.g., @changWordAcquisitionNeural2022].
 Additionally, it is worth highlighting that this research was only made possible through the availability of multiple open data and open science resources, emphasising the importance of open science practices. 
 Continued advancements in data collection and sharing from a greater breadth of languages will certainly help to further our understanding of language acquisition in young children.
 

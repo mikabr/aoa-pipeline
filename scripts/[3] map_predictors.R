@@ -16,7 +16,8 @@ map_predictor <- function(uni_lemmas, predictor, variable_mapping) {
     select(names(variable_mapping)) |>
     group_by(word) |>
     # in case a word appears in the list twice
-    summarize(across({{ predictors }}, mean))
+    summarize(across({{ predictors }}, mean)) |>
+    mutate(word = tolower(word))
 
   # TODO: What do we do about things like "chips" and "can (auxiliary)"
   # chips doesnt match to "chip" and "can" gets the measures for "can (object)"

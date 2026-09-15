@@ -19,7 +19,7 @@ fit_aoas <- function(wb_data, max_steps = 200, min_aoa = 0, max_aoa = 72) {
   aoas <- wb_data |>
     mutate(num_false = total - num_true) |>
     nest(data = -c(language, measure, uni_lemma)) |>
-    mutate(aoas = map(data, fit_bglm)) |>
+    mutate(aoas = map(data, fit_bglm, .progress = "Fitting AoAs")) |>
     dplyr::select(-data) |>
     unnest(aoas) |>
     filter(aoa >= min_aoa, aoa <= max_aoa)
@@ -40,8 +40,8 @@ make_predictor_formula <- function(predictors, lexcat_interactions = TRUE,
   }
   if (all_lang) {
     predictors <- c(predictors,
-                    #paste("(", predictors, "|language)", sep = "")
-                    "(1|language)"
+                    glue("({paste(predictors, collapse = ' + ')}|language)")
+                    # "(1|language)"
                     )
   }
   glue("aoa ~ {paste(predictors, collapse = ' + ')}") |> as.formula()
@@ -59,7 +59,15 @@ fit_group_model <- function(predictors, group_data, lexcat_interactions = TRUE,
                                             morphcomp_interactions, all_lang)
   }
   if (all_lang) {
-    lmerTest::lmer(model_formula, group_data)
+    # lmerTest::lmer(model_formula, group_data)
+    brms::brm(model_formula,
+              group_data,
+              # prior = brms::prior(horseshoe(1), class = "b"),
+              prior = brms::prior(student_t(3, 0, 2), class = "b"),
+              control = list(adapt_delta = 0.95, max_treedepth = 12),
+              init_r = 0.1,
+              cores = if (parallel::detectCores() > 4) 4 else 1,
+              iter = 4000)
   } else {
     # lm(model_formula, group_data)
     # arm::bayesglm(model_formula,
@@ -70,8 +78,11 @@ fit_group_model <- function(predictors, group_data, lexcat_interactions = TRUE,
     #               scaled = FALSE)
     brms::brm(model_formula,
               group_data,
+              # prior = brms::prior(horseshoe(1), class = "b"),
               prior = brms::prior(student_t(3, 0, 2), class = "b"),
-              iter = 4000)
+              cores = if (parallel::detectCores() > 4) 4 else 1,
+              iter = 4000,
+              refresh = 0)
   }
 }
 
@@ -95,7 +106,8 @@ fit_models <- function(predictors, predictor_data, lexcat_interactions = TRUE,
            model = map2(group_data, predictors,
                         \(gd, preds) fit_group_model(preds, gd, lexcat_interactions,
                                                      morphcomp_interactions = FALSE,
-                                                     all_lang = FALSE, model_formula)),
+                                                     all_lang = FALSE, model_formula),
+                        .progress = TRUE),
            # coefs = map(model, broom.mixed::tidy),
            coefs = map(model, bayestestR::describe_posterior,
                        centrality = "MAP", ci_method = "HDI"),
@@ -117,8 +129,9 @@ fit_all_lang_model <- function(predictors, predictor_data,
              map(\(gd) fit_group_model(predictors, gd, lexcat_interactions,
                                        morphcomp_interactions,
                                        all_lang = TRUE, model_formula)),
-           coefs = map(model, broom::tidy),
-           stats = map(model, broom::glance),
+           coefs = map(model, bayestestR::describe_posterior,
+                       centrality = "MAP", ci_method = "HDI"),
+           stats = map(model, broom.mixed::glance),
            # alias = map(model, alias)
            # vifs = map(model, get_vifs)
     )

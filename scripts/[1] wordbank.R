@@ -1,11 +1,11 @@
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
-                            exclude_multilingual = TRUE, db_args = NULL) {
+                            exclude_multilingual = TRUE) {
   message(glue("Getting administrations for {language} {form}..."))
 
   admins <- get_administration_data(language = language,
                                     form = form,
                                     include_language_exposure = TRUE,
-                                    db_args = db_args)
+                                    version = "next")
 
   if (exclude_longitudinal) {
     # take earliest administration for any child with multiple administrations
@@ -26,14 +26,14 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
       filter(!is_multilingual)
   }
 
-  admins |> select(language, form, form_type, age, data_id)
+  admins |> select(language, form, form_type, age, data_id, dataset_name)
 }
 
-get_inst_words <- function(language, form, db_args = NULL) {
+get_inst_words <- function(language, form) {
   message(glue("Getting words for {language} {form}..."))
   items <- get_item_data(language = language,
                 form = form,
-                db_args = db_args) |>
+                version = "next") |>
     filter(item_kind == "word") |>
     # # split predicates into adjectives and verbs
     # # REVERTED: Chinese adjectives function like stative verbs, so this division is not cross-linguistically robust
@@ -85,7 +85,7 @@ get_inst_words <- function(language, form, db_args = NULL) {
   items
 }
 
-get_inst_data <- function(language, form, admins, items, db_args = NULL) {
+get_inst_data <- function(language, form, admins, items) {
   message(glue("Getting data for {language} {form}..."))
 
   # temp solution:
@@ -101,14 +101,24 @@ get_inst_data <- function(language, form, admins, items, db_args = NULL) {
                                    items = items$item_id,
                                    administration_info = admins,
                                    item_info = items,
-                                   db_args = db_args) |>
+                                   version = "next") |>
     select(-value) |>
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
     filter(measure == "produces" | form_type == "WG")
 
+  if (language == "French (French)" & form == "WS") {
+    inst_data <- inst_data |>
+      filter(dataset_name != "Kern")
+  }
+  if (language == "Mandarin (Beijing)" & form == "WS") {
+    inst_data <- inst_data |>
+      filter(dataset_name != "Tardif")
+  }
+
   inst_data |>
-    filter(!is.na(uni_lemma))
+    filter(!is.na(uni_lemma)) |>
+    select(-dataset_name)
 }
 
 collapse_inst_data <- function(inst_data) {
@@ -142,18 +152,17 @@ combine_form_data <- function(inst_summaries) {
     ungroup()
 }
 
-create_inst_data <- function(language, form, db_args = NULL) {
-  inst_admins <- get_inst_admins(language, form, db_args = db_args)
-  inst_words <- get_inst_words(language, form, db_args = db_args)
-  get_inst_data(language, form, inst_admins, inst_words, db_args = db_args)
+create_inst_data <- function(language, form) {
+  inst_admins <- get_inst_admins(language, form)
+  inst_words <- get_inst_words(language, form)
+  get_inst_data(language, form, inst_admins, inst_words)
 }
 
-create_wb_data <- function(language, write = TRUE, db_args = NULL) {
+create_wb_data <- function(language, write = TRUE) {
   lang <- language # for filter name scope issues
-  insts <- get_instruments(db_args = db_args)
+  insts <- get_instruments(version = "next")
   forms <- insts |>
-    filter(language == lang,
-           form != "WSOther") |> # hotfix for Arabic (Saudi)
+    filter(language == lang) |>
     pull(form)
   if (length(forms) == 0) {
     message(glue("\tNo instruments found for language {lang}, skipping."))
@@ -161,8 +170,7 @@ create_wb_data <- function(language, write = TRUE, db_args = NULL) {
   }
 
   lang_datas <- map(forms, partial(create_inst_data,
-                                   language = language,
-                                   db_args = db_args))
+                                   language = language))
   lang_summaries <- map(lang_datas, collapse_inst_data)
   lang_summary <- combine_form_data(lang_summaries)
 
@@ -173,7 +181,7 @@ create_wb_data <- function(language, write = TRUE, db_args = NULL) {
   return(lang_summary)
 }
 
-load_wb_data <- function(languages, cache = TRUE, db_args = NULL) {
+load_wb_data <- function(languages, cache = TRUE) {
   wb_data <- map_df(languages, function(lang) {
     norm_lang <- normalize_language(lang)
     lang_file <- here(wb_path, glue("{norm_lang}.rds"))
@@ -183,7 +191,7 @@ load_wb_data <- function(languages, cache = TRUE, db_args = NULL) {
     } else {
       if (cache) {
         message(glue("No cached Wordbank data for {lang}, getting and caching data."))
-        lang_data <- create_wb_data(lang, db_args = db_args)
+        lang_data <- create_wb_data(lang)
       } else {
         message(glue("No cached Wordbank data for {lang}, skipping."))
         lang_data <- tibble()

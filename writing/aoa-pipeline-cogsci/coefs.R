@@ -29,7 +29,8 @@ aoa_coefs <- aoa_models_lexcat |>
                             Morphological = c("N features", "Form entropy", "N morphemes"),
                             Syntactic = c("MLU-w", "Subcat entropy"),
                             Phonological = c("Length in phonemes", "Phon neighbours"),
-                            Other = c("Frequency", "Concreteness", "Babiness")) |>
+                            Distributional = c("Frequency", "Burstiness", "Context diversity"),
+                            Semantic = c("Concreteness", "Babiness", "Sensorimotor", "Emotionality")) |>
       fct_rev() |>
       fct_shift(-2)) |>
   rename(estimate = MAP,

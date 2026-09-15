@@ -20,33 +20,33 @@ transform_counts <- function(childes_metrics, smooth = TRUE, normalize = TRUE,
     rename_with(\(col) str_replace(col, "count", "freq"), starts_with("count"))
 }
 
-residualize_col <- function(target_column, residualizing_column) {
+residualise_col <- function(target_column, residualising_column) {
   if (all(is.na(target_column))) return(NA)
-  residuals <- lm(target_column ~ residualizing_column,
+  residuals <- lm(target_column ~ residualising_column,
                   na.action = na.exclude) |>
     residuals()
   return(residuals)
 }
 
-# residualize all columns that starts with "freq_" from the column "freq"
-residualize_freqs <- function(childes_metrics) {
+# residualise all columns that starts with "freq_" from the column "freq"
+residualise_freqs <- function(childes_metrics) {
   childes_metrics |>
-    mutate(across(starts_with("freq_"), partial(residualize_col, freq)))
+    mutate(across(starts_with("freq_"), partial(residualise_col, freq)))
 }
 
 
-residualize_morph <- function(lang, childes_metrics) {
-  residualized <- childes_metrics |>
+residualise_morph <- function(lang, childes_metrics) {
+  residualised <- childes_metrics |>
     filter(language == lang,
            !is.na(form_entropy),
            !is.na(n_features)) |>
-    mutate(n_features = residualize_col(n_features, form_entropy)) |>
+    mutate(n_features = residualise_col(n_features, form_entropy)) |>
     select(uni_lemma, n_features)
 
   childes_metrics |>
     filter(language == lang) |>
     select(-n_features) |>
-    left_join(residualized, by = "uni_lemma")
+    left_join(residualised, by = "uni_lemma")
 }
 
 ## Imputation
@@ -159,7 +159,13 @@ do_full_imputation <- function(model_data, predictor_sources, max_steps) {
 do_scaling <- function(model_data, predictors) {
   model_data |>
     #group_by(language) |>
-    mutate(across(all_of(predictors), \(x) as.numeric(scale(x))))
+    mutate(across(all_of(predictors), \(x) {
+      out <- as.numeric(scale(x))
+      if (all(is.nan(out))) {
+        out <- rep(0, length(x))
+      }
+      out
+    }))
 }
 
 
@@ -175,15 +181,16 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
                   select(language, item_definition, lexical_category) |>
                   distinct(),
                 by = c("language", "item_definition")) |>
-      mutate(lexical_category = coalesce(lexical_category.y, lexical_category.x),
-             lexical_category = ifelse(lexical_category %in% c("verbs", "adjectives"),
-                                       "predicates", lexical_category)) |>
+      mutate(lexical_category = coalesce(lexical_category.y, lexical_category.x)) |>
+             # lexical_category = ifelse(lexical_category %in% c("verbs", "adjectives"),
+             #                           "predicates", lexical_category)) |>
       select(language, uni_lemma, lexical_category, category, item_definition)
   }
 
   lexical_categories <- uni_lemmas_items |>
     distinct() |>
-    filter(!lexical_category == "other") # loss of 407 items
+    filter(lexical_category != "other",
+           category != "descriptive_words (adverbs)") # loss of 407 items
 
   # uni_lemmas with items in multiple categories are discarded
   lc_count <- lexical_categories |>
@@ -195,10 +202,15 @@ prep_lexcat <- function(predictor_data, uni_lemmas, ref_cat) {
     left_join(lc_count, by = c("language", "uni_lemma")) |>
     filter(!is.na(n_lexcat)) |>
     select(-n_lexcat) |>
-    mutate(lexical_category = lexical_category |> as_factor() |>
-             fct_relevel("nouns", "predicates", "function_words") |>
-             fct_relevel(ref_cat, after = Inf) |>
-             `contrasts<-`(value = contr.sum))
+    mutate(lexical_category = case_when(
+      category == "action_words" ~ "verbs",
+      category == "descriptive_words" ~ "adjectives",
+      category == "descriptive_words (adjectives)" ~ "adjectives",
+      .default = lexical_category
+    ) |> as_factor() |>
+      fct_relevel("nouns", "verbs", "adjectives", "function_words") |>
+      fct_relevel(ref_cat, after = Inf) |>
+      `contrasts<-`(value = contr.sum))
 
   predictor_data |>
     left_join(lexical_categories) |>

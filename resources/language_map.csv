@@ -1,11 +1,12 @@
 iso_name,wordbank,childes,snowball,hunspell,espeak,espeak-ng,unimorph,unimorph segmentation,unimorph derivation,morph complexity,udpipe
-Danish,Danish,dan,danish,da_DK,da,da,dan,NA,dan,dan,danish-ddt
+Danish,Danish,dan,danish,da_DK,da,da,dan,dan,dan,dan,danish-ddt
 English,English (American),eng,english,en_US,en-us,en-us,eng,eng,eng,eng,english-gum
 English,English (Australian),eng,english,en_AU,en,en,eng,eng,eng,eng,english-gum
 English,English (British),eng,english,en_GB,en,en,eng,eng,eng,eng,english-gum
+English,English (Irish),eng,english,en_GB,en,en,eng,eng,eng,eng,english-gum
 French,French (French),fra,french,fr_FR,fr,fr,fra,fra,fra,fra,french-gsd
 French,French (Quebecois),fra,french,fr_FR,fr,fr,fra,fra,fra,fra,french-gsd
-German,German,deu,german,de_DE,de,de,deu,deu,deu,deu,german-gsd
+German,German (German),deu,german,de_DE,de,de,deu,deu,deu,deu,german-gsd
 Italian,Italian,ita,italian,it_IT,it,it,ita,ita,ita,ita,italian-isdt
 Modern Greek,Greek (Cypriot),ell,greek,el_GR,el,el,ell,NA,ell,ell,greek-gdt
 Norwegian,Norwegian,nor,norwegian,no_NO,no,nb,nob,NA,nob,nob,norwegian-bokmaal
@@ -13,17 +14,19 @@ Portuguese,Portuguese (European),por,portuguese,pt_PT,pt-pt,pt,por,por,por,por,p
 Russian,Russian,rus,russian,ru_RU,ru,ru,rus,rus,rus,rus,russian-taiga
 Spanish,Spanish (European),spa,spanish,es_ES,es,es,spa,spa,spa,spa,spanish-ancora
 Spanish,Spanish (Mexican),spa,spanish,es_MX,es-la,es-419,spa,spa,spa,spa,spanish-ancora
+Spanish,Spanish (Argentinian),spa,spanish,es_MX,es-la,es-419,spa,spa,spa,spa,spanish-ancora
+Spanish,Spanish (Peruvian),spa,spanish,es_MX,es-la,es-419,spa,spa,spa,spa,spanish-ancora
 Swedish,Swedish,swe,swedish,sv_SE,sv,sv,swe,swe,swe,swe,swedish-talbanken
-Turkish,Turkish,tur,turkish,tr,tr,tr,tur,NA,tur,tur,turkish-imst
-Croatian,Croatian,hrv,NA,hr_HR,hr,hr,hbs,NA,hbs,hrv,croatian-set
+Turkish,Turkish,tur,turkish,tr,tr,tr,tur,tur,tur,tur,turkish-imst
+Croatian,Croatian,hrv,NA,hr_HR,hr,hr,hbs,hbs,hbs,hrv,croatian-set
 Czech,Czech,ces,NA,cs_CZ,cs,cs,ces,ces,ces,ces,czech-cac
 Mandarin Chinese,Mandarin (Beijing),zho,no need,no need,zh,cmn-Latn-pinyin,zho,zho,NA,cmn,chinese-gsdsimp
 Mandarin Chinese,Mandarin (Taiwanese),zho,no need,no need,zh,cmn-Latn-pinyin,zho,zho,NA,cmn,chinese-gsdsimp
 Yue Chinese,Cantonese,yue eng,no need,no need,zh-yue,yue,yue,yue,NA,yue,cantonese-hk
-Hebrew,Hebrew,heb,NA,he_IL,NA,he,heb,NA,NA,heb,hebrew-htb
-Korean,Korean,kor,NA,ko,NA,ko,kor,NA,NA,kor,korean-kaist
+Hebrew,Hebrew,heb,NA,he_IL,NA,he,heb,heb,NA,heb,hebrew-htb
+Korean,Korean,kor,NA,ko,NA,ko,kor,kor,NA,kor,korean-kaist
 Catalan,Catalan,cat,catalan,ca_ES,ca,ca,cat,cat,cat,cat,catalan-ancora
-Dutch,Dutch,nld,dutch,nl_NL,nl,nl,nld,NA,nld,nld,dutch-alpino
+Dutch,Dutch,nld,dutch,nl_NL,nl,nl,nld,nld,nld,nld,dutch-alpino
 Hungarian,Hungarian,hun,hungarian,hu_HU,hu,hu,hun,hun,hun,hun,hungarian-szeged
 Indonesian,NA,ind,indonesian,id_ID,id,id,ind,NA,NA,ind,indonesian-gsd
 Romanian,NA,ron,romanian,ro_RO,ro,ro,ron,NA,ron,ron,romanian-rrt
@@ -31,13 +34,13 @@ Tamil,NA,tam,tamil,ta,ta,ta,NA,NA,NA,tam,tamil-ttb
 Afrikaans,NA,afr,NA,af_ZA,af,af,afr,NA,NA,afr,afrikaans-afribooms
 Arabic,Arabic (Saudi),ara,arabic,ar,NA,ar,ara,NA,NA,arb,arabic-padt
 Basque,NA,eus,basque,eu,NA,eu,eus,NA,NA,eus,basque-bdt
-Finnish,NA,NA,finnish,fi_FI,fi,fi,fin,fin,fin,fin,finnish-tdt
+Finnish,Finnish,fin,finnish,fi_FI,fi,fi,fin,fin,fin,fin,finnish-tdt
 Hindi,NA,NA,hindi,hi_IN,hi,hi,hin,NA,NA,hin,hindi-hdtb
 Icelandic,NA,isl,NA,is,is,is,isl,NA,NA,isl,NA
-Irish,NA,gle,irish,ga_IE,NA,ga,gle,NA,gle,gle,irish-idt
+Irish,Irish,gle,irish,ga_IE,NA,ga,gle,NA,gle,gle,irish-idt
 Latvian,Latvian,NA,NA,lv_LV,lv,lv,lav,NA,lav,lav,latvian-lvtb
-Polish,NA,pol,NA,pl_PL,pl,pl,pol,pol,pol,pol,polish-lfg
-Serbian,NA,srp,NA,sr,sr,sr,hbs,NA,hbs,hrv,serbian-set
+Polish,Polish,pol,NA,pl_PL,pl,pl,pol,pol,pol,pol,polish-lfg
+Serbian,NA,srp,NA,sr,sr,sr,hbs,hbs,hbs,hrv,serbian-set
 Slovak,Slovak,NA,NA,sk_SK,sk,sk,slk,NA,NA,NA,slovak-snk
 Swahili,Kiswahili,NA,NA,sw_KE,sw,sw,swc,NA,NA,swh,NA
 Welsh,NA,cym,NA,cy_GB,cy,cy,cym,NA,NA,cym,NA
@@ -47,7 +50,7 @@ Armenian,NA,NA,NA,hy,hy,hy,hye,NA,hye,hye,armenian-armtdp
 Bosnian,NA,NA,NA,NA,bs,bs,NA,NA,NA,NA,NA
 British Sign Language,British Sign Language,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
 Esperanto,NA,NA,NA,eo_13,eo,eo,NA,NA,NA,NA,NA
-Estonian,Estonian,est,NA,et_EE,NA,et,est,NA,NA,est,estonian-edt
+Estonian,Estonian,est,NA,et_EE,NA,et,est,est,NA,est,estonian-edt
 Gaelic,NA,gla,NA,gd_GB,NA,gd,NA,NA,glg,NA,scottish_gaelic-arcosg
 Galician,NA,glg,NA,gl_ES,NA,NA,NA,NA,NA,NA,galician-treegal
 Georgian,NA,NA,NA,ka,ka,ka,kat,NA,NA,kat,NA
@@ -67,7 +70,7 @@ Marathi,NA,mar,NA,mr_IN,NA,mr,NA,NA,NA,mar,marathi-ufal
 Minnan,NA,nan,NA,NA,NA,NA,NA,NA,NA,NA,chinese-gsdsimp
 Nepali,NA,NA,nepali,ne_NP,NA,ne,NA,NA,NA,NA,NA
 Northwest Alaska Inupiatun,NA,esk,NA,NA,NA,NA,NA,NA,NA,NA,NA
-Persian,NA,fas,NA,fa,NA,fa,fas,NA,NA,pes,persian-seraji
+Persian,Persian,fas,NA,fa,NA,fa,fas,NA,NA,pes,persian-seraji
 Portuguese,NA,NA,NA,pt_BR,pt,pt-br,por,NA,NA,por,portuguese-br
 Quechua,NA,que,NA,NA,NA,qu,que,NA,NA,qvi,NA
 Slovenian,NA,slv,NA,sl_SI,NA,sl,slv,NA,NA,slv,slovenian-ssj

@@ -9,6 +9,7 @@ get_ipa <- function(word, lang, method = "espeak-ng") {
       return(ipa)
     } else {
       message(glue("Error in processing '{word}' in {lang}"))
+      return(NA_character_)
     }
   }
 }

@@ -1,120 +1,117 @@
-get_childes_data_jpn <- function(corpus_args) {
-  utt_fp <- here("data", "childes", "utterances_jpn.rds")
-  if (file.exists(utt_fp)) {
-    utterances_df <- readRDS(utt_fp)
+contains_japanese <- function(x) {
+  str_detect(replace_na(x, ""), "\\p{Hiragana}|\\p{Katakana}|\\p{Han}")
+}
+
+contains_latin <- function(x) {
+  str_detect(replace_na(x, ""), "[A-Za-z]")
+}
+
+clean_jpn_ort <- function(x) {
+  x |>
+    str_replace_all("\\[[^]]*\\]", " ") |>
+    str_replace_all("\\p{Punct}+", " ") |>
+    str_squish()
+}
+
+# Prefer %ort when the main gloss is romanized but ort is kana/kanji.
+apply_jpn_ort <- function(utterances) {
+  if (!"ort" %in% names(utterances)) return(utterances)
+  ort_clean <- clean_jpn_ort(utterances$ort)
+  use_ort <- contains_latin(utterances$gloss) &
+    contains_japanese(utterances$ort) &
+    !is.na(ort_clean) & ort_clean != ""
+  utterances |>
+    mutate(
+      gloss = if_else(use_ort, ort_clean, gloss),
+      num_tokens = if_else(
+        is.na(gloss) | gloss == "",
+        0L,
+        as.integer(str_count(gloss, "\\S+"))
+      )
+    )
+}
+
+tokens_from_jpn_utterances <- function(utterances, corpus_args) {
+  tokens_df <- utterances |>
+    filter(!is.na(gloss), gloss != "") |>
+    rename(utterance_type = type, utterance_id = id) |>
+    mutate(tokens = str_split(gloss, "\\s+")) |>
+    unnest_longer(tokens, values_to = "token", indices_to = "token_order") |>
+    filter(token != "") |>
+    mutate(
+      gloss = token,
+      prefix = "",
+      suffix = "",
+      english = "",
+      clitic = "",
+      id = row_number()
+    ) |>
+    select(id, gloss, language, token_order,
+           prefix, part_of_speech, stem,
+           actual_phonology, model_phonology,
+           suffix, num_morphemes,
+           english, clitic,
+           utterance_type, corpus_name,
+           speaker_code, speaker_name, speaker_role,
+           target_child_name, target_child_age, target_child_sex,
+           collection_name, collection_id, corpus_id,
+           speaker_id, target_child_id,
+           transcript_id, utterance_id, utterance_order)
+
+  if (!is.null(corpus_args$token) && !identical("*", corpus_args$token)) {
+    token_string <- paste0("gloss %like% '", corpus_args$token, "'",
+                           collapse = " | ")
+    tokens_df <- tokens_df |> filter(!!parse(text = token_string)[[1]])
+  }
+  tokens_df
+}
+
+get_childes_data_jpn <- function(corpus_args,
+                                 components = c("utterances", "tokens")) {
+  components <- intersect(components, c("utterances", "tokens"))
+  file_u <- here(childes_path, "utterances_jpn.rds")
+  file_u_orig <- here(childes_path, "utterances_jpn_orig.rds")
+  file_t <- here(childes_path, "tokens_jpn.rds")
+
+  if (file.exists(file_u_orig)) {
+    utterances_df <- readRDS(file_u_orig)
+  } else if (file.exists(file_u)) {
+    utterances_df <- readRDS(file_u)
+    saveRDS(utterances_df, file_u_orig)
   } else {
-    # Get and unzip CHAT files from CHILDES
-    jpn_path <- here("data", "childes", "Japanese")
-    if (length(list.dirs(jpn_path)) == 0) {
-      dir.create(jpn_path, showWarnings = FALSE)
-      system(glue("/opt/homebrew/bin/wget -nd -N -r -np -A.zip -o 'wget.log' ",
-                  "-e robots=off -P {jpn_path} ",
-                  "https://childes.talkbank.org/data/Japanese/"))
-      system(glue("/opt/homebrew/bin/wget -nd -N -r -np -A.zip -o 'wget.log' ",
-                  "-e robots=off -P {jpn_path} ",
-                  "https://phon.talkbank.org/data/Japanese/"))
-      system("cd data/childes/Japanese/; unzip '*.zip'; rm *.zip")
-    }
-
-    # Get Japanese collection from childes-db
-    utt_orig_fp <- here("data", "childes", "utterances_jpn_orig.rds")
-    if (file.exists(utt_orig_fp)) {
-      jpn_utterances <- readRDS(utt_orig_fp)
-    } else {
-      jpn_utterances <- get_utterances(collection = "Japanese",
-                                       corpus = corpus_args$corpus,
-                                       role = corpus_args$role,
-                                       role_exclude = corpus_args$role_exclude,
-                                       age = corpus_args$age,
-                                       sex = corpus_args$sex)
-      saveRDS(jpn_utterances, utt_orig_fp)
-    }
-
-    # Match orthographic representation to CHILDES
-    jpn_transcripts <- get_transcripts(collection = "Japanese")
-    ortho_utterances <- jpn_transcripts |>
-      mutate(ortho = lapply(filename, \(f) {
-        transcript <- read_lines(here("data", "childes", str_replace(f, "\\.xml", "\\.cha")))
-        ortho <- transcript[grep("%ort:\t", transcript)]
-        ortho_df <- tibble(utterance_order = seq_along(ortho),
-                           orthography = ortho) |>
-          mutate(orthography = orthography |>
-                   str_remove("%ort:\t") |>
-                   str_replace_all("(&=?(warau)?| ?([[:punct:]]|\\[.\\]))| \\[=! [a-z]* \\]", " ") |>
-                   str_squish())
-      })) |>
-      select(transcript_id, ortho) |>
-      unnest(ortho)
-
-    utterances_df <- jpn_utterances |>
-      left_join(ortho_utterances, by = c("transcript_id", "utterance_order")) |>
-      mutate(gloss = orthography) |>
-      select(-orthography) |>
-      filter(!is.na(gloss)) |>
-      mutate(num_tokens = str_count(gloss, " ") + 1)
-
-    saveRDS(utterances_df, utt_fp)
+    print("Getting CHILDES utterances")
+    utterances_df <- get_utterances(language = "jpn",
+                                    corpus = corpus_args$corpus,
+                                    role = corpus_args$role,
+                                    role_exclude = corpus_args$role_exclude,
+                                    age = corpus_args$age,
+                                    sex = corpus_args$sex)
+    saveRDS(utterances_df, file_u_orig)
   }
 
-  # Generate tokens dataframe
-  # NOTE: We don't match with tokens from `get_tokens` because the gloss
-  # representation sometimes doesn't line up with the orthographic representation;
-  # this typically happens when one word (without spaces) in the orthography is
-  # represented as two words (with a space in the middle) in the gloss, and there
-  # is no straightforward way to identify these instances systematically.
-  tok_fp <- here("data", "childes", "tokens_jpn.rds")
-  if (file.exists(tok_fp)) {
-    tokens_df <- readRDS(tok_fp)
-  } else {
-    make_tokens <- function(corpus, orthography) {
-      o <- orthography
-      if (is.na(o)) return(NA)
-      if (corpus %in% c("Yokoyama", "NINJAL-Okubo", "Noji",
-                        "Hamasaki", "Okayama", "MiiPro", "Miyata")) {
-        return(tibble(orthography = str_split(o, " ") |> unlist(),
-                      token_order = seq_along(orthography)))
-      } else {
-        return(tibble(orthography = quanteda::tokens(o)[[1]],
-                      token_order = seq_along(orthography)))
-      }
-    }
-
-    tokens_df <- utterances_df |>
-      rename(utterance_type = type,
-             utterance_id = id) |>
-      mutate(tokens = map2(corpus_name, gloss, make_tokens)) |>
-      unnest(tokens) |>
-      mutate(prefix = "",
-             suffix = "",
-             english = "",
-             clitic = "",
-             id = seq_along(token_order)) |>
-      select(id, gloss, language, token_order,
-             prefix, part_of_speech, stem,
-             actual_phonology, model_phonology,
-             suffix, num_morphemes,
-             english, clitic,
-             utterance_type,
-             corpus_name,
-             speaker_code, speaker_name, speaker_role,
-             target_child_name, target_child_age, target_child_sex,
-             collection_name, collection_id, corpus_id,
-             speaker_id, target_child_id,
-             transcript_id, utterance_id, utterance_order, orthography) |>
-      mutate(gloss = orthography) |>
-      select(-orthography) |>
-      filter(!is.na(gloss))
-
-    if (!is.null(corpus_args$token) && !identical("*", corpus_args$token)) {
-      token_string <- paste0("gloss %like% '", corpus_args$token, "'",
-                             collapse = " | ")
-      token_expr <- parse(text = token_string)[[1]]
-      tokens_df <- tokens_df |> filter(!!token_expr)
-    }
-    saveRDS(tokens_df, tok_fp)
+  utterances_swapped <- apply_jpn_ort(utterances_df)
+  cached_gloss <- if (file.exists(file_u)) readRDS(file_u)$gloss else NULL
+  swapped <- !identical(cached_gloss, utterances_swapped$gloss)
+  utterances_df <- utterances_swapped
+  if (swapped) {
+    saveRDS(utterances_df, file_u)
   }
 
-  return(list("utterances" = utterances_df, "tokens" = tokens_df))
+  tokens_df <- NULL
+  if ("tokens" %in% components) {
+    tokens_stale <- !file.exists(file_t) || swapped
+    if (!tokens_stale) {
+      tokens_df <- readRDS(file_t)
+      tokens_stale <- "gra_index" %in% names(tokens_df)
+    }
+    if (tokens_stale) {
+      tokens_df <- tokens_from_jpn_utterances(utterances_df, corpus_args)
+      saveRDS(tokens_df, file_t)
+    }
+  }
+
+  if (!"utterances" %in% components) utterances_df <- NULL
+  list(utterances = utterances_df, tokens = tokens_df)
 }
 
 get_childes_data_ara <- function(corpus_args) {
