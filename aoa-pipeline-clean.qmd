@@ -113,6 +113,76 @@ wb_data |>
   write_csv(here("resources", "lemmas.csv"))
 ```
 
+Example AoA plot
+```{r}
+df_ex <- wb_data |> 
+  filter(language == "English (American)",
+         measure == "produces", 
+         uni_lemma %in% c("dog", "jump", "tomorrow")) |> 
+  mutate(num_false = total - num_true,
+         prop = num_true / total,
+         prop_dist = abs(prop - 0.5))
+
+mod_bglm <- function(df) {
+  arm::bayesglm(cbind(num_true, num_false) ~ age,
+                family = "binomial",
+                prior.mean = .3,
+                prior.scale = c(.01),
+                prior.mean.for.intercept = 0,
+                prior.scale.for.intercept = 2.5,
+                prior.df = 1,
+                data = df,
+                maxit = 200)
+}
+
+mod_ex <- tibble(uni_lemma = c("dog", "jump", "tomorrow")) |> 
+  mutate(mod = map(uni_lemma, \(ul) {mod_bglm(df_ex |> filter(uni_lemma == ul))}),
+         preds = map(mod, \(m) {
+           tibble(age = seq(8, 36, by = .2)) |> 
+             mutate(prop = predict(m, newdata = tibble(age = seq(8, 36, by = .2)),
+                                   type = "response"))
+         })) |> 
+  select(-mod) |> 
+  unnest(preds)
+
+df_ex |> 
+  ggplot(aes(x = age, y = prop, col = uni_lemma)) +
+  geom_hline(yintercept = .5, lty = "dashed") +
+  geom_segment(aes(x = aoa, xend = aoa, yend = yend),
+               data = aoas |> 
+                 filter(language == "English (American)",
+                        measure == "produces",
+                        uni_lemma %in% c("dog", "jump", "tomorrow")) |> 
+                 mutate(prop = -0.1, yend = .5),
+               lty = "dashed") +
+  geom_point(alpha = .6) +
+  annotate("label",
+           x = 17, y = 0.75, label = "dog", col = "#f8776d") +
+  annotate("label",
+           x = 22, y = 0.63, label = "jump", col = "#00ba38") +
+  annotate("label",
+           x = 33, y = 0.3, label = "tomorrow", col = "#619cff") +
+  annotate("text",
+           x = 8, y = 0.95, label = "English (American)", 
+           hjust = 0, fontface = "italic") +
+  geom_line(data = mod_ex, linewidth = 1.5) +
+  coord_cartesian(ylim = c(0, 1), xlim = c(8, 36)) +
+  labs(x = "Age (months)", y = "Prop. of children producing word") +
+  theme(legend.position = "none")
+```
+
+```{r}
+aoas |> 
+  filter(measure == "produces") |> 
+  group_by(uni_lemma) |> 
+  summarise(n = n(),
+            aoa_mean = mean(aoa),
+            aoa_sd = sd(aoa)) |> 
+  ggplot(aes(x = aoa_mean, y = aoa_sd)) +
+  geom_point(alpha = .1)
+```
+
+
 
 # 2/3. Loading predictors and calculating metrics
 
@@ -256,7 +326,7 @@ childes_metrics <- childes_metrics |>
 ```
 
 We also optionally residualise predictors within category; this step was conducted in earlier versions of the pipeline, although later we opted not to residualise our predictors due to possible difficulties with downstream inference.
-```{r residualise, eval=T}
+```{r residualise, eval=F}
 semantic_preds <- c("concreteness", "babiness", "emotionality", "sensorimotor")
 distrib_preds <- c("freq", "context_diversity", "burstiness")
 phon_preds <- c("length_phon", "phon_neighbors")
@@ -357,8 +427,6 @@ n_by_lang <- n_by_lexcat |>
   summarise(n = sum(n))
 ```
 
-
-
 # 5. Modelling
 
 There are a range of different possible modelling approaches for AoA prediction; here we present three approaches that we have used:
@@ -375,7 +443,7 @@ This method is intuitive and interpretable, but suffers from the problem that di
 Nonetheless, we present it here for completeness, and because it may be useful for conducting AoA prediction for single languages.
 
 Run models (without and with lexical category as a predictor):
-```{r run_bylang_models, eval=T}
+```{r run_bylang_models, eval=F}
 aoa_models <- fit_models(predictors, aoa_predictor_data,
                          lexcat_interactions = FALSE)
 saveRDS(aoa_models, "outputs/aoa_models.rds")
@@ -527,7 +595,7 @@ This approach allows for more reasonable estimations, with a soft regularisation
 It is important to note the assumption that random slopes are approximately normally distributed; although this assumption is likely false since the languages in our data are not randomly sampled, in practice there is enough flexibility in the fitting process to have adequate fit for all languages.
 
 Run model:
-```{r run_alllang_model, eval=T}
+```{r run_alllang_model, eval=F}
 aoa_predictor_alllang <- aoa_predictor_data |> 
   mutate(n_morphemes = replace_na(n_morphemes, 0))
 
@@ -772,7 +840,7 @@ aoa_data_xgb <- aoa_predictor_data |>
 ```
 
 Cross-validation and hyperparameter search:
-```{r xgb_cv, eval=T}
+```{r xgb_cv, eval=F}
 hyper_grid <- expand.grid(
   objective = "reg:squarederror",
   eval_metric = "rmse",
@@ -993,6 +1061,15 @@ p_cor <- cor_all_long |>
 p_cor
 ```
 
+```{r}
+cor_all_long |> 
+  select(language, type, estimate) |> 
+  pivot_wider(names_from = type, values_from = estimate) |> 
+  mutate(within_better = fam > gen) |> 
+  count(within_better)
+```
+
+
 ## Morphological complexity
 We use the random slopes from the separate language models to examine the relationship between morphological complexity and the effect of morphosyntactic predictors on AoA.
 ```{r morph_complexity_bylang}
@@ -1009,7 +1086,7 @@ morph_coefs <- lc_plot |>
 
 lexcats <- c("Nouns", "Verbs", "Adjectives", "Function words")
 
-mc_mods <- map(c("produces", "understands"), \(y) {
+mc_mods_lc <- map(c("produces", "understands"), \(y) {
   map(ms_terms, \(x) {
     map(lexcats, \(lc) {
       arm::bayesglm(estimate ~ morph_complexity, 
@@ -1019,12 +1096,12 @@ mc_mods <- map(c("produces", "understands"), \(y) {
     })
   }) |> unlist(recursive = FALSE)
 }) |> unlist(recursive = FALSE)
-saveRDS(mc_mods, "outputs/mc_mods_bylang.rds")
+saveRDS(mc_mods_lc, "outputs/mc_mods_bylang.rds")
 
-mc_vals <- expand_grid(measure = c("produces", "understands"),
+mc_vals_lc <- expand_grid(measure = c("produces", "understands"),
                        ms_term = ms_terms,
                        lexical_category = lexcats) |> 
-  mutate(mc_data = map(mc_mods, broom.mixed::tidy)) |> 
+  mutate(mc_data = map(mc_mods_lc, broom.mixed::tidy)) |> 
   unnest(mc_data) |> 
   mutate(ci.low = estimate - std.error,
          ci.high = estimate + std.error,
@@ -1053,6 +1130,32 @@ ggplot(mlu_pred, aes(x = morph_complexity, y = estimate)) +
 ```
 
 ```{r}
+mc_vals_lc |> 
+  filter(term == "morph_complexity",
+         measure == "produces") |>
+  mutate(lexical_category = factor(lexical_category, levels = lexcats) |> 
+           fct_rev(),
+         reliability = ifelse(signif, "Reliable", "Not reliable")) |> 
+  arrange(ms_term, lexical_category) |> 
+  ggplot(aes(x = estimate, y = ms_term, col = lexical_category)) +
+  geom_rect(aes(xmin = -0.1, xmax = 0.1, ymin = -Inf, ymax = Inf), 
+            fill = "#e0e0e0", alpha = 0.2, col = NA) +
+  geom_vline(xintercept = 0, color = "#606060", linetype = "dotted") +
+  geom_errorbar(aes(xmin = ci.low, xmax = ci.high), 
+                width = 0,
+                position = position_dodge(.4)) +
+  geom_point(aes(shape = reliability, group = lexical_category),
+             position = position_dodge(.4)) +
+  scale_shape_manual(values = c(1, 16)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(x = "Morphosyntactic complexity effect",
+       y = "",
+       col = "Lexical category",
+       shape = "Reliability")
+```
+
+Overall
+```{r}
 morph_coefs_fixed <- plot_coefs |> 
   filter(term %in% ms_terms) |> 
   left_join(morph_complexity, by = join_by(language)) |> 
@@ -1079,8 +1182,13 @@ mc_vals <- expand_grid(measure = c("produces", "understands"),
 ```{r}
 p_morph <- morph_coefs_fixed |> 
   filter(measure == "produces") |> 
-  mutate(reliability = ifelse(term == "Subcat entropy", "Not reliable", "Reliable"),
-         term = term |> fct_rev()) |>
+  left_join(mc_vals |> 
+              filter(term == "morph_complexity", 
+                     measure == "produces") |> 
+              mutate(reliability = ifelse(signif, "Reliable", "Not reliable")) |> 
+              select(term = ms_term, reliability),
+            by = join_by(term)) |> 
+  mutate(term = factor(term, levels = ms_terms)) |> 
   ggplot(aes(x = morph_complexity, y = estimate)) +
   facet_wrap(term ~ .) +
   geom_hline(yintercept = 0, color = "grey", lty = "dotted") +

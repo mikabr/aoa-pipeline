@@ -34,6 +34,15 @@ get_childes_data <- function(childes_lang, corpus_args,
                                    role_exclude = corpus_args$role_exclude,
                                    age = corpus_args$age,
                                    sex = corpus_args$sex)
+      if (childes_lang == "yue") {
+        utt2 <- get_utterances(language = "yue eng",
+                               corpus = corpus_args$corpus,
+                               role = corpus_args$role,
+                               role_exclude = corpus_args$role_exclude,
+                               age = corpus_args$age,
+                               sex = corpus_args$sex)
+        utterances <- bind_rows(utterances, utt2)
+      }
       saveRDS(utterances, file_u)
     }
   }
@@ -50,6 +59,16 @@ get_childes_data <- function(childes_lang, corpus_args,
                            age = corpus_args$age,
                            sex = corpus_args$sex,
                            token = corpus_args$token)
+      if (childes_lang == "yue") {
+        tok2 <- get_tokens(language = "yue eng",
+                           corpus = corpus_args$corpus,
+                           role = corpus_args$role,
+                           role_exclude = corpus_args$role_exclude,
+                           age = corpus_args$age,
+                           sex = corpus_args$sex,
+                           token = corpus_args$token)
+        tokens <- bind_rows(tokens, tok2)
+      }
       saveRDS(tokens, file_t)
     }
   }

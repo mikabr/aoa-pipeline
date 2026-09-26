@@ -1,11 +1,13 @@
+default_version = "current"
+
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
-                            exclude_multilingual = TRUE) {
+                            exclude_multilingual = TRUE, wb_version = default_version) {
   message(glue("Getting administrations for {language} {form}..."))
 
   admins <- get_administration_data(language = language,
                                     form = form,
                                     include_language_exposure = TRUE,
-                                    version = "next")
+                                    version = wb_version)
 
   if (exclude_longitudinal) {
     # take earliest administration for any child with multiple administrations
@@ -29,66 +31,21 @@ get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
   admins |> select(language, form, form_type, age, data_id, dataset_name)
 }
 
-get_inst_words <- function(language, form) {
+get_inst_words <- function(language, form, wb_version = default_version) {
   message(glue("Getting words for {language} {form}..."))
   items <- get_item_data(language = language,
                 form = form,
-                version = "next") |>
+                version = wb_version) |>
     filter(item_kind == "word") |>
-    # # split predicates into adjectives and verbs
-    # # REVERTED: Chinese adjectives function like stative verbs, so this division is not cross-linguistically robust
-    # mutate(lexical_category = case_when(
-    #   str_detect(category, "descriptive_words") ~ "adjectives", # also catches Russian adverbs
-    #   category == "action_words" ~ "verbs",
-    #   .default = lexical_category
-    # )) |>
     select(language, form, item_kind, lexical_category, category,
            uni_lemma, item_definition, item_id)
 
-  # temporary, fix Mandarin (Beijing) WS issue
-  if (language == "Mandarin (Beijing)" && form == "WS") {
-    items$item_definition[534:537] <- c("球", "书", "小娃娃", "笔")
-  }
-
-  # temporary, to rescue failed form definition linking pre-cogsci
-  if (nrow(items) == 0) {
-    form_path <- here("resources", "temp_wb", glue("[{str_replace_all(language, '[ )(]', '')}_{form}].csv"))
-    if (file.exists(form_path)) {
-      items <- read_csv(form_path) |>
-        filter(type == "word") |>
-        mutate(language = language,
-               form = form,
-               form_type = str_sub(form, 1, 2),
-               complexity_category = NA,
-               lexical_category = case_when(
-                 category %in% c("vehicles", "animals", "body_parts",
-                                 "clothing", "toys", "food_drink",
-                                 "household", "furniture_rooms", "outside") ~ "nouns",
-                 category %in% c("action_words", "descriptive_words") ~ "predicates",
-                 category %in% c("pronouns", "quantifiers", "verb_endings",
-                                 "locations", "question_words", "quantifiers",
-                                 "helping_verbs", "connecting_words", "negation_words") ~ "function_words",
-                 category %in% c("sounds", "places", "people", "games_routines", "time_words") ~ "other",
-                 .default = NA
-               )) |>
-        select(item_id = itemID,
-               language, form, form_type,
-               item_kind = type,
-               category,
-               item_definition = definition,
-               english_gloss = gloss,
-               uni_lemma,
-               lexical_category,
-               complexity_category)
-    }
-  }
   items
 }
 
-get_inst_data <- function(language, form, admins, items) {
+get_inst_data <- function(language, form, admins, items, wb_version = default_version) {
   message(glue("Getting data for {language} {form}..."))
 
-  # temp solution:
   form_type = admins |> pull(form_type) |> unique() |> na.omit()
   if (length(form_type) != 1) {
     message(glue("form_type failure for {language} {form}"))
@@ -101,7 +58,7 @@ get_inst_data <- function(language, form, admins, items) {
                                    items = items$item_id,
                                    administration_info = admins,
                                    item_info = items,
-                                   version = "next") |>
+                                   version = wb_version) |>
     select(-value) |>
     pivot_longer(names_to = "measure", values_to = "value",
                  cols = c(produces, understands)) |>
@@ -158,9 +115,9 @@ create_inst_data <- function(language, form) {
   get_inst_data(language, form, inst_admins, inst_words)
 }
 
-create_wb_data <- function(language, write = TRUE) {
+create_wb_data <- function(language, write = TRUE, wb_version = default_version) {
   lang <- language # for filter name scope issues
-  insts <- get_instruments(version = "next")
+  insts <- get_instruments(version = wb_version)
   forms <- insts |>
     filter(language == lang) |>
     pull(form)
