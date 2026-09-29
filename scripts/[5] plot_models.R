@@ -22,11 +22,11 @@ display_predictors <- function(predictors) {
 }
 
 term_fct <- c(
-  "Frequency", "Burstiness", "Context diversity",
-  "Concreteness", "Babiness", "Sensorimotor", "Emotionality",
+  "Frequency", "Context diversity", "Burstiness",
+  "Concreteness", "Sensorimotor", "Babiness", "Emotionality",
   "Length in phonemes", "Phon neighbours",
-  "N features", "Form entropy", "N morphemes",
-  "Subcat entropy", "MDD", "MLU-w"
+  "N features", "N morphemes", "Form entropy",
+  "MLU-w", "MDD", "Subcat entropy"
 )
 
 standardise_terms <- function(df) {
@@ -76,5 +76,17 @@ summarise_draws <- function(grouped_draws) {
            eti.upper = eti$CI_high,
            reliability = sign(hdi.lower) == sign(hdi.upper)) |>
     select(-hdi, -eti)
+}
+
+median_cl_boot <- function(x, conf = 0.95) {
+  b_median <- function(data, indices) median(data[indices])
+  boot_res <- boot(data = x, statistic = b_median, R = 1000)
+  boot_ci <- boot.ci(boot_res, conf = conf, type = "perc")
+
+  tibble(
+    y = median(x),
+    ymin = boot_ci$percent[4],
+    ymax = boot_ci$percent[5]
+  )
 }
 

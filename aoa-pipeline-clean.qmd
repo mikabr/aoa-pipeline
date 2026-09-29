@@ -1,6 +1,8 @@
 ---
 title: "AoA Pipeline Template---Cleaned"
 format: pdf
+params: 
+  refit: true
 ---
 
 # Setup
@@ -20,6 +22,7 @@ library(childesr)
 library(quanteda)
 library(tmcn)
 ## modelling
+library(boot)
 library(modelr)
 library(broom.mixed)
 library(tidybayes)
@@ -112,76 +115,6 @@ wb_data |>
   unnest(data) |> 
   write_csv(here("resources", "lemmas.csv"))
 ```
-
-Example AoA plot
-```{r}
-df_ex <- wb_data |> 
-  filter(language == "English (American)",
-         measure == "produces", 
-         uni_lemma %in% c("dog", "jump", "tomorrow")) |> 
-  mutate(num_false = total - num_true,
-         prop = num_true / total,
-         prop_dist = abs(prop - 0.5))
-
-mod_bglm <- function(df) {
-  arm::bayesglm(cbind(num_true, num_false) ~ age,
-                family = "binomial",
-                prior.mean = .3,
-                prior.scale = c(.01),
-                prior.mean.for.intercept = 0,
-                prior.scale.for.intercept = 2.5,
-                prior.df = 1,
-                data = df,
-                maxit = 200)
-}
-
-mod_ex <- tibble(uni_lemma = c("dog", "jump", "tomorrow")) |> 
-  mutate(mod = map(uni_lemma, \(ul) {mod_bglm(df_ex |> filter(uni_lemma == ul))}),
-         preds = map(mod, \(m) {
-           tibble(age = seq(8, 36, by = .2)) |> 
-             mutate(prop = predict(m, newdata = tibble(age = seq(8, 36, by = .2)),
-                                   type = "response"))
-         })) |> 
-  select(-mod) |> 
-  unnest(preds)
-
-df_ex |> 
-  ggplot(aes(x = age, y = prop, col = uni_lemma)) +
-  geom_hline(yintercept = .5, lty = "dashed") +
-  geom_segment(aes(x = aoa, xend = aoa, yend = yend),
-               data = aoas |> 
-                 filter(language == "English (American)",
-                        measure == "produces",
-                        uni_lemma %in% c("dog", "jump", "tomorrow")) |> 
-                 mutate(prop = -0.1, yend = .5),
-               lty = "dashed") +
-  geom_point(alpha = .6) +
-  annotate("label",
-           x = 17, y = 0.75, label = "dog", col = "#f8776d") +
-  annotate("label",
-           x = 22, y = 0.63, label = "jump", col = "#00ba38") +
-  annotate("label",
-           x = 33, y = 0.3, label = "tomorrow", col = "#619cff") +
-  annotate("text",
-           x = 8, y = 0.95, label = "English (American)", 
-           hjust = 0, fontface = "italic") +
-  geom_line(data = mod_ex, linewidth = 1.5) +
-  coord_cartesian(ylim = c(0, 1), xlim = c(8, 36)) +
-  labs(x = "Age (months)", y = "Prop. of children producing word") +
-  theme(legend.position = "none")
-```
-
-```{r}
-aoas |> 
-  filter(measure == "produces") |> 
-  group_by(uni_lemma) |> 
-  summarise(n = n(),
-            aoa_mean = mean(aoa),
-            aoa_sd = sd(aoa)) |> 
-  ggplot(aes(x = aoa_mean, y = aoa_sd)) +
-  geom_point(alpha = .1)
-```
-
 
 
 # 2/3. Loading predictors and calculating metrics
@@ -370,7 +303,7 @@ predictor_sources <- list(
   c("freq", "burstiness", "context_diversity"),
   c("concreteness", "babiness", "emotionality", "sensorimotor"),
   c("length_phon", "phon_neighbors"),
-  c("n_features", "form_entropy", "subcat_entropy", "mdd"), 
+  c("n_features", "form_entropy", "subcat_entropy"), 
   c("n_morphemes"),
   c("mlu"))
 predictors <- unlist(predictor_sources)
@@ -416,6 +349,11 @@ aoa_predictor_data <- predictor_data_imputed_scaled |>
     `contrasts<-`(value = "contr.sum"))
 ```
 
+```{r}
+saveRDS(aoa_predictor_data, "outputs/aoa_predictor_data.rds")
+```
+
+
 Getting descriptive summaries
 ```{r descriptives}
 n_by_lexcat <- aoa_predictor_data |> 
@@ -443,7 +381,7 @@ This method is intuitive and interpretable, but suffers from the problem that di
 Nonetheless, we present it here for completeness, and because it may be useful for conducting AoA prediction for single languages.
 
 Run models (without and with lexical category as a predictor):
-```{r run_bylang_models, eval=F}
+```{r run_bylang_models, eval=params$refit}
 aoa_models <- fit_models(predictors, aoa_predictor_data,
                          lexcat_interactions = FALSE)
 saveRDS(aoa_models, "outputs/aoa_models.rds")
@@ -549,7 +487,7 @@ lc_plot |>
 lc_summary <- lc_plot |> 
   nest(data = c(language, estimate, n)) |> 
   mutate(est = map(data, \(d) {
-    d$estimate |> mean_cl_boot()
+    d$estimate |> median_cl_boot()
   })) |> 
   select(-data) |> 
   unnest(est) |> 
@@ -595,7 +533,7 @@ This approach allows for more reasonable estimations, with a soft regularisation
 It is important to note the assumption that random slopes are approximately normally distributed; although this assumption is likely false since the languages in our data are not randomly sampled, in practice there is enough flexibility in the fitting process to have adequate fit for all languages.
 
 Run model:
-```{r run_alllang_model, eval=F}
+```{r run_alllang_model, eval=params$refit}
 aoa_predictor_alllang <- aoa_predictor_data |> 
   mutate(n_morphemes = replace_na(n_morphemes, 0))
 
@@ -840,7 +778,7 @@ aoa_data_xgb <- aoa_predictor_data |>
 ```
 
 Cross-validation and hyperparameter search:
-```{r xgb_cv, eval=F}
+```{r xgb_cv, eval=params$refit}
 hyper_grid <- expand.grid(
   objective = "reg:squarederror",
   eval_metric = "rmse",
@@ -918,7 +856,7 @@ aoa_xgb_models <- aoa_data_xgb |>
 ```
 
 Get SHAP values
-```{r xgb_shap}
+```{r xgb_shap, eval=params$refit}
 aoa_shap <- aoa_xgb_models |> 
   mutate(shap = map2(model, pred_data,
                       \(model, pred_data) {
@@ -927,10 +865,17 @@ aoa_shap <- aoa_xgb_models |>
                                 interaction = TRUE)
                       }))
 
+saveRDS(aoa_shap, "outputs/aoa_shap.rds")
+
 # shap <- shapviz(aoa_xgb_model,
 #                 X_pred = data.matrix(aoa_pred_data_xgb_df),
 #                 interaction = TRUE)
 ```
+
+```{r}
+aoa_shap <- readRDS("outputs/aoa_shap.rds")
+```
+
 
 ```{r xgb_shap_plot}
 sv_importance(aoa_shap$shap[[1]], max_display = 20)
