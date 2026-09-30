@@ -272,7 +272,8 @@ compute_subcat_entropy <- function(parsed_data) {
            !str_detect(dep_rel, "nmod:poss")) |>
     mutate(dep_rel_clean = str_extract(dep_rel, "^[^:]+")) |>
     group_by(utterance_id, head_token_id) |>
-    summarise(subcat = paste(dep_rel_clean, collapse = "_"), .groups = "drop")
+    summarise(subcat = dep_rel_clean |> sort() |> paste(collapse = "+"),
+              .groups = "drop")
   items <- parsed_data |>
     select(utterance_id, token_id, lemma) |>
     left_join(frames, by = c("utterance_id", "token_id" = "head_token_id")) |>
@@ -290,23 +291,34 @@ compute_subcat_entropy <- function(parsed_data) {
 compute_mdd <- function(parsed_data) {
   print("Computing mean dependency distance")
 
-  dep_dist <- parsed_data |>
-    mutate(dist = ifelse(head_token_id == "0", 0,
-                         abs(as.numeric(head_token_id) - as.numeric(token_id))
-                         ))
-  dep_dist |>
+  by_lemma <- parsed_data |>
+    mutate(dist = if_else(
+      head_token_id == "0",
+      0,
+      abs(as.numeric(head_token_id) - as.numeric(token_id))
+    )) |>
     group_by(lemma) |>
-    summarise(mdd = mean(dist, na.rm = T)) |>
-    rename(token = lemma)
+    summarise(mdd = mean(dist, na.rm = TRUE), .groups = "drop")
+
+  parsed_data |>
+    distinct(token, lemma) |>
+    inner_join(by_lemma, by = "lemma") |>
+    group_by(token) |>
+    summarise(mdd = mean(mdd, na.rm = TRUE), .groups = "drop")
 }
 
 compute_n_features <- function(parsed_data) {
   print("Computing number of morphosyntactic features...")
 
   parsed_data |>
-    mutate(token = token,
-           n_features = str_count(replace_na(feats, ""), "\\|") + 1,
-           .keep = "none") |>
+    mutate(
+      token = token,
+      n_features = case_when(
+        is.na(feats) | feats %in% c("", "_") ~ 0,
+        TRUE ~ str_count(feats, "\\|") + 1
+      ),
+      .keep = "none"
+    ) |>
     group_by(token) |>
     summarise(n_features = mean(n_features, na.rm = TRUE), .groups = "drop")
 }

@@ -90,3 +90,56 @@ median_cl_boot <- function(x, conf = 0.95) {
   )
 }
 
+corpus_correlation_alternative <- function(main_coefs, morph_complexity,
+                                           n_boot = 1000) {
+  wide <- main_coefs |>
+    mutate(corpus = childes_corpus(language)) |>
+    filter(!is.na(corpus), corpus != "") |>
+    group_by(corpus, term) |>
+    summarise(estimate = mean(estimate), .groups = "drop") |>
+    left_join(
+      morph_complexity |>
+        mutate(corpus = childes_corpus(language)) |>
+        distinct(corpus, language_family),
+      by = "corpus"
+    ) |>
+    filter(!is.na(language_family)) |>
+    select(corpus, language_family, term, estimate) |>
+    pivot_wider(names_from = term, values_from = estimate)
+
+  families <- wide$language_family
+  mat <- wide |> select(-corpus, -language_family) |> as.matrix()
+  pair_r <- cor(t(mat), use = "pairwise.complete.obs")
+  fam_names <- unique(families)
+
+  weighted_mean_r <- function(counts) {
+    c_i <- as.numeric(counts[families])
+    n <- length(c_i)
+    num <- 0
+    den <- 0
+    for (i in seq_len(n - 1L)) {
+      for (j in (i + 1L):n) {
+        r <- pair_r[i, j]
+        if (is.na(r)) next
+        w <- if (families[i] == families[j]) c_i[i] else c_i[i] * c_i[j]
+        if (is.na(w) || w == 0) next
+        num <- num + w * r
+        den <- den + w
+      }
+    }
+    if (den == 0) NA_real_ else num / den
+  }
+
+  ones <- setNames(rep(1, length(fam_names)), fam_names)
+  boots <- map_dbl(seq_len(n_boot), \(b) {
+    drawn <- sample(fam_names, length(fam_names), replace = TRUE)
+    counts <- table(factor(drawn, levels = fam_names))
+    weighted_mean_r(counts)
+  })
+  tibble(
+    estimate = weighted_mean_r(ones),
+    ci.lb = unname(quantile(boots, 0.025, na.rm = TRUE)),
+    ci.ub = unname(quantile(boots, 0.975, na.rm = TRUE))
+  )
+}
+

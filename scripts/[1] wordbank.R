@@ -1,4 +1,4 @@
-default_version = "current"
+default_version = "next"
 
 get_inst_admins <- function(language, form, exclude_longitudinal = TRUE,
                             exclude_multilingual = TRUE, wb_version = default_version) {

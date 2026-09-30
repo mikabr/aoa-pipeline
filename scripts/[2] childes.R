@@ -133,7 +133,7 @@ compute_length_phon <- function(metric_data) {
               token_phonemes = list(token_phonemes))
 }
 
-compute_burstiness <- function(metric_data, n_perms = 10) {
+compute_burstiness <- function(metric_data) {
   neg_log_likelihood <- function(beta, tau_values) {
     if (beta <= 0) return(Inf)
 
@@ -148,43 +148,26 @@ compute_burstiness <- function(metric_data, n_perms = 10) {
   }
 
   fit_beta <- function(tau_values) {
-    if (length(tau_values) < 2) {
-      stop("Not enough tau values to fit beta")
-    }
-
-    result <- optimize(f = neg_log_likelihood,
-                       interval = c(0.01, 10),
-                       tau_values = tau_values)
-
-    return(result$minimum)
+    if (length(tau_values) < 2) return(NA_real_)
+    optimize(f = neg_log_likelihood,
+             interval = c(0.01, 10),
+             tau_values = tau_values)$minimum
   }
 
   print("Computing burstiness...")
 
-  # Keep only the columns the permutation loop needs; list-columns of all
-  # inter-arrival times for every token (the old approach) ballooned to tens
-  # of GB on English CHILDES.
-  metric_data <- metric_data |>
+  metric_data |>
     ungroup() |>
-    mutate(token = token, transcript_id = transcript_id, .keep = "none")
-
-  perm_metrics <- vector("list", n_perms)
-  for (perm in seq_len(n_perms)) {
-    set.seed(perm)
-    perm_metrics[[perm]] <- metric_data |>
-      group_by(transcript_id) |>
-      sample_frac(1) |>
-      ungroup() |>
-      mutate(token_num = row_number()) |>
-      group_by(token) |>
-      filter(n() > 2) |>
-      summarise(burstiness = fit_beta(diff(token_num)), .groups = "drop")
-    gc()
-  }
-
-  bind_rows(perm_metrics) |>
+    select(token, transcript_id) |>
+    group_by(transcript_id) |>
+    mutate(pos = row_number()) |>
+    group_by(transcript_id, token) |>
+    filter(n() > 2) |>
+    arrange(pos, .by_group = TRUE) |>
+    reframe(tau = diff(pos)) |>
     group_by(token) |>
-    summarise(burstiness = mean(burstiness, na.rm = TRUE), .groups = "drop")
+    filter(n() >= 2) |>
+    summarise(burstiness = fit_beta(tau), .groups = "drop")
 }
 
 compute_semantic_consistency <- function(metric_data) {

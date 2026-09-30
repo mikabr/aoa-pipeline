@@ -21,6 +21,17 @@ convert_lang_childes <- function(lang) {
   lang_map |> filter(wordbank == lang) |> pull(childes)
 }
 
+childes_corpus <- function(langs) {
+  map_chr(langs, \(lang) {
+    hit <- convert_lang_childes(as.character(lang))
+    if (length(hit) == 0 || is.na(hit[[1]]) || !nzchar(hit[[1]])) {
+      NA_character_
+    } else {
+      hit[[1]]
+    }
+  })
+}
+
 convert_lang_stemmer <- function(lang, method = "snowball") {
   lang_map |> filter(wordbank == lang) |> pull(!!method)
 }

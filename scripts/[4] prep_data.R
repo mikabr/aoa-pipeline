@@ -80,6 +80,7 @@ get_predictor_order <- function(lang_data, predictors, max_steps) {
     arrange(num_na) |>
     pull(predictor)
 
+  if (length(predictor_order) == 0) return(character())
   num_repeats <- max_steps %/% length(predictor_order) + 1
   return(rep(predictor_order, num_repeats)[0:max_steps])
 }
@@ -93,24 +94,21 @@ get_imputation_seed <- function(lang_data, predictors) {
 
 # takes in a predictor from the list of predictors, pulls the imputation data at
 # current status, returns a new imputation data
-do_iterate_imputation <- function(pred_sources, imputation_data, missing) {
-  prediction_list <- unlist(pred_sources)
-  # iterates through the predictor list for that language
-  for (pred in prediction_list) {
-
+do_iterate_imputation <- function(pred_sources, imputation_data, missing,
+                                 predictor_list) {
+  for (pred in predictor_list) {
     imputation_fits <- fit_predictor(pred, imputation_data, pred_sources)
     imputation_data <- missing |>
-      select(uni_lemma, lexical_category, category, !!pred) |>
-      rename(missing = !!pred) |>
+      select(uni_lemma, lexical_category, category, all_of(pred)) |>
+      rename(missing = all_of(pred)) |>
       right_join(imputation_data,
                  by = c("uni_lemma", "lexical_category", "category")) |>
       left_join(imputation_fits,
                 by = c("uni_lemma", "lexical_category", "category")) |>
-      # if the value is missing, replace it with the new value
-      mutate(across(all_of(pred), ~ ifelse(is.na(missing), .fitted, .x))) |>
+      mutate("{pred}" := if_else(missing %in% TRUE, .fitted, .data[[pred]])) |>
       select(-.fitted, -missing)
   }
-  return(imputation_data)
+  imputation_data
 }
 
 do_lang_imputation <- function(lang, data, pred_sources, max_steps) {
@@ -125,7 +123,7 @@ do_lang_imputation <- function(lang, data, pred_sources, max_steps) {
   missing_data <- get_missing_data(data, predictors)
   imputed_data <- get_imputation_seed(data, predictors)
   imputed_data <- do_iterate_imputation(pred_sources, imputed_data,
-                                        missing_data)
+                                        missing_data, predictor_list)
   scaled_data <- do_scaling(imputed_data, predictors)
   return(scaled_data)
 }

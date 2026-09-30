@@ -38,8 +38,82 @@ num_chars <- function(words) {
   map_dbl(words, ~gsub("[[:punct:]]", "", .x) |> nchar() |> mean())
 }
 
-count_phon_neighbors <- function(ipa, ipa_list, radius) {
-  (adist(ipa, ipa_list |> unlist()) <= 2) |> sum() - 1
+segment_ipa <- function(ipa) {
+  if (length(ipa) != 1 || is.na(ipa) || !nzchar(ipa)) return(character())
+  ipa <- str_remove_all(ipa, "[ˈˌ0-9]")
+  chars <- stringi::stri_split_boundaries(ipa, type = "character")[[1]]
+  chars <- chars[nzchar(chars)]
+  if (length(chars) == 0) return(character())
+  out <- chars[1]
+  if (length(chars) == 1) return(out)
+  for (ch in chars[-1]) {
+    if (ch %in% c("ː", "ˑ", "͡") || str_ends(out[length(out)], "͡")) {
+      out[length(out)] <- paste0(out[length(out)], ch)
+    } else {
+      out <- c(out, ch)
+    }
+  }
+  out
+}
+
+n_segments <- function(ipa_strings) {
+  ipa_strings <- unlist(ipa_strings)
+  ipa_strings <- ipa_strings[!is.na(ipa_strings) & nzchar(ipa_strings)]
+  if (length(ipa_strings) == 0) return(NA_real_)
+  mean(map_dbl(ipa_strings, \(s) length(segment_ipa(s))))
+}
+
+phon_neighborhoods <- function(ipa_list, lemmas, radius = 2) {
+  pronunciations <- map2(ipa_list, lemmas, \(ipa, lemma) {
+    ipa <- unlist(ipa)
+    ipa <- ipa[!is.na(ipa) & nzchar(ipa)]
+    tibble(uni_lemma = lemma, ipa = ipa)
+  }) |>
+    list_rbind()
+
+  if (nrow(pronunciations) == 0) return(rep(NA_real_, length(lemmas)))
+
+  segs <- map(pronunciations$ipa, segment_ipa)
+  inventory <- unique(unlist(segs))
+  if (length(inventory) == 0) return(rep(NA_real_, length(lemmas)))
+  codes <- intToUtf8(0xE000 + seq_along(inventory) - 1L, multiple = TRUE)
+  names(codes) <- inventory
+  pronunciations <- pronunciations |>
+    mutate(encoded = map_chr(segs, \(p) {
+      if (length(p) == 0 || anyNA(codes[p])) "" else paste0(codes[p], collapse = "")
+    })) |>
+    filter(nzchar(encoded))
+
+  by_lemma <- pronunciations |>
+    group_by(uni_lemma) |>
+    summarise(forms = list(encoded), .groups = "drop")
+  n <- nrow(by_lemma)
+  counts <- map_dbl(seq_len(n), \(i) {
+    self <- by_lemma$forms[[i]]
+    others <- by_lemma$forms[-i]
+    if (length(others) == 0) return(0)
+    sum(map_dbl(others, \(o) min(adist(self, o))) <= radius)
+  })
+  names(counts) <- by_lemma$uni_lemma
+  unname(counts[as.character(lemmas)])
+}
+
+compute_phon_metrics <- function(phon_data, radius = 2) {
+  phon_data <- phon_data |>
+    nest(items = -language) |>
+    mutate(items = map(items, \(w) {
+      w |> mutate(phon_neighborhood = phon_neighborhoods(str_phons, uni_lemma, radius))
+    })) |>
+    unnest(items)
+
+  phon_data |>
+    mutate(num_char = num_chars(cleaned_words),
+           num_phon = map_dbl(str_phons, n_segments)) |>
+    group_by(language, uni_lemma) |>
+    summarise(num_chars = mean(num_char, na.rm = TRUE),
+              num_phons = mean(num_phon, na.rm = TRUE),
+              phon_neighbors = mean(phon_neighborhood, na.rm = TRUE),
+              .groups = "drop")
 }
 
 # some predictors are sensitive to the word, not the uni-lemma, e.g. pronunciation
@@ -47,6 +121,7 @@ count_phon_neighbors <- function(ipa, ipa_list, radius) {
 
 # clean_words(c("dog", "dog / cat", "dog (animal)", "(a) dog", "dog*", "dog(go)", "(a)dog", " dog ", "Cat"))
 clean_words <- function(word_set){
+  word_set <- str_remove(word_set, "^[A-Z] Words for .+? -\\s*\\d+\\s*")
   word_set |>
     # dog / doggo -> c("dog", "doggo")
     strsplit("/") |> flatten_chr() |>
@@ -74,6 +149,8 @@ clean_words <- function(word_set){
     unique()
 }
 
+checklist_boilerplate <- function(s) str_detect(s, "^[A-Z] Words for ")
+
 map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
                          write = TRUE) {
   phon_path <- here("data", "predictors", "phonology.rds")
@@ -85,7 +162,7 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
       unnest(cols = "items") |>
       left_join(uni_phons_cached,
                 by = uni_cols) |>
-      filter(sapply(phons, is.null)) |>
+      filter(sapply(phons, is.null) | checklist_boilerplate(item_definition)) |>
       select(all_of(uni_cols))
 
     if (nrow(uni_lemmas_new) == 0) return(uni_phons_cached)
@@ -120,7 +197,7 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
 
   if (file.exists(phon_path)) {
     uni_phons_fixed <- uni_phons_fixed |>
-      bind_rows(uni_phons_cached)
+      bind_rows(uni_phons_cached |> filter(!checklist_boilerplate(item_definition)))
   }
 
   if (write) {
@@ -128,30 +205,4 @@ map_phonemes <- function(uni_lemmas, method = "espeak-ng", radius = 2,
   }
 
   uni_phons_fixed
-}
-
-compute_phon_metrics <- function(phon_data) {
-  # compute phonological neighborhood
-  phon_data <- phon_data |>
-    nest(items = -language) |>
-    mutate(items = lapply(items, \(w) {
-      w |> mutate(phon_neighborhood = sapply(str_phons, \(x) {
-        lapply(x, \(y) {
-          count_phon_neighbors(y, w$str_phons, radius)
-        }) |>
-          unlist() |>
-          mean(na.rm = T)
-      }))
-    })) |>
-    unnest(cols = items)
-
-  # get lengths
-  uni_lengths <- phon_data |>
-    mutate(num_char = num_chars(cleaned_words),
-           num_phon = num_chars(str_phons)) |>
-    group_by(language, uni_lemma) |>
-    summarize(num_chars = mean(num_char, na.rm = TRUE),
-              num_phons = mean(num_phon, na.rm = TRUE),
-              phon_neighbors = mean(phon_neighborhood, na.rm = TRUE))
-  return(uni_lengths)
 }

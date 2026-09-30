@@ -109,16 +109,16 @@ dd_cor_gen <- dd_cor_long |>
   filter(language_1 != language_2) |>
   group_by(language_1) |>
   summarise(estimate = mean(value),
-            ci.lb = mean(value) - 0.95 * sd(value) / sqrt(n()),
-            ci.ub = mean(value) + 0.95 * sd(value) / sqrt(n()))
+            ci.lb = mean(value) - qnorm(0.975) * sd(value) / sqrt(n()),
+            ci.ub = mean(value) + qnorm(0.975) * sd(value) / sqrt(n()))
 
 dd_cor_fam <- dd_cor_long |>
   filter(language_1 != language_2,
          family_1 == family_2) |>
   group_by(language_1) |>
   summarise(estimate = mean(value),
-            ci.lb = mean(value) - 0.95 * sd(value) / sqrt(n()),
-            ci.ub = mean(value) + 0.95 * sd(value) / sqrt(n()))
+            ci.lb = mean(value) - qnorm(0.975) * sd(value) / sqrt(n()),
+            ci.ub = mean(value) + qnorm(0.975) * sd(value) / sqrt(n()))
 
 dd_cor_rand <- lapply(seq(100), \(i) {
   apply(dd_matrix, 1, sample) |>
@@ -130,8 +130,8 @@ dd_cor_rand <- lapply(seq(100), \(i) {
   bind_rows() |>
   group_by(language_1) |>
   summarise(estimate = mean(value),
-            ci.lb = mean(value) - 0.95 * sd(value) / sqrt(n()),
-            ci.ub = mean(value) + 0.95 * sd(value) / sqrt(n()))
+            ci.lb = mean(value) - qnorm(0.975) * sd(value) / sqrt(n()),
+            ci.ub = mean(value) + qnorm(0.975) * sd(value) / sqrt(n()))
 
 dd_cor_all <- dd_cor_gen |>
   left_join(dd_cor_fam, by = "language_1", suffix = c("", "_fam")) |>

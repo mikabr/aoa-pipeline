@@ -232,14 +232,14 @@ childes_metrics <- load_childes_metrics(target_langs, uni_lemmas) |>
 ```
 
 ## Phonological metrics
-Get phonology via eSpeak for tokens that didn't get it from CHILDES:
+eSpeak citation-form phoneme counts are the length measure. CHILDES `actual_phonology` character length is used only when eSpeak is missing.
 ```{r phonology}
 phon_data <- uni_lemmas |> filter(uni_lemma != "NA") |> map_phonemes()
 phon_metrics <- phon_data |> compute_phon_metrics()
 childes_metrics <- childes_metrics |>
   left_join(phon_metrics, by = c("language", "uni_lemma")) |>
   mutate(length_char = coalesce(length_char, num_chars),
-         length_phon = coalesce(length_phon, num_phons)) |>
+         length_phon = coalesce(num_phons, length_phon)) |>
   select(-c(num_chars, num_phons))
 ```
 
@@ -303,7 +303,7 @@ predictor_sources <- list(
   c("freq", "burstiness", "context_diversity"),
   c("concreteness", "babiness", "emotionality", "sensorimotor"),
   c("length_phon", "phon_neighbors"),
-  c("n_features", "form_entropy", "subcat_entropy"), 
+  c("n_features", "form_entropy", "subcat_entropy", "mdd"), 
   c("n_morphemes"),
   c("mlu"))
 predictors <- unlist(predictor_sources)
@@ -739,125 +739,69 @@ plot_all_fixed_lexcat |>
 
 ## XGBoost model
 
-We fit an XGBoost model, which is more complex in that it allows for arbitrary higher-order interactions among predictors.
-We shift from an estimation to a prediction approach; this move trades direct interpretability (of coefficients) for better power.
-Our approach involves 5-fold cross-validation to find the best hyperparameters, followed by the refitting of a model with all the data using the best hyperparameter setting.
-We interpret the resultant models using SHAP values.
+We fit an XGBoost model, which allows arbitrary interactions among predictors, and read it with SHAP values.
+Hyperband draws learning rate, tree depth, minimum child weight, row and column subsampling, and L2 regularization, then promotes the better draws to more boosting rounds.
+Each cross-validation fold holds out whole languages.
+The selected setting is refit on all of the data, and the SHAP ranking is compared with the next-best settings from the search.
 
 Prepare data:
 ```{r xgboost_data_prep}
-# aoa_pred_data_xgb <- aoa_predictor_data |> 
-#   select(language, lexical_category, all_of(predictors)) |> 
-#   mutate(across(all_of(predictors), as.numeric),
-#          lexical_category = lexical_category |> factor() |> as.integer(),
-#          language = language |> factor() |> as.integer()) |> 
-#   as.matrix()
-aoa_data_xgb <- aoa_predictor_data |> 
+set.seed(42)
+aoa_data_xgb <- aoa_predictor_data |>
   nest(data = -measure) |>
-  mutate(pred_data = map(data, \(d) d |> 
-                       select(language, lexical_category, all_of(predictors)) |> 
+  mutate(folds = map(data, \(d) xgb_language_folds(d$language)),
+         pred_data = map(data, \(d) d |>
+                       select(language, lexical_category, all_of(predictors)) |>
                        mutate(across(all_of(predictors), as.numeric),
                               lexical_category = lexical_category |> factor() |> as.integer(),
                               language = language |> factor() |> as.integer())),
          out_data = map(data, \(d) d |> pull(aoa)),
-         dmat = map2(pred_data, out_data, 
-                     \(pd, od) xgb.DMatrix(data = pd, label = od)))
-
-# aoa_pred_data_xgb_df_prod <- aoa_predictor_data |> 
-#   filter(measure == "produces") |> 
-#   select(language, lexical_category, all_of(predictors)) |> 
-#   mutate(across(all_of(predictors), as.numeric),
-#          lexical_category = lexical_category |> factor() |> as.integer(),
-#          language = language |> factor() |> as.integer())
-# aoa_out_data_xgb_prod <- aoa_predictor_data |> 
-#   filter(measure == "produces") |> 
-#   pull(aoa)
-# 
-# # aoa_dtrain <- xgb.DMatrix(data = aoa_pred_data_xgb, label = aoa_out_data_xgb)
-# aoa_pred_dmat <- xgb.DMatrix(data = aoa_pred_data_xgb_df, label = aoa_out_data_xgb)
+         dmat = map2(pred_data, out_data,
+                     \(pd, od) xgb.DMatrix(data = as.matrix(pd), label = od)))
 ```
 
-Cross-validation and hyperparameter search:
+Hyperband search. Folds are fixed above so the search does not redraw them.
 ```{r xgb_cv, eval=params$refit}
-hyper_grid <- expand.grid(
-  objective = "reg:squarederror",
-  eval_metric = "rmse",
-  learning_rate = 0.1,
-  max_depth = 3:6, 
-  min_child_weight = 3,
-  subsample = 0.5, 
-  colsample_bytree = 0.5,
-  min_split_loss = c(0, 1, 10, 100, 1000),
-  reg_lambda = c(0, 1e-2, 0.1, 1, 10, 100),
-  reg_alpha = c(0, 1e-2, 0.1, 1, 10, 100, 1000)
-) |> 
-  mutate(objective = as.character(objective),
-         eval_metric = as.character(eval_metric))
+set.seed(42)
+aoa_mod_xgb_outputs <- aoa_data_xgb |>
+  select(measure, dmat, folds) |>
+  mutate(search = pmap(list(dmat, folds), \(dmat, folds) {
+    hyperband_xgb(dmat, folds)
+  })) |>
+  select(measure, search) |>
+  unnest(search)
 
-aoa_mod_xgb <- aoa_data_xgb |> 
-  select(measure, dmat) |> 
-  mutate(hyper_grid = map(dmat, \(dmat) {
-    hyper_grid |> 
-      mutate(rmse = map_dbl(seq_len(nrow(hyper_grid)), \(i) {
-        set.seed(123)
-        message("Fitting model ", i, " of ", nrow(hyper_grid))
-        params <- hyper_grid[i,] |> 
-          as.list()
-        
-        aoa_xgb_cv <- xgb.cv(params = params,
-                             data = dmat, 
-                             nrounds = 1000, 
-                             nfold = 5,
-                             verbose = FALSE,
-                             early_stopping_rounds = 50)
-        min(aoa_xgb_cv$evaluation_log$test_rmse_mean)
-      }))
-  }))
-
-# hyper_grid$rmse <- map_dbl(seq_len(nrow(hyper_grid)), \(i) {
-#   set.seed(123)
-#   message("Fitting model ", i, " of ", nrow(hyper_grid))
-#   params <- hyper_grid[i,] |> 
-#     as.list()
-#   
-#   aoa_xgb_cv <- xgb.cv(params = params,
-#                        data = aoa_pred_dmat, 
-#                        nrounds = 1000, 
-#                        nfold = 5,
-#                        verbose = FALSE,
-#                        early_stopping_rounds = 50)
-#   min(aoa_xgb_cv$evaluation_log$test_rmse_mean)
-# })
-
-aoa_mod_xgb_outputs <- aoa_mod_xgb |> 
-  select(measure, hyper_grid) |> 
-  unnest(hyper_grid)
-
-write_csv(aoa_mod_xgb_outputs, "outputs/xgb_hyperparam_grid.csv")
+write_csv(aoa_mod_xgb_outputs, "outputs/xgb_hyperband.csv")
 ```
 
 Run final model
 ```{r xgb_final_model}
-aoa_mod_xgb_outputs <- read_csv("outputs/xgb_hyperparam_grid.csv")
+aoa_mod_xgb_outputs <- read_csv("outputs/xgb_hyperband.csv")
 
 best_xgb_params <- aoa_mod_xgb_outputs |>
-  group_by(measure) |> 
-  filter(rmse == min(rmse)) |>
-  select(-rmse)
+  group_by(measure) |>
+  filter(nrounds == max(nrounds)) |>
+  slice_min(rmse, n = 1, with_ties = FALSE) |>
+  ungroup() |>
+  mutate(params = pmap(pick(all_of(xgb_param_cols())), \(...) {
+    params <- list(...)
+    params$max_depth <- as.integer(params$max_depth)
+    params
+  }))
 
-aoa_xgb_models <- aoa_data_xgb |> 
-  left_join(best_xgb_params |> nest(params = -measure), by = "measure") |>
-  mutate(model = map2(dmat, params,
-                      \(dmat, params) {
-                        xgb.train(data = dmat,
-                                  nrounds = 1000,
-                                  params = as.list(params))
-                      }))
+aoa_xgb_models <- aoa_data_xgb |>
+  left_join(best_xgb_params |> select(measure, params, nrounds), by = "measure") |>
+  mutate(model = pmap(list(dmat, params, nrounds), \(dmat, params, nrounds) {
+    xgb.train(params = c(params, list(objective = "reg:squarederror")),
+              data = dmat,
+              nrounds = as.integer(nrounds),
+              verbose = 0)
+  }))
 ```
 
-Get SHAP values
+Get SHAP values, and the rank correlation of mean absolute SHAP against the other settings that reached the longest round budget.
 ```{r xgb_shap, eval=params$refit}
-aoa_shap <- aoa_xgb_models |> 
+aoa_shap <- aoa_xgb_models |>
   mutate(shap = map2(model, pred_data,
                       \(model, pred_data) {
                         shapviz(model,
@@ -867,9 +811,42 @@ aoa_shap <- aoa_xgb_models |>
 
 saveRDS(aoa_shap, "outputs/aoa_shap.rds")
 
-# shap <- shapviz(aoa_xgb_model,
-#                 X_pred = data.matrix(aoa_pred_data_xgb_df),
-#                 interaction = TRUE)
+shap_importance <- function(model, pred_data) {
+  sv <- shapviz(model, X_pred = data.matrix(pred_data))
+  colMeans(abs(sv$S))
+}
+
+xgb_candidates <- aoa_mod_xgb_outputs |>
+  group_by(measure) |>
+  filter(nrounds == max(nrounds)) |>
+  slice_min(rmse, n = 4, with_ties = FALSE) |>
+  mutate(rank = row_number()) |>
+  ungroup()
+
+xgb_shap_stability <- aoa_data_xgb |>
+  select(measure, dmat, pred_data) |>
+  left_join(xgb_candidates, by = "measure") |>
+  mutate(params = pmap(pick(all_of(xgb_param_cols())), \(...) {
+           params <- list(...)
+           params$max_depth <- as.integer(params$max_depth)
+           params
+         }),
+         model = pmap(list(dmat, params, nrounds), \(dmat, params, nrounds) {
+           xgb.train(params = c(params, list(objective = "reg:squarederror")),
+                     data = dmat,
+                     nrounds = as.integer(nrounds),
+                     verbose = 0)
+         }),
+         importance = map2(model, pred_data, shap_importance)) |>
+  select(measure, rank, rmse, importance) |>
+  group_by(measure) |>
+  mutate(spearman = map_dbl(importance, \(imp) {
+    cor(importance[[1]], imp[names(importance[[1]])], method = "spearman")
+  })) |>
+  ungroup() |>
+  select(measure, rank, rmse, spearman)
+
+write_csv(xgb_shap_stability, "outputs/xgb_shap_stability.csv")
 ```
 
 ```{r}
@@ -925,16 +902,16 @@ cor_gen <- cor_long |>
   filter(language_1 != language_2) |>
   group_by(language_1) |>
   summarise(estimate = mean(value),
-            ci.lb = mean(value) - 0.95 * sd(value) / sqrt(n()),
-            ci.ub = mean(value) + 0.95 * sd(value) / sqrt(n()))
+            ci.lb = mean(value) - qnorm(0.975) * sd(value) / sqrt(n()),
+            ci.ub = mean(value) + qnorm(0.975) * sd(value) / sqrt(n()))
 
 cor_fam <- cor_long |>
   filter(language_1 != language_2,
          family_1 == family_2) |>
   group_by(language_1) |>
   summarise(estimate = mean(value),
-            ci.lb = mean(value) - 0.95 * sd(value) / sqrt(n()),
-            ci.ub = mean(value) + 0.95 * sd(value) / sqrt(n()))
+            ci.lb = mean(value) - qnorm(0.975) * sd(value) / sqrt(n()),
+            ci.ub = mean(value) + qnorm(0.975) * sd(value) / sqrt(n()))
 
 cor_rand <- lapply(seq(100), \(i) {
   apply(cor_matrix, 1, sample) |>
@@ -946,8 +923,8 @@ cor_rand <- lapply(seq(100), \(i) {
   bind_rows() |>
   group_by(language_1) |>
   summarise(estimate = mean(value),
-            ci.lb = mean(value) - 0.95 * sd(value) / sqrt(n()),
-            ci.ub = mean(value) + 0.95 * sd(value) / sqrt(n()))
+            ci.lb = mean(value) - qnorm(0.975) * sd(value) / sqrt(n()),
+            ci.ub = mean(value) + qnorm(0.975) * sd(value) / sqrt(n()))
 
 cor_all <- cor_gen |>
   left_join(cor_fam, by = "language_1", suffix = c("", "_fam")) |>
@@ -1007,6 +984,14 @@ p_cor
 ```
 
 ```{r}
+cor_corpus_alt <- corpus_correlation_alternative(
+  plot_coefs |> filter(measure == "produces"),
+  morph_complexity
+)
+cor_corpus_alt
+```
+
+```{r}
 cor_all_long |> 
   select(language, type, estimate) |> 
   pivot_wider(names_from = type, values_from = estimate) |> 
@@ -1016,7 +1001,6 @@ cor_all_long |>
 
 
 ## Morphological complexity
-We use the random slopes from the separate language models to examine the relationship between morphological complexity and the effect of morphosyntactic predictors on AoA.
 ```{r morph_complexity_bylang}
 ms_terms <- c("N features", "Form entropy", "N morphemes", "MLU-w", "MDD", "Subcat entropy") 
 
@@ -1048,8 +1032,8 @@ mc_vals_lc <- expand_grid(measure = c("produces", "understands"),
                        lexical_category = lexcats) |> 
   mutate(mc_data = map(mc_mods_lc, broom.mixed::tidy)) |> 
   unnest(mc_data) |> 
-  mutate(ci.low = estimate - std.error,
-         ci.high = estimate + std.error,
+  mutate(ci.low = estimate - qnorm(0.975) * std.error,
+         ci.high = estimate + qnorm(0.975) * std.error,
          signif = !(ci.low < 0 & ci.high > 0))
 ```
 
@@ -1099,29 +1083,24 @@ mc_vals_lc |>
        shape = "Reliability")
 ```
 
-Overall
+Overall: main effects, with measurement error, after collapsing varieties that share a CHILDES corpus.
 ```{r}
 morph_coefs_fixed <- plot_coefs |> 
   filter(term %in% ms_terms) |> 
   left_join(morph_complexity, by = join_by(language)) |> 
   mutate(term = as.factor(term))
 
-mc_mods <- map(c("produces", "understands"), \(y) {
-  map(ms_terms, \(x) {
-    arm::bayesglm(estimate ~ morph_complexity, 
-                  data = morph_coefs |> 
-                    filter(term == x, measure == y))
-  })
-}) |> unlist(recursive = FALSE)
+mc_mods <- fit_mc_models(plot_coefs, morph_complexity, ms_terms)
 saveRDS(mc_mods, "outputs/mc_mods_bylang_fixed.rds")
 
-mc_vals <- expand_grid(measure = c("produces", "understands"),
-                       ms_term = ms_terms) |> 
-  mutate(mc_data = map(mc_mods, broom.mixed::tidy)) |> 
-  unnest(mc_data) |> 
-  mutate(ci.low = estimate - std.error,
-         ci.high = estimate + std.error,
-         signif = !(ci.low < 0 & ci.high > 0))
+mc_vals <- mc_mods |>
+  mutate(mc_data = map(model, summarise_mc_model)) |>
+  unnest(mc_data) |>
+  mutate(signif = !(ci.low < 0 & ci.high > 0))
+
+mc_pd <- mc_mods |> 
+  mutate(pd = map(model, pd)) |> 
+  unnest(pd)
 ```
 
 ```{r}
@@ -1137,7 +1116,12 @@ p_morph <- morph_coefs_fixed |>
   ggplot(aes(x = morph_complexity, y = estimate)) +
   facet_wrap(term ~ .) +
   geom_hline(yintercept = 0, color = "grey", lty = "dotted") +
-  geom_smooth(aes(lty = reliability), method = "lm", col = "#000000") +
+  geom_ribbon(data = mc_fit_bands(mc_mods) |> filter(measure == "produces"),
+              aes(x = morph_complexity, ymin = ymin, ymax = ymax),
+              inherit.aes = FALSE, fill = "grey70", alpha = 0.35) +
+  geom_abline(data = mc_fit_lines(mc_vals) |> filter(measure == "produces"),
+              aes(intercept = intercept, slope = slope, linetype = reliability),
+              colour = "black", inherit.aes = FALSE) +
   geom_point(aes(col = language), alpha = 0.7) +
   scale_colour_discrete(guide = "none") +
   scale_linetype_manual(values = c("dashed", "solid")) +
